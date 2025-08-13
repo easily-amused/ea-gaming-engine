@@ -438,16 +438,16 @@ class Admin {
 					<div class="ea-gaming-preset-selector">
 						<?php foreach ( $presets as $preset_id => $preset ) : ?>
 							<div class="ea-gaming-preset-card <?php echo $preset_id === $current_preset ? 'selected' : ''; ?>" data-preset="<?php echo esc_attr( $preset_id ); ?>">
-								<h4><?php echo esc_html( $preset['name'] ); ?></h4>
-								<p><?php echo esc_html( $preset['description'] ); ?></p>
+								<h4><?php echo esc_html( $preset['name'] ?? '' ); ?></h4>
+								<p><?php echo esc_html( $preset['description'] ?? '' ); ?></p>
 								<div class="preset-stats">
 									<span class="preset-stat">
 										<span class="dashicons dashicons-dashboard"></span>
-										<?php echo esc_html( $preset['speed'] ); ?>x speed
+										<?php echo esc_html( $preset['settings']['speed_multiplier'] ?? '1.0' ); ?>x speed
 									</span>
 									<span class="preset-stat">
 										<span class="dashicons dashicons-awards"></span>
-										<?php echo esc_html( ucfirst( $preset['difficulty'] ) ); ?>
+										<?php echo esc_html( ucfirst( $preset['settings']['ai_difficulty'] ?? 'medium' ) ); ?>
 									</span>
 								</div>
 							</div>

@@ -404,7 +404,7 @@ class RestAPI {
 			'metadata'  => $request->get_param( 'metadata' ),
 		];
 
-		$game_engine = new GameEngine();
+		$game_engine = GameEngine::get_instance();
 		$session_id = $game_engine->start_session( $user_id, $course_id, $game_type, $options );
 
 		if ( ! $session_id ) {
@@ -546,7 +546,7 @@ class RestAPI {
 			'perfect'           => (bool) ( $request->get_param( 'perfect' ) ?? false ),
 		];
 
-		$game_engine = new GameEngine();
+		$game_engine = GameEngine::get_instance();
 		$success = $game_engine->end_session( $session_id, $stats );
 
 		if ( ! $success ) {
@@ -651,7 +651,7 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_active_policies( $request ) {
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		$policies = $policy_engine->get_active_policies();
 
 		// Filter out sensitive data
@@ -679,7 +679,7 @@ class RestAPI {
 		$user_id = get_current_user_id();
 		$course_id = $request->get_param( 'course_id' );
 
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		$result = $policy_engine->can_user_play( $user_id, $course_id );
 
 		if ( is_array( $result ) && ! $result['can_play'] ) {
@@ -709,7 +709,7 @@ class RestAPI {
 		$user_id = get_current_user_id();
 		$course_id = $request->get_param( 'course_id' );
 
-		$game_engine = new GameEngine();
+		$game_engine = GameEngine::get_instance();
 		$stats = $game_engine->get_player_stats( $user_id, $course_id );
 
 		if ( ! $stats ) {
@@ -937,7 +937,7 @@ class RestAPI {
 
 		// Check policy
 		$user_id = get_current_user_id();
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		$can_play = $policy_engine->can_user_play( $user_id, $course_id );
 
 		if ( is_array( $can_play ) && ! $can_play['can_play'] ) {
@@ -949,7 +949,7 @@ class RestAPI {
 		}
 
 		// Create session
-		$game_engine = new GameEngine();
+		$game_engine = GameEngine::get_instance();
 		$session_id = $game_engine->start_session(
 			$user_id,
 			$course_id,
