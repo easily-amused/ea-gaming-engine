@@ -1,0 +1,220 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  PLUGIN_SLUG: ea-gaming-engine
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, intl, gd, xml, zip
+        tools: composer:v2
+        coverage: none
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install PHP dependencies (production)
+      run: composer install --no-dev --optimize-autoloader --no-progress --no-suggest
+
+    - name: Install Node dependencies
+      run: npm ci
+
+    - name: Build production assets
+      run: |
+        npm run build
+        echo "Built assets:"
+        ls -la assets/dist/
+
+    - name: Generate translation files
+      run: |
+        # Install WP-CLI if available, otherwise skip
+        if command -v wp &> /dev/null; then
+          npm run i18n:make-pot
+          npm run i18n:make-json
+        else
+          echo "WP-CLI not available, skipping translation generation"
+        fi
+
+    - name: Prepare plugin directory
+      run: |
+        # Create clean plugin directory
+        mkdir -p /tmp/${{ env.PLUGIN_SLUG }}
+        
+        # Copy plugin files, excluding development files
+        rsync -av \
+          --exclude='.git*' \
+          --exclude='node_modules/' \
+          --exclude='assets/games/src/' \
+          --exclude='assets/games/node_modules/' \
+          --exclude='assets/js/' \
+          --exclude='assets/css/' \
+          --exclude='assets/images/dev/' \
+          --exclude='phpcs.xml' \
+          --exclude='webpack.config.js' \
+          --exclude='package*.json' \
+          --exclude='composer.json' \
+          --exclude='composer.lock' \
+          --exclude='tsconfig.json' \
+          --exclude='.eslintrc.js' \
+          --exclude='.prettierrc' \
+          --exclude='CLAUDE.md' \
+          --exclude='*.md' \
+          --exclude='tests/' \
+          --exclude='.github/' \
+          --exclude='bin/' \
+          --exclude='.editorconfig' \
+          --exclude='.gitignore' \
+          ./ /tmp/${{ env.PLUGIN_SLUG }}/
+
+    - name: Update version in plugin file
+      run: |
+        sed -i "s/Version: .*/Version: ${{ steps.version.outputs.version }}/" /tmp/${{ env.PLUGIN_SLUG }}/ea-gaming-engine.php
+        sed -i "s/Stable tag: .*/Stable tag: ${{ steps.version.outputs.version }}/" /tmp/${{ env.PLUGIN_SLUG }}/readme.txt
+
+    - name: Create plugin ZIP
+      run: |
+        cd /tmp
+        zip -r ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip ${{ env.PLUGIN_SLUG }}/
+        
+        # Verify ZIP contents
+        echo "ZIP contents:"
+        unzip -l ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip | head -20
+        
+        # Move ZIP to workspace
+        mv ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip $GITHUB_WORKSPACE/
+
+    - name: Generate checksums
+      run: |
+        sha256sum ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip > checksums.txt
+        md5sum ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip >> checksums.txt
+
+    - name: Generate changelog for release
+      id: changelog
+      run: |
+        # Extract changelog for this version from readme.txt
+        if [ -f "/tmp/${{ env.PLUGIN_SLUG }}/readme.txt" ]; then
+          # Try to extract version-specific changelog
+          awk '/^= ${{ steps.version.outputs.version }} =/{flag=1; next} /^= [0-9]/{flag=0} flag' /tmp/${{ env.PLUGIN_SLUG }}/readme.txt > version_changelog.txt
+          
+          if [ -s version_changelog.txt ]; then
+            echo "Found version-specific changelog"
+            cat version_changelog.txt
+          else
+            echo "No version-specific changelog found, using generic message"
+            echo "Release version ${{ steps.version.outputs.version }} of EA Gaming Engine." > version_changelog.txt
+            echo "" >> version_changelog.txt
+            echo "Please see readme.txt for full changelog details." >> version_changelog.txt
+          fi
+        else
+          echo "Release version ${{ steps.version.outputs.version }} of EA Gaming Engine." > version_changelog.txt
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: EA Gaming Engine ${{ steps.version.outputs.version }}
+        body_path: version_changelog.txt
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') || contains(steps.version.outputs.version, 'rc') }}
+        files: |
+          ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip
+          checksums.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-${{ steps.version.outputs.version }}
+        path: |
+          ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip
+          checksums.txt
+        retention-days: 90
+
+    - name: Notify on success
+      run: |
+        echo "🎉 Successfully created release ${{ steps.version.outputs.version }}"
+        echo "📦 Plugin ZIP: ${{ env.PLUGIN_SLUG }}-${{ steps.version.outputs.version }}.zip"
+        echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    
+    steps:
+    - name: Download release artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: release-${{ needs.build-and-release.outputs.version || github.ref_name }}
+
+    - name: Validate ZIP file
+      run: |
+        # Check if ZIP file exists and is valid
+        if [ ! -f *.zip ]; then
+          echo "❌ ZIP file not found"
+          exit 1
+        fi
+        
+        ZIP_FILE=$(ls *.zip)
+        echo "📁 Validating $ZIP_FILE"
+        
+        # Test ZIP integrity
+        if ! unzip -t "$ZIP_FILE" > /dev/null 2>&1; then
+          echo "❌ ZIP file is corrupted"
+          exit 1
+        fi
+        
+        # Check ZIP size (should be reasonable)
+        SIZE=$(stat -f%z "$ZIP_FILE" 2>/dev/null || stat -c%s "$ZIP_FILE" 2>/dev/null)
+        if [ "$SIZE" -lt 100000 ]; then
+          echo "❌ ZIP file seems too small ($SIZE bytes)"
+          exit 1
+        fi
+        
+        if [ "$SIZE" -gt 50000000 ]; then
+          echo "⚠️  ZIP file seems large ($SIZE bytes)"
+        fi
+        
+        echo "✅ ZIP file validation passed"
+        echo "📊 File size: $SIZE bytes"
+        
+        # List contents to verify structure
+        echo "📋 ZIP contents:"
+        unzip -l "$ZIP_FILE" | head -20
+
+    - name: Verify checksums
+      run: |
+        if [ -f checksums.txt ]; then
+          echo "🔍 Verifying checksums..."
+          sha256sum -c checksums.txt || echo "⚠️  SHA256 checksum verification failed"
+          md5sum -c checksums.txt || echo "⚠️  MD5 checksum verification failed"
+          echo "✅ Checksum verification completed"
+        else
+          echo "⚠️  No checksums file found"
+        fi

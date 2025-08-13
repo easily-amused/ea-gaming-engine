@@ -1,0 +1,104 @@
+version: 2
+updates:
+  # Enable version updates for npm (JavaScript/TypeScript)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "easily-amused"
+    assignees:
+      - "easily-amused"
+    commit-message:
+      prefix: "npm"
+      prefix-development: "npm-dev"
+      include: "scope"
+    ignore:
+      # Ignore major version updates for stable dependencies
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "phaser"
+        update-types: ["version-update:semver-major"]
+    groups:
+      wordpress-packages:
+        patterns:
+          - "@wordpress/*"
+      react-ecosystem:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      typescript-ecosystem:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "@types/*"
+      webpack-ecosystem:
+        patterns:
+          - "webpack*"
+          - "*-loader"
+          - "mini-css-extract-plugin"
+      eslint-ecosystem:
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+
+  # Enable version updates for Composer (PHP)
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "easily-amused"
+    assignees:
+      - "easily-amused"
+    commit-message:
+      prefix: "composer"
+      include: "scope"
+    ignore:
+      # Don't update dev dependencies too aggressively
+      - dependency-name: "squizlabs/php_codesniffer"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "phpcompatibility/phpcompatibility-wp"
+        update-types: ["version-update:semver-major"]
+    groups:
+      coding-standards:
+        patterns:
+          - "*codesniffer*"
+          - "*phpcs*"
+          - "*phpcompatibility*"
+          - "wp-coding-standards/*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "easily-amused"
+    assignees:
+      - "easily-amused"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      setup-actions:
+        patterns:
+          - "actions/checkout"
+          - "actions/setup-*"
+          - "actions/cache"
+          - "actions/upload-artifact"
+          - "actions/download-artifact"
+      php-actions:
+        patterns:
+          - "shivammathur/setup-php"

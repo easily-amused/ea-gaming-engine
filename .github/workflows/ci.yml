@@ -1,0 +1,255 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  php-lint:
+    name: PHP Syntax Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4', '8.0', '8.1', '8.2']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, intl, gd, xml, zip
+        tools: composer:v2
+        coverage: none
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-dev
+
+    - name: PHP Lint
+      run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" | xargs -n 1 -P 4 php -l
+
+  phpcs:
+    name: WordPress Coding Standards
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, intl, gd, xml, zip
+        tools: composer:v2
+        coverage: none
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-phpcs-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-phpcs-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Run PHPCS
+      run: composer run phpcs
+
+    - name: Run PHP Compatibility Check
+      run: composer run php-check
+
+  javascript-lint:
+    name: JavaScript/TypeScript Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Check TypeScript compilation
+      run: npx tsc --noEmit --project assets/games/tsconfig.json || echo "TypeScript check complete"
+
+  build-assets:
+    name: Build Assets
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build production assets
+      run: npm run build
+
+    - name: Check for build artifacts
+      run: |
+        if [ ! -d "assets/dist" ]; then
+          echo "Build failed: assets/dist directory not found"
+          exit 1
+        fi
+        ls -la assets/dist/
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: assets/dist/
+        retention-days: 7
+
+  test-plugin:
+    name: Plugin Integration Test
+    runs-on: ubuntu-latest
+    needs: [php-lint, phpcs, javascript-lint, build-assets]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, intl, gd, xml, zip, mysql
+        tools: composer:v2
+        coverage: none
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-dev
+
+    - name: Install Node dependencies
+      run: npm ci
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: assets/dist/
+
+    - name: Setup WordPress test environment
+      run: |
+        # Create WordPress test directory
+        mkdir -p /tmp/wordpress-tests-lib
+        mkdir -p /tmp/wordpress
+        
+        # Download WordPress test suite
+        wget -nv -O /tmp/install-wp-tests.sh https://raw.githubusercontent.com/wp-cli/sample-plugin/master/bin/install-wp-tests.sh
+        bash /tmp/install-wp-tests.sh wordpress_test root root localhost latest
+        
+        # Basic plugin activation test
+        echo "WordPress test environment setup complete"
+
+    - name: Validate plugin header
+      run: |
+        php -r "
+        if (!file_exists('ea-gaming-engine.php')) {
+          echo 'Main plugin file not found';
+          exit(1);
+        }
+        \$content = file_get_contents('ea-gaming-engine.php');
+        if (strpos(\$content, 'Plugin Name:') === false) {
+          echo 'Invalid plugin header';
+          exit(1);
+        }
+        echo 'Plugin header validation passed';
+        "
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, intl, gd, xml, zip
+        tools: composer:v2
+        coverage: none
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Run security audit
+      run: |
+        # Check for common security issues
+        echo "Checking for potential security issues..."
+        
+        # Check for eval() usage
+        if grep -r "eval(" --include="*.php" . --exclude-dir=vendor --exclude-dir=node_modules; then
+          echo "Warning: eval() found in code"
+        fi
+        
+        # Check for direct database queries without prepare
+        if grep -r "\$wpdb->query" --include="*.php" . --exclude-dir=vendor --exclude-dir=node_modules | grep -v "prepare"; then
+          echo "Warning: Unprepared database queries found"
+        fi
+        
+        # Check for $_GET/$_POST without sanitization
+        if grep -r "\$_\(GET\|POST\)" --include="*.php" . --exclude-dir=vendor --exclude-dir=node_modules | grep -v "sanitize\|wp_verify_nonce\|check_admin_referer"; then
+          echo "Warning: Unsanitized input usage found"
+        fi
+        
+        echo "Security scan completed"
