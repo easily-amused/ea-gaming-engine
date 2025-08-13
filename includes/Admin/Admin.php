@@ -7,6 +7,10 @@
 
 namespace EAGamingEngine\Admin;
 
+use EAGamingEngine\Core\ThemeManager;
+use EAGamingEngine\Core\PolicyEngine;
+use EAGamingEngine\Core\GameEngine;
+
 /**
  * Admin class
  */
@@ -144,7 +148,7 @@ class Admin {
 		// Enqueue our admin script
 		wp_enqueue_script(
 			'ea-gaming-admin',
-			EA_GAMING_ENGINE_URL . 'assets/js/admin.js',
+			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
 			[ 'wp-api', 'wp-i18n', 'wp-components', 'wp-element', 'wp-api-fetch', 'wp-data', 'wp-notices', 'chartjs' ],
 			EA_GAMING_ENGINE_VERSION,
 			true
@@ -153,7 +157,7 @@ class Admin {
 		// Enqueue admin styles
 		wp_enqueue_style(
 			'ea-gaming-admin',
-			EA_GAMING_ENGINE_URL . 'assets/css/admin.css',
+			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.css',
 			[ 'wp-components' ],
 			EA_GAMING_ENGINE_VERSION
 		);
@@ -234,16 +238,124 @@ class Admin {
 	 * @return void
 	 */
 	public function render_dashboard_page() {
+		global $wpdb;
+		
+		// Get stats
+		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
+		$stats_table = $wpdb->prefix . 'ea_player_stats';
+		
+		$total_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
+		$active_players = $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$sessions_table}" );
+		$total_score = $wpdb->get_var( "SELECT SUM(score) FROM {$sessions_table}" );
+		$avg_score = $wpdb->get_var( "SELECT AVG(score) FROM {$sessions_table}" );
+		
+		// Get recent sessions
+		$recent_sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT s.*, u.display_name 
+				FROM {$sessions_table} s
+				LEFT JOIN {$wpdb->users} u ON s.user_id = u.ID
+				ORDER BY s.started_at DESC
+				LIMIT %d",
+				5
+			)
+		);
+		
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
-			<h1><?php esc_html_e( 'EA Gaming Engine Dashboard', 'ea-gaming-engine' ); ?></h1>
-			<div id="ea-gaming-dashboard" class="ea-gaming-admin-container">
-				<!-- React app will mount here -->
-				<div class="ea-gaming-loading">
-					<span class="spinner is-active"></span>
-					<p><?php esc_html_e( 'Loading dashboard...', 'ea-gaming-engine' ); ?></p>
+			<div class="ea-gaming-admin-header">
+				<h1>
+					<span class="dashicons dashicons-games"></span>
+					<?php esc_html_e( 'EA Gaming Engine Dashboard', 'ea-gaming-engine' ); ?>
+				</h1>
+			</div>
+			
+			<!-- Quick Stats -->
+			<div class="ea-gaming-analytics-grid">
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Total Sessions', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value"><?php echo number_format( $total_sessions ); ?></div>
+					<div class="ea-gaming-stat-label"><?php esc_html_e( 'Games Played', 'ea-gaming-engine' ); ?></div>
+				</div>
+				
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Active Players', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value"><?php echo number_format( $active_players ); ?></div>
+					<div class="ea-gaming-stat-label"><?php esc_html_e( 'Unique Users', 'ea-gaming-engine' ); ?></div>
+				</div>
+				
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Total Score', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value"><?php echo number_format( $total_score ); ?></div>
+					<div class="ea-gaming-stat-label"><?php esc_html_e( 'Points Earned', 'ea-gaming-engine' ); ?></div>
+				</div>
+				
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Average Score', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value"><?php echo number_format( $avg_score, 1 ); ?></div>
+					<div class="ea-gaming-stat-label"><?php esc_html_e( 'Per Session', 'ea-gaming-engine' ); ?></div>
 				</div>
 			</div>
+			
+			<!-- Quick Actions -->
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Quick Actions', 'ea-gaming-engine' ); ?></h2>
+				<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+					<a href="<?php echo admin_url( 'admin.php?page=ea-gaming-settings' ); ?>" class="ea-gaming-button">
+						<?php esc_html_e( 'Configure Settings', 'ea-gaming-engine' ); ?>
+					</a>
+					<a href="<?php echo admin_url( 'admin.php?page=ea-gaming-policies' ); ?>" class="ea-gaming-button secondary">
+						<?php esc_html_e( 'Manage Policies', 'ea-gaming-engine' ); ?>
+					</a>
+					<a href="<?php echo admin_url( 'admin.php?page=ea-gaming-games' ); ?>" class="ea-gaming-button secondary">
+						<?php esc_html_e( 'View Games', 'ea-gaming-engine' ); ?>
+					</a>
+					<a href="<?php echo admin_url( 'admin.php?page=ea-gaming-analytics' ); ?>" class="ea-gaming-button secondary">
+						<?php esc_html_e( 'View Analytics', 'ea-gaming-engine' ); ?>
+					</a>
+				</div>
+			</div>
+			
+			<!-- Recent Sessions -->
+			<?php if ( ! empty( $recent_sessions ) ) : ?>
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Recent Game Sessions', 'ea-gaming-engine' ); ?></h2>
+				<table class="ea-gaming-policies-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Player', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Game Type', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Score', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Status', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Date', 'ea-gaming-engine' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $recent_sessions as $session ) : ?>
+						<tr>
+							<td><?php echo esc_html( $session->display_name ); ?></td>
+							<td><?php echo esc_html( ucwords( str_replace( '_', ' ', $session->game_type ) ) ); ?></td>
+							<td><?php echo number_format( $session->score ); ?></td>
+							<td>
+								<span class="ea-gaming-policy-status <?php echo $session->status === 'completed' ? 'active' : 'inactive'; ?>">
+									<?php echo esc_html( ucfirst( $session->status ) ); ?>
+								</span>
+							</td>
+							<td><?php echo esc_html( human_time_diff( strtotime( $session->started_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+			<?php else : ?>
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Getting Started', 'ea-gaming-engine' ); ?></h2>
+				<div class="ea-gaming-notice info">
+					<p><?php esc_html_e( 'No game sessions yet. Create a LearnDash course with quizzes to get started!', 'ea-gaming-engine' ); ?></p>
+					<p><?php esc_html_e( 'Once you have courses set up, use the [ea_gaming_arcade] shortcode to display games on your site.', 'ea-gaming-engine' ); ?></p>
+				</div>
+			</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -254,16 +366,156 @@ class Admin {
 	 * @return void
 	 */
 	public function render_settings_page() {
+		$theme_manager = ThemeManager::get_instance();
+		$current_theme = $theme_manager->get_current_theme();
+		$current_preset = $theme_manager->get_current_preset();
+		$themes = $theme_manager->get_all_themes();
+		$presets = $theme_manager->get_all_presets();
+		
+		// Get current settings
+		$enabled = get_option( 'ea_gaming_engine_enabled', true );
+		$cache_enabled = get_option( 'ea_gaming_engine_cache_enabled', true );
+		$debug_mode = get_option( 'ea_gaming_engine_debug_mode', false );
+		$hint_settings = get_option( 'ea_gaming_engine_hint_settings', [
+			'enabled' => true,
+			'cooldown' => 30,
+			'max_per_session' => 3
+		]);
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
-			<h1><?php esc_html_e( 'EA Gaming Engine Settings', 'ea-gaming-engine' ); ?></h1>
-			<div id="ea-gaming-settings" class="ea-gaming-admin-container">
-				<!-- React app will mount here -->
-				<div class="ea-gaming-loading">
-					<span class="spinner is-active"></span>
-					<p><?php esc_html_e( 'Loading settings...', 'ea-gaming-engine' ); ?></p>
-				</div>
+			<div class="ea-gaming-admin-header">
+				<h1>
+					<span class="dashicons dashicons-games"></span>
+					<?php esc_html_e( 'EA Gaming Engine Settings', 'ea-gaming-engine' ); ?>
+				</h1>
 			</div>
+			
+			<form method="post" action="options.php" id="ea-gaming-settings-form" class="ea-gaming-settings-form">
+				<?php settings_fields( 'ea_gaming_general' ); ?>
+				
+				<!-- General Settings -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'General Settings', 'ea-gaming-engine' ); ?></h2>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="ea_gaming_engine_enabled">
+							<?php esc_html_e( 'Enable Gaming Engine', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_enabled" id="ea_gaming_engine_enabled" value="1" <?php checked( $enabled ); ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php esc_html_e( 'Enable or disable the gaming features globally', 'ea-gaming-engine' ); ?></span>
+					</div>
+				</div>
+				
+				<!-- Theme Selection -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'Theme Selection', 'ea-gaming-engine' ); ?></h2>
+					<p class="description"><?php esc_html_e( 'Choose the visual theme for your games', 'ea-gaming-engine' ); ?></p>
+					
+					<div class="ea-gaming-theme-selector">
+						<?php foreach ( $themes as $theme_id => $theme ) : ?>
+							<div class="ea-gaming-theme-card <?php echo $theme_id === $current_theme ? 'selected' : ''; ?>" data-theme="<?php echo esc_attr( $theme_id ); ?>">
+								<h3><?php echo esc_html( $theme['name'] ); ?></h3>
+								<p><?php echo esc_html( $theme['description'] ); ?></p>
+								<div class="theme-preview">
+									<?php foreach ( array_slice( $theme['colors'], 0, 4 ) as $color ) : ?>
+										<span class="color-swatch" style="background-color: <?php echo esc_attr( $color ); ?>"></span>
+									<?php endforeach; ?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+					<input type="hidden" name="ea_gaming_engine_default_theme" id="selected-theme" value="<?php echo esc_attr( $current_theme ); ?>">
+				</div>
+				
+				<!-- Difficulty Preset -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'Difficulty Preset', 'ea-gaming-engine' ); ?></h2>
+					<p class="description"><?php esc_html_e( 'Select a difficulty preset for your games', 'ea-gaming-engine' ); ?></p>
+					
+					<div class="ea-gaming-preset-selector">
+						<?php foreach ( $presets as $preset_id => $preset ) : ?>
+							<div class="ea-gaming-preset-card <?php echo $preset_id === $current_preset ? 'selected' : ''; ?>" data-preset="<?php echo esc_attr( $preset_id ); ?>">
+								<h4><?php echo esc_html( $preset['name'] ); ?></h4>
+								<p><?php echo esc_html( $preset['description'] ); ?></p>
+								<div class="preset-stats">
+									<span class="preset-stat">
+										<span class="dashicons dashicons-dashboard"></span>
+										<?php echo esc_html( $preset['speed'] ); ?>x speed
+									</span>
+									<span class="preset-stat">
+										<span class="dashicons dashicons-awards"></span>
+										<?php echo esc_html( ucfirst( $preset['difficulty'] ) ); ?>
+									</span>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+					<input type="hidden" name="ea_gaming_engine_default_preset" id="selected-preset" value="<?php echo esc_attr( $current_preset ); ?>">
+				</div>
+				
+				<!-- Hint System Settings -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'Hint System', 'ea-gaming-engine' ); ?></h2>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="hint_enabled">
+							<?php esc_html_e( 'Enable Hints', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_hint_settings[enabled]" id="hint_enabled" value="1" <?php checked( $hint_settings['enabled'] ?? true ); ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="hint_cooldown">
+							<?php esc_html_e( 'Hint Cooldown (seconds)', 'ea-gaming-engine' ); ?>
+						</label>
+						<input type="number" name="ea_gaming_engine_hint_settings[cooldown]" id="hint_cooldown" value="<?php echo esc_attr( $hint_settings['cooldown'] ?? 30 ); ?>" min="0" max="300">
+						<span class="description"><?php esc_html_e( 'Time between hint requests', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="hint_max">
+							<?php esc_html_e( 'Max Hints per Session', 'ea-gaming-engine' ); ?>
+						</label>
+						<input type="number" name="ea_gaming_engine_hint_settings[max_per_session]" id="hint_max" value="<?php echo esc_attr( $hint_settings['max_per_session'] ?? 3 ); ?>" min="0" max="10">
+						<span class="description"><?php esc_html_e( 'Maximum hints allowed per game session', 'ea-gaming-engine' ); ?></span>
+					</div>
+				</div>
+				
+				<!-- Advanced Settings -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'Advanced Settings', 'ea-gaming-engine' ); ?></h2>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="ea_gaming_engine_cache_enabled">
+							<?php esc_html_e( 'Enable Caching', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_cache_enabled" id="ea_gaming_engine_cache_enabled" value="1" <?php checked( $cache_enabled ); ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php esc_html_e( 'Cache questions and game data for better performance', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="ea_gaming_engine_debug_mode">
+							<?php esc_html_e( 'Debug Mode', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_debug_mode" id="ea_gaming_engine_debug_mode" value="1" <?php checked( $debug_mode ); ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php esc_html_e( 'Enable debug logging for troubleshooting', 'ea-gaming-engine' ); ?></span>
+					</div>
+				</div>
+				
+				<?php submit_button( __( 'Save Settings', 'ea-gaming-engine' ), 'primary', 'save-settings' ); ?>
+			</form>
 		</div>
 		<?php
 	}
@@ -274,17 +526,107 @@ class Admin {
 	 * @return void
 	 */
 	public function render_policies_page() {
+		global $wpdb;
+		$policies_table = $wpdb->prefix . 'ea_game_policies';
+		
+		// Get all policies
+		$policies = $wpdb->get_results(
+			"SELECT * FROM {$policies_table} ORDER BY priority ASC, id DESC"
+		);
+		
+		$policy_types = PolicyEngine::get_policy_types();
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
-			<h1><?php esc_html_e( 'Gaming Policies', 'ea-gaming-engine' ); ?></h1>
-			<div id="ea-gaming-policies" class="ea-gaming-admin-container">
-				<!-- React app will mount here -->
-				<div class="ea-gaming-loading">
-					<span class="spinner is-active"></span>
-					<p><?php esc_html_e( 'Loading policies...', 'ea-gaming-engine' ); ?></p>
+			<div class="ea-gaming-admin-header">
+				<h1>
+					<span class="dashicons dashicons-shield"></span>
+					<?php esc_html_e( 'Gaming Policies', 'ea-gaming-engine' ); ?>
+				</h1>
+			</div>
+			
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Policy Management', 'ea-gaming-engine' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Configure access rules and restrictions for gaming features', 'ea-gaming-engine' ); ?></p>
+				
+				<?php if ( ! empty( $policies ) ) : ?>
+				<table class="ea-gaming-policies-table" id="ea-gaming-policies-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Policy Name', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Type', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Priority', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Status', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Actions', 'ea-gaming-engine' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $policies as $policy ) : ?>
+						<tr id="policy-<?php echo esc_attr( $policy->id ); ?>">
+							<td><strong><?php echo esc_html( $policy->name ); ?></strong></td>
+							<td><?php echo esc_html( $policy_types[ $policy->type ] ?? ucwords( str_replace( '_', ' ', $policy->type ) ) ); ?></td>
+							<td><?php echo esc_html( $policy->priority ); ?></td>
+							<td>
+								<span class="ea-gaming-policy-status <?php echo $policy->enabled ? 'active' : 'inactive'; ?>">
+									<?php echo $policy->enabled ? esc_html__( 'Active', 'ea-gaming-engine' ) : esc_html__( 'Inactive', 'ea-gaming-engine' ); ?>
+								</span>
+							</td>
+							<td>
+								<button class="button toggle-policy-status" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
+									<?php echo $policy->enabled ? esc_html__( 'Disable', 'ea-gaming-engine' ) : esc_html__( 'Enable', 'ea-gaming-engine' ); ?>
+								</button>
+								<button class="button delete-policy" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
+									<?php esc_html_e( 'Delete', 'ea-gaming-engine' ); ?>
+								</button>
+							</td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<?php else : ?>
+				<div class="ea-gaming-notice info">
+					<p><?php esc_html_e( 'No policies configured yet.', 'ea-gaming-engine' ); ?></p>
+				</div>
+				<?php endif; ?>
+			</div>
+			
+			<!-- Add Example Policies -->
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Quick Add Policy', 'ea-gaming-engine' ); ?></h2>
+				<p><?php esc_html_e( 'Click to add common policy configurations:', 'ea-gaming-engine' ); ?></p>
+				<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+					<button class="ea-gaming-button" onclick="addExamplePolicy('free_play')">
+						<?php esc_html_e( 'Add Free Play Policy', 'ea-gaming-engine' ); ?>
+					</button>
+					<button class="ea-gaming-button secondary" onclick="addExamplePolicy('quiet_hours')">
+						<?php esc_html_e( 'Add Quiet Hours Policy', 'ea-gaming-engine' ); ?>
+					</button>
+					<button class="ea-gaming-button secondary" onclick="addExamplePolicy('daily_limit')">
+						<?php esc_html_e( 'Add Daily Limit Policy', 'ea-gaming-engine' ); ?>
+					</button>
 				</div>
 			</div>
 		</div>
+		
+		<script>
+		function addExamplePolicy(type) {
+			jQuery.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'ea_gaming_add_example_policy',
+					policy_type: type,
+					nonce: '<?php echo wp_create_nonce( 'ea-gaming-engine-admin' ); ?>'
+				},
+				success: function(response) {
+					if (response.success) {
+						location.reload();
+					} else {
+						alert('Error adding policy: ' + response.data);
+					}
+				}
+			});
+		}
+		</script>
 		<?php
 	}
 
@@ -294,15 +636,87 @@ class Admin {
 	 * @return void
 	 */
 	public function render_analytics_page() {
+		global $wpdb;
+		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
+		$stats_table = $wpdb->prefix . 'ea_player_stats';
+		
+		// Get analytics data
+		$total_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
+		$completed_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table} WHERE status = 'completed'" );
+		$avg_duration = $wpdb->get_var( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" );
+		$top_players = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT u.display_name, ps.total_score, ps.games_played, ps.avg_score
+				FROM {$stats_table} ps
+				LEFT JOIN {$wpdb->users} u ON ps.user_id = u.ID
+				ORDER BY ps.total_score DESC
+				LIMIT %d",
+				10
+			)
+		);
+		
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
-			<h1><?php esc_html_e( 'Gaming Analytics', 'ea-gaming-engine' ); ?></h1>
-			<div id="ea-gaming-analytics" class="ea-gaming-admin-container">
-				<!-- React app will mount here -->
-				<div class="ea-gaming-loading">
-					<span class="spinner is-active"></span>
-					<p><?php esc_html_e( 'Loading analytics...', 'ea-gaming-engine' ); ?></p>
+			<div class="ea-gaming-admin-header">
+				<h1>
+					<span class="dashicons dashicons-chart-area"></span>
+					<?php esc_html_e( 'Gaming Analytics', 'ea-gaming-engine' ); ?>
+				</h1>
+			</div>
+			
+			<!-- Overview Stats -->
+			<div class="ea-gaming-analytics-grid">
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Total Sessions', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value"><?php echo number_format( $total_sessions ); ?></div>
 				</div>
+				
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Completion Rate', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value">
+						<?php echo $total_sessions > 0 ? number_format( ( $completed_sessions / $total_sessions ) * 100, 1 ) : 0; ?>%
+					</div>
+				</div>
+				
+				<div class="ea-gaming-analytics-card">
+					<h3><?php esc_html_e( 'Avg Duration', 'ea-gaming-engine' ); ?></h3>
+					<div class="ea-gaming-stat-value">
+						<?php echo $avg_duration ? gmdate( 'i:s', $avg_duration ) : '00:00'; ?>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Top Players Leaderboard -->
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Top Players', 'ea-gaming-engine' ); ?></h2>
+				<?php if ( ! empty( $top_players ) ) : ?>
+				<table class="ea-gaming-policies-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Rank', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Player', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Total Score', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Games Played', 'ea-gaming-engine' ); ?></th>
+							<th><?php esc_html_e( 'Average Score', 'ea-gaming-engine' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $top_players as $index => $player ) : ?>
+						<tr>
+							<td><strong>#<?php echo $index + 1; ?></strong></td>
+							<td><?php echo esc_html( $player->display_name ); ?></td>
+							<td><?php echo number_format( $player->total_score ); ?></td>
+							<td><?php echo number_format( $player->games_played ); ?></td>
+							<td><?php echo number_format( $player->avg_score, 1 ); ?></td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<?php else : ?>
+				<div class="ea-gaming-notice info">
+					<p><?php esc_html_e( 'No player statistics available yet.', 'ea-gaming-engine' ); ?></p>
+				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php
@@ -314,14 +728,75 @@ class Admin {
 	 * @return void
 	 */
 	public function render_games_page() {
+		$game_engine = GameEngine::get_instance();
+		$game_types = $game_engine->get_game_types();
+		
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
-			<h1><?php esc_html_e( 'Game Configuration', 'ea-gaming-engine' ); ?></h1>
-			<div id="ea-gaming-games" class="ea-gaming-admin-container">
-				<!-- React app will mount here -->
-				<div class="ea-gaming-loading">
-					<span class="spinner is-active"></span>
-					<p><?php esc_html_e( 'Loading games...', 'ea-gaming-engine' ); ?></p>
+			<div class="ea-gaming-admin-header">
+				<h1>
+					<span class="dashicons dashicons-games"></span>
+					<?php esc_html_e( 'Game Configuration', 'ea-gaming-engine' ); ?>
+				</h1>
+			</div>
+			
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Available Games', 'ea-gaming-engine' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Configure and manage your educational games', 'ea-gaming-engine' ); ?></p>
+				
+				<div class="ea-gaming-games-grid">
+					<?php foreach ( $game_types as $game_id => $game ) : ?>
+					<div class="ea-gaming-game-card">
+						<div class="ea-gaming-game-card-header">
+							<h3><?php echo esc_html( $game['name'] ); ?></h3>
+						</div>
+						<div class="ea-gaming-game-card-body">
+							<p><?php echo esc_html( $game['description'] ); ?></p>
+							<div class="ea-gaming-game-card-stats">
+								<div class="ea-gaming-game-card-stat">
+									<div class="ea-gaming-game-card-stat-value">
+										<span class="dashicons dashicons-clock"></span>
+									</div>
+									<div class="ea-gaming-game-card-stat-label">
+										<?php echo esc_html( $game['duration'] ?? '5-10 min' ); ?>
+									</div>
+								</div>
+								<div class="ea-gaming-game-card-stat">
+									<div class="ea-gaming-game-card-stat-value">
+										<span class="dashicons dashicons-groups"></span>
+									</div>
+									<div class="ea-gaming-game-card-stat-label">
+										<?php echo esc_html( $game['players'] ?? 'Single' ); ?>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+			
+			<!-- Shortcode Examples -->
+			<div class="ea-gaming-settings-section">
+				<h2><?php esc_html_e( 'Usage Examples', 'ea-gaming-engine' ); ?></h2>
+				<p><?php esc_html_e( 'Use these shortcodes to display games on your site:', 'ea-gaming-engine' ); ?></p>
+				
+				<div style="background: #f1f1f1; padding: 15px; border-radius: 4px; margin-top: 15px;">
+					<h4><?php esc_html_e( 'Display Game Arcade', 'ea-gaming-engine' ); ?></h4>
+					<code>[ea_gaming_arcade]</code>
+					<p class="description"><?php esc_html_e( 'Shows all available games for enrolled courses', 'ea-gaming-engine' ); ?></p>
+				</div>
+				
+				<div style="background: #f1f1f1; padding: 15px; border-radius: 4px; margin-top: 15px;">
+					<h4><?php esc_html_e( 'Display Specific Game', 'ea-gaming-engine' ); ?></h4>
+					<code>[ea_gaming_launcher course_id="123" game_type="whack_a_question"]</code>
+					<p class="description"><?php esc_html_e( 'Shows a specific game for a specific course', 'ea-gaming-engine' ); ?></p>
+				</div>
+				
+				<div style="background: #f1f1f1; padding: 15px; border-radius: 4px; margin-top: 15px;">
+					<h4><?php esc_html_e( 'Display Leaderboard', 'ea-gaming-engine' ); ?></h4>
+					<code>[ea_gaming_leaderboard limit="10"]</code>
+					<p class="description"><?php esc_html_e( 'Shows top players across all games', 'ea-gaming-engine' ); ?></p>
 				</div>
 			</div>
 		</div>

@@ -2,6 +2,10 @@
  * Admin JavaScript Entry Point
  */
 
+// Import styles
+import '../../css/admin.css';
+
+// Import modules
 import './settings';
 import './dashboard';
 import './analytics';
