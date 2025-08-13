@@ -83,6 +83,8 @@ class Plugin {
 		if ( class_exists( 'SFWD_LMS' ) ) {
 			$this->components['learndash'] = new LearnDash();
 		}
+		// Add Student-Parent Access integration (optional; self-detects availability)
+		$this->components['student_parent_access'] = new \EAGamingEngine\Integrations\StudentParentAccess();
 
 		// REST API
 		$this->components['rest_api'] = new RestAPI();
