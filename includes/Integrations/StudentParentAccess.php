@@ -50,8 +50,8 @@ class StudentParentAccess {
 		// Simple fallback admin settings (optional; used if SPA is not active or returns no data).
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
 		
-		// Only add menu if SPA is active
-		add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
+		// Hook into our custom action to add menu at the right place
+		add_action( 'ea_gaming_engine_add_admin_menus', [ $this, 'add_admin_menu' ] );
 		
 		// Listen for plugin activation/deactivation
 		add_action( 'activated_plugin', [ $this, 'check_plugin_activation' ], 10, 2 );

@@ -115,6 +115,10 @@ class Admin {
 			'ea-gaming-games',
 			[ $this, 'render_games_page' ]
 		);
+		
+		// Parent Controls submenu (only if Student-Parent Access plugin is active)
+		// This hook allows the StudentParentAccess integration to add its menu item
+		do_action( 'ea_gaming_engine_add_admin_menus' );
 	}
 
 	/**
