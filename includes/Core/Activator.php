@@ -18,19 +18,19 @@ class Activator {
 	 * @return void
 	 */
 	public static function activate() {
-		// Create database tables
+		// Create database tables.
 		self::create_tables();
 
-		// Set default options
+		// Set default options.
 		self::set_default_options();
 
-		// Schedule cron events
+		// Schedule cron events.
 		self::schedule_events();
 
-		// Set flag to flush rewrite rules
+		// Set flag to flush rewrite rules.
 		update_option( 'ea_gaming_engine_flush_rules', true );
 
-		// Set activation timestamp
+		// Set activation timestamp.
 		update_option( 'ea_gaming_engine_activated', time() );
 	}
 
@@ -44,7 +44,7 @@ class Activator {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// Game sessions table
+		// Game sessions table.
 		$table_sessions = $wpdb->prefix . 'ea_game_sessions';
 		$sql_sessions   = "CREATE TABLE IF NOT EXISTS $table_sessions (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -69,7 +69,7 @@ class Activator {
 			KEY created_at (created_at)
 		) $charset_collate;";
 
-		// Policy rules table
+		// Policy rules table.
 		$table_policies = $wpdb->prefix . 'ea_game_policies';
 		$sql_policies   = "CREATE TABLE IF NOT EXISTS $table_policies (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -87,7 +87,7 @@ class Activator {
 			KEY priority (priority)
 		) $charset_collate;";
 
-		// Question attempts table
+		// Question attempts table.
 		$table_attempts = $wpdb->prefix . 'ea_question_attempts';
 		$sql_attempts   = "CREATE TABLE IF NOT EXISTS $table_attempts (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -105,7 +105,7 @@ class Activator {
 			KEY quiz_id (quiz_id)
 		) $charset_collate;";
 
-		// Player stats table
+		// Player stats table.
 		$table_stats = $wpdb->prefix . 'ea_player_stats';
 		$sql_stats   = "CREATE TABLE IF NOT EXISTS $table_stats (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -128,7 +128,7 @@ class Activator {
 			KEY course_id (course_id)
 		) $charset_collate;";
 
-		// Hint usage table
+		// Hint usage table.
 		$table_hints = $wpdb->prefix . 'ea_hint_usage';
 		$sql_hints   = "CREATE TABLE IF NOT EXISTS $table_hints (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -152,7 +152,7 @@ class Activator {
 		dbDelta( $sql_stats );
 		dbDelta( $sql_hints );
 
-		// Store database version
+		// Store database version.
 		update_option( 'ea_gaming_engine_db_version', '1.1.0' );
 	}
 
@@ -162,12 +162,12 @@ class Activator {
 	 * @return void
 	 */
 	private static function set_default_options() {
-		// General settings
+		// General settings.
 		add_option( 'ea_gaming_engine_enabled', true );
 		add_option( 'ea_gaming_engine_default_theme', 'playful' );
 		add_option( 'ea_gaming_engine_default_preset', 'classic' );
 
-		// Policy settings
+		// Policy settings.
 		add_option(
 			'ea_gaming_engine_policies',
 			array(
@@ -182,7 +182,7 @@ class Activator {
 			)
 		);
 
-		// Game settings
+		// Game settings.
 		add_option(
 			'ea_gaming_engine_games',
 			array(
@@ -203,7 +203,7 @@ class Activator {
 			)
 		);
 
-		// Theme settings
+		// Theme settings.
 		add_option(
 			'ea_gaming_engine_themes',
 			array(
@@ -230,7 +230,7 @@ class Activator {
 			)
 		);
 
-		// Profile presets
+		// Profile presets.
 		add_option(
 			'ea_gaming_engine_presets',
 			array(
@@ -267,7 +267,7 @@ class Activator {
 			)
 		);
 
-		// Hint system settings
+		// Hint system settings.
 		add_option(
 			'ea_gaming_engine_hint_settings',
 			array(
@@ -287,12 +287,12 @@ class Activator {
 	 * @return void
 	 */
 	private static function schedule_events() {
-		// Schedule daily stats cleanup
+		// Schedule daily stats cleanup.
 		if ( ! wp_next_scheduled( 'ea_gaming_engine_daily_cleanup' ) ) {
 			wp_schedule_event( time(), 'daily', 'ea_gaming_engine_daily_cleanup' );
 		}
 
-		// Schedule hourly policy check
+		// Schedule hourly policy check.
 		if ( ! wp_next_scheduled( 'ea_gaming_engine_policy_check' ) ) {
 			wp_schedule_event( time(), 'hourly', 'ea_gaming_engine_policy_check' );
 		}

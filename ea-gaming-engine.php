@@ -17,25 +17,25 @@
  * @package EAGamingEngine
  */
 
-// If this file is called directly, abort.
+// If this file is called directly, abort..
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Plugin version
+// Plugin version.
 define( 'EA_GAMING_ENGINE_VERSION', '1.0.0' );
 
-// Plugin paths
+// Plugin paths.
 define( 'EA_GAMING_ENGINE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EA_GAMING_ENGINE_URL', plugin_dir_url( __FILE__ ) );
 define( 'EA_GAMING_ENGINE_FILE', __FILE__ );
 define( 'EA_GAMING_ENGINE_BASENAME', plugin_basename( __FILE__ ) );
 
-// Plugin requirements
+// Plugin requirements.
 define( 'EA_GAMING_ENGINE_MIN_PHP', '7.4' );
 define( 'EA_GAMING_ENGINE_MIN_WP', '5.9' );
 
-// Autoloader
+// Autoloader.
 require_once EA_GAMING_ENGINE_PATH . 'vendor/autoload.php';
 
 use EA\Licensing\License;
@@ -57,7 +57,7 @@ function ea_gaming_engine_requirements_met() {
 		return false;
 	}
 
-	// Check for LearnDash
+	// Check for LearnDash.
 	if ( ! class_exists( 'SFWD_LMS' ) ) {
 		return false;
 	}
@@ -134,20 +134,20 @@ register_deactivation_hook( __FILE__, 'ea_gaming_engine_deactivate' );
  * @return void
  */
 function ea_gaming_engine_init() {
-	// Load text domain
+	// Load text domain.
 	load_plugin_textdomain(
 		'ea-gaming-engine',
 		false,
 		dirname( EA_GAMING_ENGINE_BASENAME ) . '/languages/'
 	);
 
-	// Check requirements
+	// Check requirements.
 	if ( ! ea_gaming_engine_requirements_met() ) {
 		add_action( 'admin_notices', 'ea_gaming_engine_requirements_error' );
 		return;
 	}
 
-	// Initialize the plugin
+	// Initialize the plugin.
 	Plugin::get_instance();
 }
 add_action( 'plugins_loaded', 'ea_gaming_engine_init' );
@@ -158,10 +158,10 @@ add_action( 'plugins_loaded', 'ea_gaming_engine_init' );
 add_action(
 	'init',
 	function () {
-		// Initialize License
+		// Initialize License.
 		new License(
 			__( 'EA Gaming Engine', 'ea-gaming-engine' ),
-			9999, // Product ID - update with actual ID
+			9999, // Product ID - update with actual ID.
 			'ea-gaming-engine',
 			__FILE__,
 			EA_GAMING_ENGINE_VERSION

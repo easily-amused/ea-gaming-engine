@@ -428,5 +428,5 @@ class EAGamingEngineUninstaller {
 	}
 }
 
-// Run the uninstall process
+// Run the uninstall process.
 EAGamingEngineUninstaller::uninstall();
