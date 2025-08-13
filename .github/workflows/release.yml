@@ -15,7 +15,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Extract version from tag
       id: version
@@ -169,7 +169,7 @@ jobs:
     
     steps:
     - name: Download release artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: release-${{ needs.build-and-release.outputs.version || github.ref_name }}
 
