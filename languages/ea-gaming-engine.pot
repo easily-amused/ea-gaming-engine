@@ -1,0 +1,973 @@
+# Copyright (C) 2025 HonorsWP
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: EA Gaming Engine 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ea-games\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-08-13T03:55:18+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: ea-gaming-engine\n"
+
+#. Plugin Name of the plugin
+#: ea-gaming-engine.php
+#: ea-gaming-engine.php:163
+#: includes/Admin/Admin.php:50
+#: includes/Blocks/Blocks.php:118
+msgid "EA Gaming Engine"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: ea-gaming-engine.php
+msgid "https://honorswp.com/ea-gaming-engine"
+msgstr ""
+
+#. Description of the plugin
+#: ea-gaming-engine.php
+msgid "Transform LearnDash courses into interactive educational games with dynamic question gates, themed experiences, and engaging gameplay."
+msgstr ""
+
+#. Author of the plugin
+#: ea-gaming-engine.php
+msgid "HonorsWP"
+msgstr ""
+
+#. Author URI of the plugin
+#: ea-gaming-engine.php
+msgid "https://honorswp.com"
+msgstr ""
+
+#. translators: %1$s: minimum PHP version, %2$s: minimum WordPress version
+#: ea-gaming-engine.php:79
+#, php-format
+msgid "<strong>EA Gaming Engine</strong> requires PHP %1$s+, WordPress %2$s+, and LearnDash to be installed and activated."
+msgstr ""
+
+#. translators: %1$s: current PHP version, %2$s: current WordPress version
+#: ea-gaming-engine.php:85
+#, php-format
+msgid " You are running PHP %1$s and WordPress %2$s."
+msgstr ""
+
+#: ea-gaming-engine.php:91
+msgid " LearnDash is not installed or activated."
+msgstr ""
+
+#: ea-gaming-engine.php:108
+msgid "EA Gaming Engine requires PHP 7.4+, WordPress 5.9+, and LearnDash to be installed and activated."
+msgstr ""
+
+#: ea-gaming-engine.php:109
+msgid "Plugin Activation Error"
+msgstr ""
+
+#: includes/Admin/Admin.php:51
+msgid "Gaming Engine"
+msgstr ""
+
+#: includes/Admin/Admin.php:62
+#: includes/Admin/Admin.php:63
+msgid "Dashboard"
+msgstr ""
+
+#: includes/Admin/Admin.php:72
+#: includes/Admin/Admin.php:73
+#: includes/Admin/Admin.php:339
+msgid "Settings"
+msgstr ""
+
+#: includes/Admin/Admin.php:82
+#: includes/Admin/Admin.php:83
+msgid "Policies"
+msgstr ""
+
+#: includes/Admin/Admin.php:92
+#: includes/Admin/Admin.php:93
+msgid "Analytics"
+msgstr ""
+
+#: includes/Admin/Admin.php:102
+#: includes/Admin/Admin.php:103
+msgid "Games"
+msgstr ""
+
+#: includes/Admin/Admin.php:172
+msgid "Save Settings"
+msgstr ""
+
+#: includes/Admin/Admin.php:173
+msgid "Saving..."
+msgstr ""
+
+#: includes/Admin/Admin.php:174
+msgid "Settings Saved"
+msgstr ""
+
+#: includes/Admin/Admin.php:175
+#: includes/Core/Plugin.php:286
+msgid "Error saving settings"
+msgstr ""
+
+#: includes/Admin/Admin.php:176
+msgid "Reset to Defaults"
+msgstr ""
+
+#: includes/Admin/Admin.php:177
+msgid "Are you sure you want to reset all settings to defaults?"
+msgstr ""
+
+#: includes/Admin/Admin.php:178
+msgid "No data available"
+msgstr ""
+
+#: includes/Admin/Admin.php:179
+#: includes/Core/Plugin.php:225
+msgid "Loading..."
+msgstr ""
+
+#: includes/Admin/Admin.php:180
+msgid "Export Data"
+msgstr ""
+
+#: includes/Admin/Admin.php:181
+msgid "Exporting..."
+msgstr ""
+
+#: includes/Admin/Admin.php:182
+msgid "Data Exported"
+msgstr ""
+
+#: includes/Admin/Admin.php:183
+msgid "This will create a backup file with all plugin data. Continue?"
+msgstr ""
+
+#: includes/Admin/Admin.php:184
+msgid "Keep data when uninstalling plugin"
+msgstr ""
+
+#: includes/Admin/Admin.php:185
+msgid "If enabled, plugin data will be preserved when the plugin is deleted."
+msgstr ""
+
+#: includes/Admin/Admin.php:186
+msgid "Export data before uninstalling"
+msgstr ""
+
+#: includes/Admin/Admin.php:187
+msgid "If enabled, a backup file will be created before deleting plugin data."
+msgstr ""
+
+#: includes/Admin/Admin.php:239
+msgid "EA Gaming Engine Dashboard"
+msgstr ""
+
+#: includes/Admin/Admin.php:244
+msgid "Loading dashboard..."
+msgstr ""
+
+#: includes/Admin/Admin.php:259
+msgid "EA Gaming Engine Settings"
+msgstr ""
+
+#: includes/Admin/Admin.php:264
+msgid "Loading settings..."
+msgstr ""
+
+#: includes/Admin/Admin.php:279
+msgid "Gaming Policies"
+msgstr ""
+
+#: includes/Admin/Admin.php:284
+msgid "Loading policies..."
+msgstr ""
+
+#: includes/Admin/Admin.php:299
+msgid "Gaming Analytics"
+msgstr ""
+
+#: includes/Admin/Admin.php:304
+msgid "Loading analytics..."
+msgstr ""
+
+#: includes/Admin/Admin.php:319
+msgid "Game Configuration"
+msgstr ""
+
+#: includes/Admin/Admin.php:324
+msgid "Loading games..."
+msgstr ""
+
+#: includes/Admin/Admin.php:340
+msgid "Docs"
+msgstr ""
+
+#. translators: %s: LearnDash link
+#: includes/Admin/Admin.php:360
+#, php-format
+msgid "EA Gaming Engine requires %s to be installed and activated."
+msgstr ""
+
+#. translators: %s: Settings page link
+#: includes/Admin/Admin.php:377
+#, php-format
+msgid "EA Gaming Engine is ready! %s to get started."
+msgstr ""
+
+#: includes/Admin/Admin.php:378
+msgid "Configure your settings"
+msgstr ""
+
+#: includes/Admin/Admin.php:484
+#: includes/Admin/Admin.php:537
+#: includes/Admin/Admin.php:552
+#: includes/Admin/Admin.php:586
+#: includes/Admin/Admin.php:689
+msgid "Permission denied"
+msgstr ""
+
+#: includes/Admin/Admin.php:490
+msgid "Invalid settings data"
+msgstr ""
+
+#: includes/Admin/Admin.php:522
+msgid "Settings saved successfully"
+msgstr ""
+
+#: includes/Admin/Admin.php:571
+msgid "Settings reset to defaults"
+msgstr ""
+
+#: includes/Admin/Admin.php:746
+msgid "Failed to create export file"
+msgstr ""
+
+#: includes/Admin/Admin.php:754
+msgid "Data exported successfully"
+msgstr ""
+
+#: includes/Blocks/Blocks.php:73
+#: includes/Frontend/Frontend.php:155
+msgid "Play Game"
+msgstr ""
+
+#: includes/Core/Activator.php:211
+#: includes/Core/ThemeManager.php:74
+#: assets/js/blocks/index.js:35
+msgid "Playful"
+msgstr ""
+
+#: includes/Core/Activator.php:221
+#: includes/Core/ThemeManager.php:127
+#: assets/js/blocks/index.js:37
+msgid "Minimal Pro"
+msgstr ""
+
+#: includes/Core/Activator.php:238
+#: assets/js/blocks/index.js:47
+msgid "Chill"
+msgstr ""
+
+#: includes/Core/Activator.php:245
+#: assets/js/blocks/index.js:48
+msgid "Classic"
+msgstr ""
+
+#: includes/Core/Activator.php:252
+#: assets/js/blocks/index.js:49
+msgid "Pro"
+msgstr ""
+
+#: includes/Core/Activator.php:259
+msgid "Accessible"
+msgstr ""
+
+#: includes/Core/GameEngine.php:262
+#: includes/Core/HintSystem.php:725
+#: includes/Core/QuestionGate.php:441
+#: includes/Core/ThemeManager.php:622
+#: includes/Core/ThemeManager.php:649
+msgid "Invalid parameters"
+msgstr ""
+
+#: includes/Core/GameEngine.php:277
+msgid "Game session started"
+msgstr ""
+
+#: includes/Core/GameEngine.php:281
+msgid "Failed to start game session"
+msgstr ""
+
+#: includes/Core/GameEngine.php:296
+#: includes/Core/GameEngine.php:328
+msgid "Invalid session ID"
+msgstr ""
+
+#: includes/Core/GameEngine.php:309
+msgid "Game session ended"
+msgstr ""
+
+#: includes/Core/GameEngine.php:313
+msgid "Failed to end game session"
+msgstr ""
+
+#: includes/Core/GameEngine.php:349
+msgid "Session updated"
+msgstr ""
+
+#: includes/Core/HintSystem.php:86
+msgid "Hints are not available for your current profile."
+msgstr ""
+
+#. translators: %d: number of seconds to wait
+#: includes/Core/HintSystem.php:97
+#, php-format
+msgid "Please wait %d seconds before requesting another hint."
+msgstr ""
+
+#: includes/Core/HintSystem.php:109
+msgid "Maximum hints reached for this question."
+msgstr ""
+
+#: includes/Core/HintSystem.php:120
+msgid "Question not found or expired."
+msgstr ""
+
+#. translators: %s: lesson title
+#: includes/Core/HintSystem.php:392
+#, php-format
+msgid "Think about what you learned in \"%s\"."
+msgstr ""
+
+#. translators: %s: lesson keyword/concept
+#: includes/Core/HintSystem.php:403
+#, php-format
+msgid "Focus on the concept of \"%s\" from the lesson."
+msgstr ""
+
+#: includes/Core/HintSystem.php:412
+msgid "Only one answer is correct. Consider each option carefully."
+msgstr ""
+
+#: includes/Core/HintSystem.php:415
+msgid "Multiple answers may be correct. Think about all possibilities."
+msgstr ""
+
+#: includes/Core/HintSystem.php:418
+msgid "Think about the key terms you studied in the lesson."
+msgstr ""
+
+#. translators: %s: relevant sentence from lesson content
+#: includes/Core/HintSystem.php:446
+#, php-format
+msgid "Remember: \"%s\""
+msgstr ""
+
+#. translators: %s: question category/topic
+#: includes/Core/HintSystem.php:459
+#, php-format
+msgid "This question is about %s. What did you learn about this topic?"
+msgstr ""
+
+#: includes/Core/HintSystem.php:466
+msgid "Try to eliminate answers that seem obviously wrong first."
+msgstr ""
+
+#. translators: %d: number of answer options
+#: includes/Core/HintSystem.php:471
+#, php-format
+msgid "Look for clues in the question that might point to specific answers among the %d options."
+msgstr ""
+
+#. translators: %s: key concept from the question
+#: includes/Core/HintSystem.php:498
+#, php-format
+msgid "The answer is directly related to %s. Look for the option that best represents this concept."
+msgstr ""
+
+#: includes/Core/HintSystem.php:506
+msgid "Read each answer choice and ask yourself: \"Does this make sense based on what I learned?\""
+msgstr ""
+
+#: includes/Core/HintSystem.php:507
+msgid "The correct answer should directly relate to the main concept discussed in the lesson."
+msgstr ""
+
+#. translators: %s: comma-separated list of important keywords
+#: includes/Core/HintSystem.php:516
+#, php-format
+msgid "Think about important terms like: %s"
+msgstr ""
+
+#: includes/Core/HintSystem.php:534
+msgid "Take a moment to think about what you learned."
+msgstr ""
+
+#: includes/Core/HintSystem.php:535
+msgid "Consider the key concepts from the lesson."
+msgstr ""
+
+#: includes/Core/HintSystem.php:536
+msgid "Look for clues in the question wording."
+msgstr ""
+
+#: includes/Core/HintSystem.php:539
+msgid "Break down the question into smaller parts."
+msgstr ""
+
+#: includes/Core/HintSystem.php:540
+msgid "Think about the main topic you studied recently."
+msgstr ""
+
+#: includes/Core/HintSystem.php:541
+msgid "Which answer choice seems most logical?"
+msgstr ""
+
+#: includes/Core/HintSystem.php:544
+msgid "Focus on the key terms in the question and match them to what you learned."
+msgstr ""
+
+#: includes/Core/HintSystem.php:545
+msgid "Eliminate answers that clearly don't fit, then choose from the remaining options."
+msgstr ""
+
+#: includes/Core/HintSystem.php:546
+msgid "The correct answer should be something specifically covered in your recent lesson."
+msgstr ""
+
+#: includes/Core/Plugin.php:133
+msgid "Game Sessions"
+msgstr ""
+
+#: includes/Core/Plugin.php:134
+msgid "Game Session"
+msgstr ""
+
+#: includes/Core/Plugin.php:163
+msgid "Game Types"
+msgstr ""
+
+#: includes/Core/Plugin.php:164
+msgid "Game Type"
+msgstr ""
+
+#: includes/Core/Plugin.php:226
+msgid "An error occurred"
+msgstr ""
+
+#: includes/Core/Plugin.php:227
+msgid "Try Again"
+msgstr ""
+
+#: includes/Core/Plugin.php:228
+#: includes/Core/QuestionGate.php:347
+msgid "Correct!"
+msgstr ""
+
+#: includes/Core/Plugin.php:229
+#: includes/Core/QuestionGate.php:347
+msgid "Incorrect"
+msgstr ""
+
+#: includes/Core/Plugin.php:230
+msgid "Game Over"
+msgstr ""
+
+#: includes/Core/Plugin.php:231
+msgid "Score"
+msgstr ""
+
+#: includes/Core/Plugin.php:232
+msgid "Play Again"
+msgstr ""
+
+#: includes/Core/Plugin.php:285
+msgid "Settings saved"
+msgstr ""
+
+#: includes/Core/Plugin.php:287
+msgid "Are you sure you want to delete this?"
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:82
+msgid "Free Play Window"
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:101
+msgid "Quiet Hours"
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:112
+#: includes/Core/PolicyEngine.php:357
+#: includes/Core/PolicyEngine.php:366
+msgid "Games are not available during quiet hours."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:119
+msgid "Study First"
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:130
+msgid "Please complete the lesson before playing games."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:404
+msgid "Please complete a lesson before playing games."
+msgstr ""
+
+#. translators: %d: number of minutes to study
+#: includes/Core/PolicyEngine.php:418
+#, php-format
+msgid "Please study for %d more minutes before playing games."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:456
+#: includes/Integrations/StudentParentAccess.php:122
+msgid "Games have been disabled by your parent/guardian."
+msgstr ""
+
+#. translators: %1$s: start time, %2$s: end time
+#: includes/Core/PolicyEngine.php:472
+#: includes/Integrations/StudentParentAccess.php:138
+#, php-format
+msgid "Games are only available between %1$s and %2$s."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:487
+msgid "You need tickets to play. Ask your parent/guardian for more."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:516
+msgid "You have reached your daily game limit."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:527
+msgid "You have reached your daily play time limit."
+msgstr ""
+
+#: includes/Core/PolicyEngine.php:563
+msgid "Games are not available for this course."
+msgstr ""
+
+#. translators: %d: percentage of course completion required
+#: includes/Core/PolicyEngine.php:577
+#, php-format
+msgid "Complete at least %d%% of the course to unlock games."
+msgstr ""
+
+#: includes/Core/QuestionGate.php:304
+msgid "Question expired or not found"
+msgstr ""
+
+#: includes/Core/QuestionGate.php:412
+#: includes/Integrations/LearnDash.php:705
+msgid "Invalid quiz ID"
+msgstr ""
+
+#: includes/Core/QuestionGate.php:425
+msgid "No questions available"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:75
+msgid "Vibrant and energetic theme for younger learners"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:128
+msgid "Clean and professional theme for adult learners"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:180
+msgid "Neon Cyber"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:181
+msgid "Futuristic cyberpunk theme with neon aesthetics"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:246
+msgid "Chill Mode"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:247
+msgid "Relaxed gameplay with hints and slower pace"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:269
+msgid "Classic Mode"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:270
+msgid "Standard gameplay experience"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:292
+msgid "Pro Mode"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:293
+msgid "Challenging gameplay for experienced players"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:315
+msgid "Accessible Mode"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:316
+msgid "Optimized for accessibility needs"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:628
+msgid "Theme updated successfully"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:633
+msgid "Invalid theme"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:655
+msgid "Preset updated successfully"
+msgstr ""
+
+#: includes/Core/ThemeManager.php:660
+msgid "Invalid preset"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:75
+msgid "Please log in to play games."
+msgstr ""
+
+#: includes/Frontend/Frontend.php:111
+msgid "Gaming Arcade"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:113
+msgid "Switch Theme"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:116
+msgid "Change Difficulty"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:258
+#: includes/REST/RestAPI.php:906
+msgid "Whack-a-Question"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:259
+msgid "Fast-paced question answering"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:264
+#: includes/REST/RestAPI.php:912
+msgid "Tic-Tac-Tactics"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:265
+msgid "Strategic quiz tic-tac-toe"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:270
+#: includes/REST/RestAPI.php:918
+msgid "Target Trainer"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:271
+#: includes/REST/RestAPI.php:919
+msgid "Aim and shoot correct answers"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:295
+msgid "Play Now"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:346
+msgid "No games played yet"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:354
+msgid "Your Stats"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:358
+msgid "Games Played"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:362
+msgid "Total Score"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:366
+msgid "Accuracy"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:370
+msgid "Best Streak"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:436
+msgid "No leaderboard data yet"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:442
+msgid "Leaderboard"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:493
+msgid "Play as Game"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:546
+msgid "Fullscreen"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:549
+msgid "Toggle Sound"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:562
+msgid "Score:"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:566
+msgid "Time:"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:571
+msgid "Quit Game"
+msgstr ""
+
+#: includes/Frontend/Frontend.php:588
+msgid "Please log in to play"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:526
+msgid "Play Course as Game"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:527
+msgid "Transform your learning experience into an interactive adventure!"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:529
+msgid "Start Gaming Mode"
+msgstr ""
+
+#. translators: %d: number of worlds/lessons
+#: includes/Integrations/LearnDash.php:532
+#, php-format
+msgid "Worlds: %d"
+msgstr ""
+
+#. translators: %d: number of boss battles/quizzes
+#: includes/Integrations/LearnDash.php:533
+#, php-format
+msgid "Boss Battles: %d"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:560
+#: includes/Integrations/LearnDash.php:582
+msgid "Challenge Gate"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:561
+msgid "Complete this challenge to advance!"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:563
+msgid "Play Challenge"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:582
+msgid "Boss Battle"
+msgstr ""
+
+#. translators: %s: game type label (Boss Battle or Challenge Gate)
+#: includes/Integrations/LearnDash.php:586
+#, php-format
+msgid "Play as %s"
+msgstr ""
+
+#. translators: %s: game type label (Boss Battle or Challenge Gate)
+#: includes/Integrations/LearnDash.php:587
+msgid "Take this quiz as an interactive game!"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:589
+msgid "Start Game Mode"
+msgstr ""
+
+#: includes/Integrations/LearnDash.php:687
+msgid "Invalid course ID"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:153
+msgid "You need tickets to play. Please ask your parent/guardian for more."
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:391
+#: includes/Integrations/StudentParentAccess.php:392
+msgid "Parent Controls"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:423
+msgid "Parent Controls (Fallback)"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:427
+msgid "EA Student-Parent Access plugin detected. These fallback settings are only used if SPA does not provide controls for a user."
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:429
+msgid "EA Student-Parent Access plugin not detected. Use these fallback settings to apply basic controls."
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:439
+msgid "Enable Fallback Controls"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:443
+msgid "Apply these settings when SPA is not active or has no data for the user"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:448
+msgid "Block All Games"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:452
+msgid "Prevent playing any games"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:457
+msgid "Allowed Time Window"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:460
+msgid "Start (HH:MM)"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:465
+msgid "End (HH:MM)"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:468
+msgid "Leave blank to disable time window restriction."
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:472
+msgid "Require Tickets"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:476
+msgid "Users must have tickets to play"
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:478
+msgid "Ticket balances are stored per user under the \"ea_gaming_tickets\" user meta or provided by SPA if present."
+msgstr ""
+
+#: includes/Integrations/StudentParentAccess.php:482
+msgid "Save Changes"
+msgstr ""
+
+#: includes/REST/RestAPI.php:316
+#: includes/REST/RestAPI.php:333
+#: includes/REST/RestAPI.php:370
+msgid "You must be logged in to access this endpoint."
+msgstr ""
+
+#: includes/REST/RestAPI.php:352
+msgid "You do not have permission to access this session."
+msgstr ""
+
+#: includes/REST/RestAPI.php:381
+msgid "You do not have access to this course."
+msgstr ""
+
+#: includes/REST/RestAPI.php:413
+msgid "Failed to create game session."
+msgstr ""
+
+#: includes/REST/RestAPI.php:421
+msgid "Session created successfully."
+msgstr ""
+
+#: includes/REST/RestAPI.php:469
+msgid "Session not found."
+msgstr ""
+
+#: includes/REST/RestAPI.php:507
+msgid "No data to update."
+msgstr ""
+
+#: includes/REST/RestAPI.php:521
+msgid "Failed to update session."
+msgstr ""
+
+#: includes/REST/RestAPI.php:528
+msgid "Session updated successfully."
+msgstr ""
+
+#: includes/REST/RestAPI.php:555
+msgid "Failed to end session."
+msgstr ""
+
+#: includes/REST/RestAPI.php:562
+msgid "Session ended successfully."
+msgstr ""
+
+#: includes/REST/RestAPI.php:588
+msgid "No questions available."
+msgstr ""
+
+#: includes/REST/RestAPI.php:813
+msgid "Invalid theme ID."
+msgstr ""
+
+#: includes/REST/RestAPI.php:820
+msgid "Theme updated successfully."
+msgstr ""
+
+#: includes/REST/RestAPI.php:868
+msgid "Invalid preset ID."
+msgstr ""
+
+#: includes/REST/RestAPI.php:875
+msgid "Preset updated successfully."
+msgstr ""
+
+#: includes/REST/RestAPI.php:907
+msgid "Fast-paced question answering game"
+msgstr ""
+
+#: includes/REST/RestAPI.php:913
+msgid "Strategic quiz-based tic-tac-toe"
+msgstr ""
+
+#: includes/REST/RestAPI.php:967
+msgid "Failed to launch game."
+msgstr ""
+
+#: assets/js/blocks/index.js:6
+#: assets/js/blocks/index.js:18
+msgid "EA Gaming Arcade"
+msgstr ""
+
+#: assets/js/blocks/index.js:20
+msgid "Course ID"
+msgstr ""
+
+#: assets/js/blocks/index.js:30
+msgid "Theme"
+msgstr ""
+
+#: assets/js/blocks/index.js:42
+msgid "Preset"
+msgstr ""
+
+#: assets/js/blocks/index.js:65
+msgid "Start Game"
+msgstr ""

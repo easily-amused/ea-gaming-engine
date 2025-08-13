@@ -414,6 +414,7 @@ class PolicyEngine {
 					return [
 						'block'   => true,
 						'message' => sprintf(
+							/* translators: %d: number of minutes to study */
 							__( 'Please study for %d more minutes before playing games.', 'ea-gaming-engine' ),
 							ceil( $remaining / 60 )
 						),
@@ -467,7 +468,8 @@ class PolicyEngine {
 				return [
 					'block'   => true,
 					'message' => sprintf(
-						__( 'Games are only available between %s and %s.', 'ea-gaming-engine' ),
+						/* translators: %1$s: start time, %2$s: end time */
+						__( 'Games are only available between %1$s and %2$s.', 'ea-gaming-engine' ),
 						$allowed_start,
 						$allowed_end
 					),
@@ -571,6 +573,7 @@ class PolicyEngine {
 				return [
 					'block'   => true,
 					'message' => sprintf(
+						/* translators: %d: percentage of course completion required */
 						__( 'Complete at least %d%% of the course to unlock games.', 'ea-gaming-engine' ),
 						$conditions['minimum_progress']
 					),

@@ -93,6 +93,7 @@ class HintSystem {
 			return [
 				'success' => false,
 				'message' => sprintf(
+					/* translators: %d: number of seconds to wait */
 					__( 'Please wait %d seconds before requesting another hint.', 'ea-gaming-engine' ),
 					$remaining
 				),
@@ -387,6 +388,7 @@ class HintSystem {
 		// Context-based hints
 		if ( ! empty( $lesson_context['title'] ) ) {
 			$hints[] = sprintf(
+				/* translators: %s: lesson title */
 				__( 'Think about what you learned in "%s".', 'ea-gaming-engine' ),
 				$lesson_context['title']
 			);
@@ -397,6 +399,7 @@ class HintSystem {
 			$keyword = $lesson_context['keywords'][0];
 			if ( stripos( $question['question'], $keyword ) !== false ) {
 				$hints[] = sprintf(
+					/* translators: %s: lesson keyword/concept */
 					__( 'Focus on the concept of "%s" from the lesson.', 'ea-gaming-engine' ),
 					$keyword
 				);
@@ -439,6 +442,7 @@ class HintSystem {
 				foreach ( $sentences as $sentence ) {
 					if ( stripos( $sentence, $keyword ) !== false ) {
 						$hints[] = sprintf(
+							/* translators: %s: relevant sentence from lesson content */
 							__( 'Remember: "%s"', 'ea-gaming-engine' ),
 							trim( $sentence )
 						);
@@ -451,6 +455,7 @@ class HintSystem {
 		// Category-based hints
 		if ( ! empty( $question['category'] ) ) {
 			$hints[] = sprintf(
+				/* translators: %s: question category/topic */
 				__( 'This question is about %s. What did you learn about this topic?', 'ea-gaming-engine' ),
 				$question['category']
 			);
@@ -462,6 +467,7 @@ class HintSystem {
 			
 			if ( count( $question['answers'] ) > 2 ) {
 				$hints[] = sprintf(
+					/* translators: %d: number of answer options */
 					__( 'Look for clues in the question that might point to specific answers among the %d options.', 'ea-gaming-engine' ),
 					count( $question['answers'] )
 				);
@@ -488,6 +494,7 @@ class HintSystem {
 		foreach ( $concepts as $concept ) {
 			if ( stripos( $question_text, strtolower( $concept ) ) !== false ) {
 				$hints[] = sprintf(
+					/* translators: %s: key concept from the question */
 					__( 'The answer is directly related to %s. Look for the option that best represents this concept.', 'ea-gaming-engine' ),
 					$concept
 				);
@@ -505,6 +512,7 @@ class HintSystem {
 			$keywords = $lesson_context['keywords'] ?? [];
 			if ( ! empty( $keywords ) ) {
 				$hints[] = sprintf(
+					/* translators: %s: comma-separated list of important keywords */
 					__( 'Think about important terms like: %s', 'ea-gaming-engine' ),
 					implode( ', ', array_slice( $keywords, 0, 3 ) )
 				);

@@ -70,7 +70,7 @@ class Blocks {
 					'courseId'   => [ 'type' => 'number', 'default' => 0 ],
 					'quizId'     => [ 'type' => 'number', 'default' => 0 ],
 					'gameType'   => [ 'type' => 'string', 'default' => 'whack_a_question' ],
-					'buttonText' => [ 'type' => 'string', 'default' => 'Play Game' ],
+					'buttonText' => [ 'type' => 'string', 'default' => __( 'Play Game', 'ea-gaming-engine' ) ],
 					'style'      => [ 'type' => 'string', 'default' => 'default' ],
 				],
 			]

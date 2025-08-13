@@ -529,8 +529,8 @@ class LearnDash {
 				<?php esc_html_e( 'Start Gaming Mode', 'ea-gaming-engine' ); ?>
 			</button>
 			<div class="ea-gaming-stats">
-				<span><?php echo esc_html( sprintf( __( 'Worlds: %d', 'ea-gaming-engine' ), count( $structure['worlds'] ) ) ); ?></span>
-				<span><?php echo esc_html( sprintf( __( 'Boss Battles: %d', 'ea-gaming-engine' ), count( $structure['boss_battles'] ) ) ); ?></span>
+				<span><?php echo esc_html( sprintf( /* translators: %d: number of worlds/lessons */ __( 'Worlds: %d', 'ea-gaming-engine' ), count( $structure['worlds'] ) ) ); ?></span>
+				<span><?php echo esc_html( sprintf( /* translators: %d: number of boss battles/quizzes */ __( 'Boss Battles: %d', 'ea-gaming-engine' ), count( $structure['boss_battles'] ) ) ); ?></span>
 			</div>
 		</div>
 		<?php
@@ -583,7 +583,7 @@ class LearnDash {
 
 		?>
 		<div class="ea-gaming-quiz-option" data-quiz-id="<?php echo esc_attr( $quiz_id ); ?>">
-			<h4><?php echo esc_html( sprintf( __( 'Play as %s', 'ea-gaming-engine' ), $gate_label ) ); ?></h4>
+			<h4><?php echo esc_html( sprintf( /* translators: %s: game type label (Boss Battle or Challenge Gate) */ __( 'Play as %s', 'ea-gaming-engine' ), $gate_label ) ); ?></h4>
 			<p><?php esc_html_e( 'Take this quiz as an interactive game!', 'ea-gaming-engine' ); ?></p>
 			<button class="ea-gaming-quiz-game-btn button button-primary" data-quiz-id="<?php echo esc_attr( $quiz_id ); ?>">
 				<?php esc_html_e( 'Start Game Mode', 'ea-gaming-engine' ); ?>

@@ -134,7 +134,8 @@ class StudentParentAccess {
 				return [
 					'can_play' => false,
 					'reason'   => sprintf(
-						__( 'Games are only available between %s and %s.', 'ea-gaming-engine' ),
+						/* translators: %1$s: start time, %2$s: end time */
+						__( 'Games are only available between %1$s and %2$s.', 'ea-gaming-engine' ),
 						$start,
 						$end
 					),

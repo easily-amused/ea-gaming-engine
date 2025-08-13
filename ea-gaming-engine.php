@@ -75,11 +75,13 @@ function ea_gaming_engine_requirements_error() {
 
 	$error = '<div class="notice notice-error"><p>';
 	$error .= sprintf(
+		/* translators: %1$s: minimum PHP version, %2$s: minimum WordPress version */
 		__( '<strong>EA Gaming Engine</strong> requires PHP %1$s+, WordPress %2$s+, and LearnDash to be installed and activated.', 'ea-gaming-engine' ),
 		EA_GAMING_ENGINE_MIN_PHP,
 		EA_GAMING_ENGINE_MIN_WP
 	);
 	$error .= sprintf(
+		/* translators: %1$s: current PHP version, %2$s: current WordPress version */
 		__( ' You are running PHP %1$s and WordPress %2$s.', 'ea-gaming-engine' ),
 		PHP_VERSION,
 		$wp_version
