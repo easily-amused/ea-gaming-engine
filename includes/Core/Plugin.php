@@ -230,21 +230,15 @@ class Plugin {
 			]
 		);
 
-		// Phaser library for games
-		wp_enqueue_script(
-			'phaser',
-			EA_GAMING_ENGINE_URL . 'assets/lib/phaser.min.js',
-			[],
-			'3.70.0',
-			true
-		);
+		// Load games bundle built by Webpack
+		$games_min = EA_GAMING_ENGINE_PATH . 'assets/dist/js/games.min.js';
+		$games_rel = file_exists( $games_min ) ? 'assets/dist/js/games.min.js' : 'assets/dist/js/games.js';
 
-		// Game engine scripts (conditionally loaded)
 		if ( $this->should_load_games() ) {
 			wp_enqueue_script(
 				'ea-gaming-engine-games',
-				EA_GAMING_ENGINE_URL . 'assets/games/dist/bundle.js',
-				[ 'phaser', 'ea-gaming-engine' ],
+				EA_GAMING_ENGINE_URL . $games_rel,
+				[ 'ea-gaming-engine' ],
 				EA_GAMING_ENGINE_VERSION,
 				true
 			);

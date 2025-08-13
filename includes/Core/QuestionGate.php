@@ -55,48 +55,119 @@ class QuestionGate {
 	 * @return array|false
 	 */
 	public function get_question( $quiz_id, $options = [] ) {
-		// Check if LearnDash is available
 		if ( ! function_exists( 'learndash_get_quiz_questions' ) ) {
 			return false;
 		}
 
-		// Get quiz questions
-		$questions = learndash_get_quiz_questions( $quiz_id );
-		
-		if ( empty( $questions ) ) {
+		$ld_questions_map = learndash_get_quiz_questions( $quiz_id );
+		if ( empty( $ld_questions_map ) || ! is_array( $ld_questions_map ) ) {
 			return false;
 		}
 
-		// Filter out already answered questions if needed
-		if ( ! empty( $options['exclude'] ) ) {
-			$questions = array_filter(
-				$questions,
-				function ( $q ) use ( $options ) {
-					return ! in_array( $q['question_id'], $options['exclude'], true );
-				}
+		// Extract IDs
+		$question_ids = array_keys( $ld_questions_map );
+
+		// Exclude answered
+		if ( ! empty( $options['exclude'] ) && is_array( $options['exclude'] ) ) {
+			$exclude = array_map( 'intval', $options['exclude'] );
+			$question_ids = array_values( array_diff( $question_ids, $exclude ) );
+		}
+
+		// Difficulty filter (optional, uses post meta _difficulty_level)
+		if ( ! empty( $options['difficulty'] ) ) {
+			$question_ids = array_values(
+				array_filter(
+					$question_ids,
+					function ( $qid ) use ( $options ) {
+						$difficulty = get_post_meta( $qid, '_difficulty_level', true );
+						return $difficulty === $options['difficulty'];
+					}
+				)
 			);
 		}
 
-		// Get random question or specific one
-		if ( ! empty( $options['question_id'] ) ) {
-			$question = $this->get_specific_question( $questions, $options['question_id'] );
-		} else {
-			$question = $this->get_random_question( $questions, $options );
-		}
-
-		if ( ! $question ) {
+		if ( empty( $question_ids ) ) {
 			return false;
 		}
 
-		// Format question for frontend
-		$formatted = $this->format_question( $question );
+		// Pick a question
+		$chosen_id = ! empty( $options['question_id'] ) && in_array( (int) $options['question_id'], $question_ids, true )
+			? (int) $options['question_id']
+			: $question_ids[ array_rand( $question_ids ) ];
 
-		// Cache the question with answer for validation
+		// Format for frontend
+		$formatted = $this->format_question( $chosen_id, (int) $quiz_id );
+		if ( empty( $formatted ) ) {
+			return false;
+		}
+
+		// Cache full data (with correct answers) for validation
 		$this->cache_question( $formatted );
 
-		// Remove correct answer from response
-		unset( $formatted['correct_answer'] );
-		unset( $formatted['correct_answers'] );
+		// Remove correctness details before sending to client
+		unset( $formatted['correct_answer'], $formatted['correct_answers'] );
+
+		return $formatted;
+	}
+
+	/**
+		* Format question for frontend by Post ID
+		*
+		* @param int $question_id Question Post ID.
+		* @param int $quiz_id Quiz ID.
+		* @return array
+		*/
+	private function format_question( $question_id, $quiz_id ) {
+		$question_post = get_post( $question_id );
+
+		if ( ! $question_post ) {
+			return [];
+		}
+
+		// Load ProQuiz question model
+		$question_pro_id = get_post_meta( $question_id, 'question_pro_id', true );
+		$question_pro_id = (int) $question_pro_id;
+
+		if ( empty( $question_pro_id ) ) {
+			return [];
+		}
+
+		$question_mapper = new \WpProQuiz_Model_QuestionMapper();
+		$question_model  = $question_mapper->fetch( $question_pro_id );
+
+		if ( ! $question_model ) {
+			return [];
+		}
+
+		$answer_data = $question_model->getAnswerData();
+		$answers = [];
+
+		// Build answers list with stable IDs (index from model)
+		foreach ( $answer_data as $index => $answer ) {
+			$answers[] = [
+				'id'   => $index,
+				'text' => $answer->getAnswer(),
+				'html' => $answer->isHtml(),
+			];
+		}
+
+		// Shuffle answers if ProQuiz indicates random order
+		if ( method_exists( $question_model, 'isAnswerRandom' ) && $question_model->isAnswerRandom() ) {
+			shuffle( $answers );
+		}
+
+		$formatted = [
+			'id'       => $question_id,
+			'quiz_id'  => $quiz_id,
+			'title'    => $question_model->getTitle(),
+			'question' => $question_model->getQuestion(),
+			'type'     => $this->get_question_type( $question_model ),
+			'points'   => (int) $question_model->getPoints(),
+			'answers'  => $answers,
+		];
+
+		// For validation server-side
+		$formatted['correct_answer'] = $this->get_correct_answers( $question_model );
 
 		return $formatted;
 	}
@@ -278,7 +349,7 @@ class QuestionGate {
 	 */
 	public function validate_answer( $question_id, $answer ) {
 		$question = $this->get_cached_question( $question_id );
-		
+
 		if ( ! $question ) {
 			return [
 				'valid'   => false,
@@ -287,34 +358,36 @@ class QuestionGate {
 			];
 		}
 
-		// Check answer based on question type
 		$is_correct = false;
-		
+
 		switch ( $question['type'] ) {
 			case 'single_choice':
-				$is_correct = in_array( $answer, $question['correct_answer'], true );
+				// Expect single answer ID (number or string numeric)
+				$is_correct = in_array( (int) $answer, array_map( 'intval', (array) $question['correct_answer'] ), true );
 				break;
-				
+
 			case 'multiple_choice':
+				// Expect array of IDs
 				if ( is_array( $answer ) ) {
-					sort( $answer );
-					$correct = $question['correct_answer'];
+					$given   = array_map( 'intval', $answer );
+					$correct = array_map( 'intval', (array) $question['correct_answer'] );
+					sort( $given );
 					sort( $correct );
-					$is_correct = $answer === $correct;
+					$is_correct = ( $given === $correct );
 				}
 				break;
-				
+
 			case 'free_text':
-				// For free text, we need more complex validation
+			case 'fill_blank':
 				$is_correct = $this->validate_free_text( $answer, $question );
 				break;
-				
+
 			default:
 				$is_correct = false;
 		}
 
 		// Record attempt
-		$this->record_attempt( $question_id, $answer, $is_correct );
+		$this->record_attempt( $question['id'], $answer, $is_correct, $question['quiz_id'], $question['points'] );
 
 		// Clear cached question
 		$cache_key = 'ea_gaming_question_' . $question_id . '_' . get_current_user_id();
@@ -323,7 +396,7 @@ class QuestionGate {
 		return [
 			'valid'   => true,
 			'correct' => $is_correct,
-			'points'  => $is_correct ? $question['points'] : 0,
+			'points'  => $is_correct ? (int) $question['points'] : 0,
 			'message' => $is_correct ? __( 'Correct!', 'ea-gaming-engine' ) : __( 'Incorrect', 'ea-gaming-engine' ),
 		];
 	}

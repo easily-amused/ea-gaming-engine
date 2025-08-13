@@ -275,9 +275,21 @@ class LearnDash {
 			return;
 		}
 
-		// Calculate if quiz passed
-		$passing_percentage = learndash_get_setting( $quiz_id, 'passing_percentage' );
-		$score_percentage = ( $stats['questions_correct'] / $stats['questions_total'] ) * 100;
+		// Passing percentage key may differ between LD versions
+		$passing_percentage = 0;
+		$pp1 = learndash_get_setting( $quiz_id, 'passingpercentage' );
+		$pp2 = learndash_get_setting( $quiz_id, 'passing_percentage' );
+		if ( is_numeric( $pp1 ) ) {
+			$passing_percentage = (float) $pp1;
+		} elseif ( is_numeric( $pp2 ) ) {
+			$passing_percentage = (float) $pp2;
+		} else {
+			$passing_percentage = 80; // sane default
+		}
+
+		$correct = (int) ( $stats['questions_correct'] ?? 0 );
+		$total   = (int) ( $stats['questions_total'] ?? 0 );
+		$score_percentage = ( $total > 0 ) ? ( ( $correct / $total ) * 100.0 ) : 0.0;
 
 		if ( $score_percentage >= $passing_percentage ) {
 			// Mark quiz as complete
