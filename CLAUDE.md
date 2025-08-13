@@ -276,3 +276,4 @@ When implementing tests:
 - **Organization**: easily-amused
 - **License**: GPL-2.0+
 - **Requires**: PHP 7.4+, WordPress 5.9+, LearnDash
+- Add to memory
