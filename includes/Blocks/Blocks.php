@@ -27,7 +27,7 @@ class Blocks {
 		// Register block scripts
 		wp_register_script(
 			'ea-gaming-blocks',
-			EA_GAMING_ENGINE_URL . 'assets/js/blocks.js',
+			EA_GAMING_ENGINE_URL . 'assets/dist/js/blocks.min.js',
 			[ 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n' ],
 			EA_GAMING_ENGINE_VERSION,
 			true
@@ -35,7 +35,7 @@ class Blocks {
 
 		wp_register_style(
 			'ea-gaming-blocks',
-			EA_GAMING_ENGINE_URL . 'assets/css/blocks.css',
+			EA_GAMING_ENGINE_URL . 'assets/dist/css/blocks.min.css',
 			[ 'wp-edit-blocks' ],
 			EA_GAMING_ENGINE_VERSION
 		);

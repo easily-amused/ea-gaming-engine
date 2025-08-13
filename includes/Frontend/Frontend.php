@@ -91,7 +91,7 @@ class Frontend {
 		}
 
 		// Check policies
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		$can_play = $policy_engine->can_user_play( get_current_user_id(), $atts['course_id'] );
 
 		ob_start();
@@ -593,7 +593,7 @@ class Frontend {
 		$quiz_id = intval( $_POST['quiz_id'] ?? 0 );
 
 		// Check policies
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		$can_play = $policy_engine->can_user_play( get_current_user_id(), $course_id );
 
 		if ( is_array( $can_play ) && ! $can_play['can_play'] ) {
