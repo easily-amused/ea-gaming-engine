@@ -1,6 +1,7 @@
 import { EAGameBase, GameConfig } from './index';
 import { WhackAQuestion } from './games/WhackAQuestion';
 import { TicTacTactics } from './games/TicTacTactics';
+import { TargetTrainer } from './games/TargetTrainer';
 
 /**
  * Game Factory - Creates game instances based on game type
@@ -16,8 +17,7 @@ export class GameFactory {
 			case 'tic_tac_tactics':
 				return new TicTacTactics('tic-tac-tactics', config);
 			case 'target_trainer':
-				// TODO: Implement TargetTrainer
-				throw new Error('TargetTrainer not implemented yet');
+				return new TargetTrainer('target-trainer', config);
 			default:
 				throw new Error(`Unknown game type: ${gameType}`);
 		}
@@ -41,7 +41,7 @@ export class GameFactory {
 			{
 				id: 'target_trainer',
 				name: 'Target Trainer',
-				description: 'Aim and shoot correct answers'
+				description: 'Aim and shoot at targets with correct answers to score points'
 			}
 		];
 	}
