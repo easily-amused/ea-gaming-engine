@@ -157,7 +157,7 @@ class Admin {
 		// Enqueue admin styles
 		wp_enqueue_style(
 			'ea-gaming-admin',
-			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.css',
+			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
 			[ 'wp-components' ],
 			EA_GAMING_ENGINE_VERSION
 		);
@@ -487,34 +487,72 @@ class Admin {
 					</div>
 				</div>
 				
+				<!-- Integration Settings -->
+				<div class="ea-gaming-settings-section">
+					<h2><?php esc_html_e( 'Integrations', 'ea-gaming-engine' ); ?></h2>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="learndash_enabled">
+							<?php esc_html_e( 'LearnDash Integration', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_integrations[learndash]" id="learndash_enabled" value="1" <?php checked( class_exists( 'SFWD_LMS' ) ); ?> <?php echo ! class_exists( 'SFWD_LMS' ) ? 'disabled' : ''; ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php echo class_exists( 'SFWD_LMS' ) ? esc_html__( 'Pull questions from LearnDash courses and quizzes', 'ea-gaming-engine' ) : esc_html__( 'LearnDash not detected', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="parent_controls_enabled">
+							<?php esc_html_e( 'Parent Controls', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_integrations[parent_controls]" id="parent_controls_enabled" value="1" <?php checked( class_exists( 'EA_Student_Parent_Access' ) ); ?> <?php echo ! class_exists( 'EA_Student_Parent_Access' ) ? 'disabled' : ''; ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php echo class_exists( 'EA_Student_Parent_Access' ) ? esc_html__( 'Enable parent-managed gaming restrictions', 'ea-gaming-engine' ) : esc_html__( 'Student-Parent Access plugin not detected', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="flashcards_enabled">
+							<?php esc_html_e( 'Flashcards Integration', 'ea-gaming-engine' ); ?>
+						</label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" name="ea_gaming_engine_integrations[flashcards]" id="flashcards_enabled" value="1" <?php checked( class_exists( 'EA_Flashcards' ) ); ?> <?php echo ! class_exists( 'EA_Flashcards' ) ? 'disabled' : ''; ?>>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php echo class_exists( 'EA_Flashcards' ) ? esc_html__( 'Use flashcards as remediation questions', 'ea-gaming-engine' ) : esc_html__( 'Flashcards plugin not detected', 'ea-gaming-engine' ); ?></span>
+					</div>
+				</div>
+				
 				<!-- Advanced Settings -->
 				<div class="ea-gaming-settings-section">
 					<h2><?php esc_html_e( 'Advanced Settings', 'ea-gaming-engine' ); ?></h2>
 					
 					<div class="ea-gaming-settings-row">
-						<label for="ea_gaming_engine_cache_enabled">
+						<label for="ea_gaming_cache">
 							<?php esc_html_e( 'Enable Caching', 'ea-gaming-engine' ); ?>
 						</label>
 						<label class="ea-gaming-toggle">
-							<input type="checkbox" name="ea_gaming_engine_cache_enabled" id="ea_gaming_engine_cache_enabled" value="1" <?php checked( $cache_enabled ); ?>>
+							<input type="checkbox" name="ea_gaming_engine_cache_enabled" id="ea_gaming_cache" value="1" <?php checked( $cache_enabled ); ?>>
 							<span class="ea-gaming-toggle-slider"></span>
 						</label>
 						<span class="description"><?php esc_html_e( 'Cache questions and game data for better performance', 'ea-gaming-engine' ); ?></span>
 					</div>
 					
 					<div class="ea-gaming-settings-row">
-						<label for="ea_gaming_engine_debug_mode">
+						<label for="ea_gaming_debug">
 							<?php esc_html_e( 'Debug Mode', 'ea-gaming-engine' ); ?>
 						</label>
 						<label class="ea-gaming-toggle">
-							<input type="checkbox" name="ea_gaming_engine_debug_mode" id="ea_gaming_engine_debug_mode" value="1" <?php checked( $debug_mode ); ?>>
+							<input type="checkbox" name="ea_gaming_engine_debug_mode" id="ea_gaming_debug" value="1" <?php checked( $debug_mode ); ?>>
 							<span class="ea-gaming-toggle-slider"></span>
 						</label>
 						<span class="description"><?php esc_html_e( 'Enable debug logging for troubleshooting', 'ea-gaming-engine' ); ?></span>
 					</div>
 				</div>
 				
-				<?php submit_button( __( 'Save Settings', 'ea-gaming-engine' ), 'primary', 'save-settings' ); ?>
+				<?php submit_button( __( 'Save Settings', 'ea-gaming-engine' ), 'primary', 'ea-gaming-save-settings' ); ?>
 			</form>
 		</div>
 		<?php
@@ -959,37 +997,51 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$settings = json_decode( stripslashes( $_POST['settings'] ?? '{}' ), true );
+		$settings = $_POST['settings'] ?? [];
 
 		if ( empty( $settings ) ) {
 			wp_send_json_error( __( 'Invalid settings data', 'ea-gaming-engine' ) );
 		}
 
-		// Save each settings group
-		if ( isset( $settings['general'] ) ) {
-			update_option( 'ea_gaming_engine_enabled', $settings['general']['enabled'] ?? true );
-			update_option( 'ea_gaming_engine_default_theme', sanitize_text_field( $settings['general']['default_theme'] ?? 'playful' ) );
-			update_option( 'ea_gaming_engine_default_preset', sanitize_text_field( $settings['general']['default_preset'] ?? 'classic' ) );
+		// Save general settings
+		if ( isset( $settings['enabled'] ) ) {
+			update_option( 'ea_gaming_engine_enabled', filter_var( $settings['enabled'], FILTER_VALIDATE_BOOLEAN ) );
+		}
+		
+		if ( isset( $settings['cache_enabled'] ) ) {
+			update_option( 'ea_gaming_engine_cache_enabled', filter_var( $settings['cache_enabled'], FILTER_VALIDATE_BOOLEAN ) );
+		}
+		
+		if ( isset( $settings['debug_mode'] ) ) {
+			update_option( 'ea_gaming_engine_debug_mode', filter_var( $settings['debug_mode'], FILTER_VALIDATE_BOOLEAN ) );
+		}
+		
+		if ( isset( $settings['default_theme'] ) ) {
+			update_option( 'ea_gaming_engine_default_theme', sanitize_text_field( $settings['default_theme'] ) );
+		}
+		
+		if ( isset( $settings['default_preset'] ) ) {
+			update_option( 'ea_gaming_engine_default_preset', sanitize_text_field( $settings['default_preset'] ) );
 		}
 
-		if ( isset( $settings['policies'] ) ) {
-			update_option( 'ea_gaming_engine_policies', $settings['policies'] );
+		// Save hint settings
+		if ( isset( $settings['hint_settings'] ) ) {
+			$hint_settings = [
+				'enabled' => filter_var( $settings['hint_settings']['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+				'cooldown' => intval( $settings['hint_settings']['cooldown'] ?? 30 ),
+				'max_per_session' => intval( $settings['hint_settings']['max_per_session'] ?? 3 )
+			];
+			update_option( 'ea_gaming_engine_hint_settings', $hint_settings );
 		}
 
-		if ( isset( $settings['games'] ) ) {
-			update_option( 'ea_gaming_engine_games', $settings['games'] );
-		}
-
-		if ( isset( $settings['themes'] ) ) {
-			update_option( 'ea_gaming_engine_themes', $settings['themes'] );
-		}
-
-		if ( isset( $settings['advanced'] ) ) {
-			update_option( 'ea_gaming_engine_cache_enabled', $settings['advanced']['cache_enabled'] ?? true );
-			update_option( 'ea_gaming_engine_debug_mode', $settings['advanced']['debug_mode'] ?? false );
-			update_option( 'ea_gaming_engine_api_rate_limit', intval( $settings['advanced']['api_rate_limit'] ?? 100 ) );
-			update_option( 'ea_gaming_engine_keep_data_on_uninstall', $settings['advanced']['keep_data_on_uninstall'] ?? false );
-			update_option( 'ea_gaming_engine_export_data_on_uninstall', $settings['advanced']['export_data_on_uninstall'] ?? false );
+		// Save integration settings
+		if ( isset( $settings['integration_settings'] ) ) {
+			$integration_settings = [
+				'learndash_enabled' => filter_var( $settings['integration_settings']['learndash_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+				'parent_controls_enabled' => filter_var( $settings['integration_settings']['parent_controls_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN ),
+				'flashcards_enabled' => filter_var( $settings['integration_settings']['flashcards_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN )
+			];
+			update_option( 'ea_gaming_engine_integration_settings', $integration_settings );
 		}
 
 		wp_send_json_success(

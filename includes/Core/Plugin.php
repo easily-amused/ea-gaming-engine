@@ -259,7 +259,7 @@ class Plugin {
 		// Admin styles
 		wp_enqueue_style(
 			'ea-gaming-engine-admin',
-			EA_GAMING_ENGINE_URL . 'assets/css/admin.css',
+			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
 			[ 'wp-components' ],
 			EA_GAMING_ENGINE_VERSION
 		);
@@ -267,7 +267,7 @@ class Plugin {
 		// Admin scripts
 		wp_enqueue_script(
 			'ea-gaming-engine-admin',
-			EA_GAMING_ENGINE_URL . 'assets/js/admin.js',
+			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
 			[ 'jquery', 'wp-api-fetch', 'wp-i18n', 'wp-components', 'wp-element' ],
 			EA_GAMING_ENGINE_VERSION,
 			true
