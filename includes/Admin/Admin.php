@@ -41,6 +41,12 @@ class Admin {
 		add_action( 'wp_ajax_ea_gaming_reset_settings', [ $this, 'ajax_reset_settings' ] );
 		add_action( 'wp_ajax_ea_gaming_get_analytics', [ $this, 'ajax_get_analytics' ] );
 		add_action( 'wp_ajax_ea_gaming_export_data', [ $this, 'ajax_export_data' ] );
+		
+		// Policy AJAX handlers
+		add_action( 'wp_ajax_ea_gaming_get_policy', [ $this, 'ajax_get_policy' ] );
+		add_action( 'wp_ajax_ea_gaming_save_policy', [ $this, 'ajax_save_policy' ] );
+		add_action( 'wp_ajax_ea_gaming_toggle_policy', [ $this, 'ajax_toggle_policy' ] );
+		add_action( 'wp_ajax_ea_gaming_delete_policy', [ $this, 'ajax_delete_policy' ] );
 	}
 
 	/**
@@ -599,20 +605,23 @@ class Admin {
 					</thead>
 					<tbody>
 						<?php foreach ( $policies as $policy ) : ?>
-						<tr id="policy-<?php echo esc_attr( $policy->id ); ?>">
+						<tr id="policy-<?php echo esc_attr( $policy->id ); ?>" class="<?php echo $policy->active ? '' : 'policy-inactive'; ?>">
 							<td><strong><?php echo esc_html( $policy->name ); ?></strong></td>
-							<td><?php echo esc_html( $policy_types[ $policy->type ] ?? ucwords( str_replace( '_', ' ', $policy->type ) ) ); ?></td>
+							<td><?php echo esc_html( $policy_types[ $policy->rule_type ] ?? ucwords( str_replace( '_', ' ', $policy->rule_type ) ) ); ?></td>
 							<td><?php echo esc_html( $policy->priority ); ?></td>
 							<td>
-								<span class="ea-gaming-policy-status <?php echo $policy->enabled ? 'active' : 'inactive'; ?>">
-									<?php echo $policy->enabled ? esc_html__( 'Active', 'ea-gaming-engine' ) : esc_html__( 'Inactive', 'ea-gaming-engine' ); ?>
+								<span class="ea-gaming-policy-status <?php echo $policy->active ? 'active' : 'inactive'; ?>">
+									<?php echo $policy->active ? esc_html__( 'Active', 'ea-gaming-engine' ) : esc_html__( 'Inactive', 'ea-gaming-engine' ); ?>
 								</span>
 							</td>
 							<td>
-								<button class="button toggle-policy-status" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
-									<?php echo $policy->enabled ? esc_html__( 'Disable', 'ea-gaming-engine' ) : esc_html__( 'Enable', 'ea-gaming-engine' ); ?>
+								<button class="button button-small edit-policy" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
+									<?php esc_html_e( 'Edit', 'ea-gaming-engine' ); ?>
 								</button>
-								<button class="button delete-policy" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
+								<button class="button button-small toggle-policy-status" data-policy-id="<?php echo esc_attr( $policy->id ); ?>" data-status="<?php echo esc_attr( $policy->active ); ?>">
+									<?php echo $policy->active ? esc_html__( 'Disable', 'ea-gaming-engine' ) : esc_html__( 'Enable', 'ea-gaming-engine' ); ?>
+								</button>
+								<button class="button button-small delete-policy" data-policy-id="<?php echo esc_attr( $policy->id ); ?>">
 									<?php esc_html_e( 'Delete', 'ea-gaming-engine' ); ?>
 								</button>
 							</td>
@@ -627,44 +636,88 @@ class Admin {
 				<?php endif; ?>
 			</div>
 			
-			<!-- Add Example Policies -->
+			<!-- Add New Policy Section -->
 			<div class="ea-gaming-settings-section">
-				<h2><?php esc_html_e( 'Quick Add Policy', 'ea-gaming-engine' ); ?></h2>
-				<p><?php esc_html_e( 'Click to add common policy configurations:', 'ea-gaming-engine' ); ?></p>
+				<h2><?php esc_html_e( 'Add New Policy', 'ea-gaming-engine' ); ?></h2>
+				<p><?php esc_html_e( 'Create a new policy or use a template:', 'ea-gaming-engine' ); ?></p>
 				<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-					<button class="ea-gaming-button" onclick="addExamplePolicy('free_play')">
-						<?php esc_html_e( 'Add Free Play Policy', 'ea-gaming-engine' ); ?>
+					<button class="button button-primary" id="add-new-policy">
+						<span class="dashicons dashicons-plus-alt"></span>
+						<?php esc_html_e( 'Create Custom Policy', 'ea-gaming-engine' ); ?>
 					</button>
-					<button class="ea-gaming-button secondary" onclick="addExamplePolicy('quiet_hours')">
-						<?php esc_html_e( 'Add Quiet Hours Policy', 'ea-gaming-engine' ); ?>
+					<button class="button add-template-policy" data-template="free_play">
+						<?php esc_html_e( 'Free Play Template', 'ea-gaming-engine' ); ?>
 					</button>
-					<button class="ea-gaming-button secondary" onclick="addExamplePolicy('daily_limit')">
-						<?php esc_html_e( 'Add Daily Limit Policy', 'ea-gaming-engine' ); ?>
+					<button class="button add-template-policy" data-template="quiet_hours">
+						<?php esc_html_e( 'Quiet Hours Template', 'ea-gaming-engine' ); ?>
+					</button>
+					<button class="button add-template-policy" data-template="daily_limit">
+						<?php esc_html_e( 'Daily Limit Template', 'ea-gaming-engine' ); ?>
+					</button>
+					<button class="button add-template-policy" data-template="study_first">
+						<?php esc_html_e( 'Study First Template', 'ea-gaming-engine' ); ?>
 					</button>
 				</div>
 			</div>
 		</div>
 		
-		<script>
-		function addExamplePolicy(type) {
-			jQuery.ajax({
-				url: ajaxurl,
-				type: 'POST',
-				data: {
-					action: 'ea_gaming_add_example_policy',
-					policy_type: type,
-					nonce: '<?php echo wp_create_nonce( 'ea-gaming-engine-admin' ); ?>'
-				},
-				success: function(response) {
-					if (response.success) {
-						location.reload();
-					} else {
-						alert('Error adding policy: ' + response.data);
-					}
-				}
-			});
-		}
-		</script>
+		<!-- Policy Edit Modal -->
+		<div id="policy-modal" class="ea-gaming-modal" style="display: none;">
+			<div class="ea-gaming-modal-content">
+				<span class="ea-gaming-modal-close">&times;</span>
+				<h2 id="policy-modal-title"><?php esc_html_e( 'Edit Policy', 'ea-gaming-engine' ); ?></h2>
+				
+				<form id="policy-form">
+					<input type="hidden" id="policy-id" name="policy_id" value="">
+					
+					<div class="ea-gaming-settings-row">
+						<label for="policy-name"><?php esc_html_e( 'Policy Name', 'ea-gaming-engine' ); ?></label>
+						<input type="text" id="policy-name" name="name" required style="width: 100%;">
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="policy-type"><?php esc_html_e( 'Policy Type', 'ea-gaming-engine' ); ?></label>
+						<select id="policy-type" name="rule_type" required style="width: 100%;">
+							<?php foreach ( $policy_types as $type => $label ) : ?>
+								<option value="<?php echo esc_attr( $type ); ?>"><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="policy-priority"><?php esc_html_e( 'Priority', 'ea-gaming-engine' ); ?></label>
+						<input type="number" id="policy-priority" name="priority" min="1" max="100" value="10" required>
+						<span class="description"><?php esc_html_e( 'Lower numbers = higher priority', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row">
+						<label for="policy-active"><?php esc_html_e( 'Status', 'ea-gaming-engine' ); ?></label>
+						<label class="ea-gaming-toggle">
+							<input type="checkbox" id="policy-active" name="active" value="1" checked>
+							<span class="ea-gaming-toggle-slider"></span>
+						</label>
+						<span class="description"><?php esc_html_e( 'Enable this policy immediately', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row" id="policy-conditions-wrapper">
+						<label><?php esc_html_e( 'Conditions (JSON)', 'ea-gaming-engine' ); ?></label>
+						<textarea id="policy-conditions" name="conditions" rows="5" style="width: 100%; font-family: monospace;">{}</textarea>
+						<span class="description"><?php esc_html_e( 'Define when this policy applies', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-settings-row" id="policy-actions-wrapper">
+						<label><?php esc_html_e( 'Actions (JSON)', 'ea-gaming-engine' ); ?></label>
+						<textarea id="policy-actions" name="actions" rows="5" style="width: 100%; font-family: monospace;">{}</textarea>
+						<span class="description"><?php esc_html_e( 'Define what happens when conditions are met', 'ea-gaming-engine' ); ?></span>
+					</div>
+					
+					<div class="ea-gaming-modal-footer" style="margin-top: 20px;">
+						<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Policy', 'ea-gaming-engine' ); ?></button>
+						<button type="button" class="button cancel-policy"><?php esc_html_e( 'Cancel', 'ea-gaming-engine' ); ?></button>
+					</div>
+				</form>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -1288,5 +1341,169 @@ class Admin {
 				],
 			]
 		);
+	}
+
+	/**
+	 * AJAX handler for getting a single policy
+	 *
+	 * @return void
+	 */
+	public function ajax_get_policy() {
+		check_ajax_referer( 'ea-gaming-engine-admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
+		}
+
+		$policy_id = intval( $_POST['policy_id'] ?? 0 );
+
+		if ( ! $policy_id ) {
+			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ea_game_policies';
+		
+		$policy = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table WHERE id = %d",
+				$policy_id
+			)
+		);
+
+		if ( ! $policy ) {
+			wp_send_json_error( __( 'Policy not found', 'ea-gaming-engine' ) );
+		}
+
+		wp_send_json_success( $policy );
+	}
+
+	/**
+	 * AJAX handler for saving a policy
+	 *
+	 * @return void
+	 */
+	public function ajax_save_policy() {
+		check_ajax_referer( 'ea-gaming-engine-admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
+		}
+
+		$policy = $_POST['policy'] ?? [];
+		
+		if ( empty( $policy ) ) {
+			wp_send_json_error( __( 'Invalid policy data', 'ea-gaming-engine' ) );
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ea_game_policies';
+
+		$data = [
+			'name'       => sanitize_text_field( $policy['name'] ?? '' ),
+			'rule_type'  => sanitize_text_field( $policy['rule_type'] ?? '' ),
+			'priority'   => intval( $policy['priority'] ?? 10 ),
+			'conditions' => wp_unslash( $policy['conditions'] ?? '{}' ),
+			'actions'    => wp_unslash( $policy['actions'] ?? '{}' ),
+			'active'     => intval( $policy['active'] ?? 0 ),
+		];
+
+		// Validate JSON
+		if ( json_decode( $data['conditions'] ) === null || json_decode( $data['actions'] ) === null ) {
+			wp_send_json_error( __( 'Invalid JSON in conditions or actions', 'ea-gaming-engine' ) );
+		}
+
+		if ( ! empty( $policy['policy_id'] ) ) {
+			// Update existing policy
+			$result = $wpdb->update(
+				$table,
+				$data,
+				[ 'id' => intval( $policy['policy_id'] ) ]
+			);
+		} else {
+			// Insert new policy
+			$result = $wpdb->insert( $table, $data );
+		}
+
+		if ( $result === false ) {
+			wp_send_json_error( __( 'Failed to save policy', 'ea-gaming-engine' ) );
+		}
+
+		wp_send_json_success( [
+			'message' => __( 'Policy saved successfully', 'ea-gaming-engine' ),
+			'policy_id' => ! empty( $policy['policy_id'] ) ? intval( $policy['policy_id'] ) : $wpdb->insert_id,
+		] );
+	}
+
+	/**
+	 * AJAX handler for toggling policy status
+	 *
+	 * @return void
+	 */
+	public function ajax_toggle_policy() {
+		check_ajax_referer( 'ea-gaming-engine-admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
+		}
+
+		$policy_id = intval( $_POST['policy_id'] ?? 0 );
+		$active = intval( $_POST['active'] ?? 0 );
+
+		if ( ! $policy_id ) {
+			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ea_game_policies';
+
+		$result = $wpdb->update(
+			$table,
+			[ 'active' => $active ],
+			[ 'id' => $policy_id ]
+		);
+
+		if ( $result === false ) {
+			wp_send_json_error( __( 'Failed to update policy status', 'ea-gaming-engine' ) );
+		}
+
+		wp_send_json_success( [
+			'message' => __( 'Policy status updated', 'ea-gaming-engine' ),
+		] );
+	}
+
+	/**
+	 * AJAX handler for deleting a policy
+	 *
+	 * @return void
+	 */
+	public function ajax_delete_policy() {
+		check_ajax_referer( 'ea-gaming-engine-admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
+		}
+
+		$policy_id = intval( $_POST['policy_id'] ?? 0 );
+
+		if ( ! $policy_id ) {
+			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ea_game_policies';
+
+		$result = $wpdb->delete(
+			$table,
+			[ 'id' => $policy_id ]
+		);
+
+		if ( $result === false ) {
+			wp_send_json_error( __( 'Failed to delete policy', 'ea-gaming-engine' ) );
+		}
+
+		wp_send_json_success( [
+			'message' => __( 'Policy deleted successfully', 'ea-gaming-engine' ),
+		] );
 	}
 }
