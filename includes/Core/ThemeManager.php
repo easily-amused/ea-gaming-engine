@@ -13,6 +13,13 @@ namespace EAGamingEngine\Core;
 class ThemeManager {
 
 	/**
+	 * Instance
+	 *
+	 * @var ThemeManager
+	 */
+	private static $instance = null;
+
+	/**
 	 * Available themes
 	 *
 	 * @var array
@@ -41,9 +48,21 @@ class ThemeManager {
 	private $current_preset = 'classic';
 
 	/**
+	 * Get instance
+	 *
+	 * @return ThemeManager
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	private function __construct() {
 		$this->init_themes();
 		$this->init_presets();
 		$this->init_hooks();

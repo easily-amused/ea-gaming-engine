@@ -775,7 +775,7 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_themes( $request ) {
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$themes = $theme_manager->get_all_themes();
 
 		return rest_ensure_response( $themes );
@@ -788,7 +788,7 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_current_theme( $request ) {
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$theme = $theme_manager->get_theme_data( null );
 
 		return rest_ensure_response( $theme );
@@ -804,7 +804,7 @@ class RestAPI {
 		$user_id = get_current_user_id();
 		$theme_id = $request->get_param( 'theme_id' );
 
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$success = $theme_manager->set_user_theme( $user_id, $theme_id );
 
 		if ( ! $success ) {
@@ -830,7 +830,7 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_presets( $request ) {
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$presets = $theme_manager->get_all_presets();
 
 		return rest_ensure_response( $presets );
@@ -843,7 +843,7 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_current_preset( $request ) {
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$preset = $theme_manager->get_preset_data( null );
 
 		return rest_ensure_response( $preset );
@@ -859,7 +859,7 @@ class RestAPI {
 		$user_id = get_current_user_id();
 		$preset_id = $request->get_param( 'preset_id' );
 
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$success = $theme_manager->set_user_preset( $user_id, $preset_id );
 
 		if ( ! $success ) {
@@ -970,7 +970,7 @@ class RestAPI {
 		}
 
 		// Get game configuration
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$theme = $theme_manager->get_theme_data( null );
 		$preset = $theme_manager->get_preset_data( null );
 

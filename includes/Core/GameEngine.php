@@ -13,20 +13,63 @@ namespace EAGamingEngine\Core;
 class GameEngine {
 
 	/**
+	 * Instance
+	 *
+	 * @var GameEngine
+	 */
+	private static $instance = null;
+
+	/**
 	 * Available game types
 	 *
 	 * @var array
 	 */
 	private $game_types = [
-		'whack_a_question',
-		'tic_tac_tactics',
-		'target_trainer',
+		'whack_a_question' => [
+			'name' => 'Whack-a-Question',
+			'description' => 'Test your reflexes by whacking questions as they pop up!',
+			'duration' => '3-5 min',
+			'players' => 'Single',
+		],
+		'tic_tac_tactics' => [
+			'name' => 'Tic-Tac-Tactics',
+			'description' => 'Strategic tic-tac-toe where correct answers earn your moves.',
+			'duration' => '5-10 min',
+			'players' => 'Single',
+		],
+		'target_trainer' => [
+			'name' => 'Target Trainer',
+			'description' => 'Sharpen your accuracy by hitting the right answer targets.',
+			'duration' => '5-7 min',
+			'players' => 'Single',
+		],
 	];
+
+	/**
+	 * Get instance
+	 *
+	 * @return GameEngine
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Get game types
+	 *
+	 * @return array
+	 */
+	public function get_game_types() {
+		return $this->game_types;
+	}
 
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	private function __construct() {
 		$this->init_hooks();
 	}
 
@@ -53,12 +96,12 @@ class GameEngine {
 	public function start_session( $user_id, $course_id, $game_type, $options = [] ) {
 		global $wpdb;
 
-		if ( ! in_array( $game_type, $this->game_types, true ) ) {
+		if ( ! array_key_exists( $game_type, $this->game_types ) ) {
 			return false;
 		}
 
 		// Check if user can play
-		$policy_engine = new PolicyEngine();
+		$policy_engine = PolicyEngine::get_instance();
 		if ( ! $policy_engine->can_user_play( $user_id, $course_id ) ) {
 			return false;
 		}

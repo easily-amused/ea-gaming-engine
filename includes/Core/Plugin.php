@@ -74,9 +74,9 @@ class Plugin {
 	 */
 	private function init_components() {
 		// Core components
-		$this->components['game_engine']    = new GameEngine();
-		$this->components['policy_engine']  = new PolicyEngine();
-		$this->components['theme_manager']  = new ThemeManager();
+		$this->components['game_engine']    = GameEngine::get_instance();
+		$this->components['policy_engine']  = PolicyEngine::get_instance();
+		$this->components['theme_manager']  = ThemeManager::get_instance();
 		$this->components['hint_system']    = new HintSystem();
 		
 		// Integrations

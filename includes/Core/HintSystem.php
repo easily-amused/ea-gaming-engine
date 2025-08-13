@@ -149,7 +149,7 @@ class HintSystem {
 	 * @return bool
 	 */
 	private function are_hints_enabled( $user_id ) {
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$preset_data = $theme_manager->get_preset_data( $user_id );
 		
 		return $preset_data['hints'] ?? false;

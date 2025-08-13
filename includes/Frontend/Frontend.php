@@ -510,7 +510,7 @@ class Frontend {
 		if ( get_option( 'ea_gaming_engine_enabled', true ) ) {
 			$classes[] = 'ea-gaming-enabled';
 			
-			$theme_manager = new ThemeManager();
+			$theme_manager = ThemeManager::get_instance();
 			$current_theme = $theme_manager->get_current_theme();
 			$classes[] = 'ea-gaming-theme-' . $current_theme;
 		}
@@ -601,7 +601,7 @@ class Frontend {
 		}
 
 		// Get theme and preset
-		$theme_manager = new ThemeManager();
+		$theme_manager = ThemeManager::get_instance();
 		$theme = $theme_manager->get_theme_data( null );
 		$preset = $theme_manager->get_preset_data( null );
 

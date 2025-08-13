@@ -13,17 +13,24 @@ namespace EAGamingEngine\Core;
 class PolicyEngine {
 
 	/**
+	 * Instance
+	 *
+	 * @var PolicyEngine
+	 */
+	private static $instance = null;
+
+	/**
 	 * Policy types
 	 *
 	 * @var array
 	 */
-	private $policy_types = [
-		'free_play',
-		'quiet_hours',
-		'study_first',
-		'parent_control',
-		'daily_limit',
-		'course_specific',
+	private static $policy_types = [
+		'free_play'       => 'Free Play',
+		'quiet_hours'     => 'Quiet Hours',
+		'study_first'     => 'Study First',
+		'parent_control'  => 'Parent Control',
+		'daily_limit'     => 'Daily Limit',
+		'course_specific' => 'Course Specific',
 	];
 
 	/**
@@ -34,9 +41,30 @@ class PolicyEngine {
 	private $active_policies = null;
 
 	/**
+	 * Get instance
+	 *
+	 * @return PolicyEngine
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Get policy types
+	 *
+	 * @return array
+	 */
+	public static function get_policy_types() {
+		return self::$policy_types;
+	}
+
+	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	private function __construct() {
 		$this->init_hooks();
 	}
 
