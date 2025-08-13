@@ -73,7 +73,7 @@ function ea_gaming_engine_requirements_met() {
 function ea_gaming_engine_requirements_error() {
 	global $wp_version;
 
-	$error = '<div class="notice notice-error"><p>';
+	$error  = '<div class="notice notice-error"><p>';
 	$error .= sprintf(
 		/* translators: %1$s: minimum PHP version, %2$s: minimum WordPress version */
 		__( '<strong>EA Gaming Engine</strong> requires PHP %1$s+, WordPress %2$s+, and LearnDash to be installed and activated.', 'ea-gaming-engine' ),

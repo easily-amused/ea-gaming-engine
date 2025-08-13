@@ -24,14 +24,14 @@ class PolicyEngine {
 	 *
 	 * @var array
 	 */
-	private static $policy_types = [
+	private static $policy_types = array(
 		'free_play'       => 'Free Play',
 		'quiet_hours'     => 'Quiet Hours',
 		'study_first'     => 'Study First',
 		'parent_control'  => 'Parent Control',
 		'daily_limit'     => 'Daily Limit',
 		'course_specific' => 'Course Specific',
-	];
+	);
 
 	/**
 	 * Active policies cache
@@ -74,9 +74,9 @@ class PolicyEngine {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'init', [ $this, 'load_default_policies' ] );
-		add_action( 'ea_gaming_engine_policy_check', [ $this, 'evaluate_policies' ] );
-		add_filter( 'ea_gaming_can_play', [ $this, 'filter_can_play' ], 10, 3 );
+		add_action( 'init', array( $this, 'load_default_policies' ) );
+		add_action( 'ea_gaming_engine_policy_check', array( $this, 'evaluate_policies' ) );
+		add_filter( 'ea_gaming_can_play', array( $this, 'filter_can_play' ), 10, 3 );
 	}
 
 	/**
@@ -105,63 +105,63 @@ class PolicyEngine {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_policies';
 
-		$default_policies = [
-			[
+		$default_policies = array(
+			array(
 				'name'       => __( 'Free Play Window', 'ea-gaming-engine' ),
 				'rule_type'  => 'free_play',
 				'conditions' => wp_json_encode(
-					[
+					array(
 						'start_time' => '15:00',
 						'end_time'   => '17:00',
-						'days'       => [ 'mon', 'tue', 'wed', 'thu', 'fri' ],
-					]
+						'days'       => array( 'mon', 'tue', 'wed', 'thu', 'fri' ),
+					)
 				),
 				'actions'    => wp_json_encode(
-					[
-						'allow_free_play' => true,
+					array(
+						'allow_free_play'     => true,
 						'no_tickets_required' => true,
-					]
+					)
 				),
 				'priority'   => 10,
 				'active'     => 0,
-			],
-			[
+			),
+			array(
 				'name'       => __( 'Quiet Hours', 'ea-gaming-engine' ),
 				'rule_type'  => 'quiet_hours',
 				'conditions' => wp_json_encode(
-					[
+					array(
 						'start_time' => '22:00',
 						'end_time'   => '07:00',
-					]
+					)
 				),
 				'actions'    => wp_json_encode(
-					[
+					array(
 						'block_access' => true,
 						'message'      => __( 'Games are not available during quiet hours.', 'ea-gaming-engine' ),
-					]
+					)
 				),
 				'priority'   => 5,
 				'active'     => 0,
-			],
-			[
+			),
+			array(
 				'name'       => __( 'Study First', 'ea-gaming-engine' ),
 				'rule_type'  => 'study_first',
 				'conditions' => wp_json_encode(
-					[
+					array(
 						'require_lesson_view' => true,
 						'minimum_time'        => 600, // 10 minutes
-					]
+					)
 				),
 				'actions'    => wp_json_encode(
-					[
+					array(
 						'redirect_to_lesson' => true,
 						'message'            => __( 'Please complete the lesson before playing games.', 'ea-gaming-engine' ),
-					]
+					)
 				),
 				'priority'   => 20,
 				'active'     => 1,
-			],
-		];
+			),
+		);
 
 		foreach ( $default_policies as $policy ) {
 			$wpdb->insert( $table, $policy );
@@ -188,17 +188,17 @@ class PolicyEngine {
 			ORDER BY priority ASC, id ASC"
 		);
 
-		$this->active_policies = [];
+		$this->active_policies = array();
 
 		foreach ( $policies as $policy ) {
-			$this->active_policies[] = [
+			$this->active_policies[] = array(
 				'id'         => $policy->id,
 				'name'       => $policy->name,
 				'rule_type'  => $policy->rule_type,
 				'conditions' => json_decode( $policy->conditions, true ),
 				'actions'    => json_decode( $policy->actions, true ),
 				'priority'   => $policy->priority,
-			];
+			);
 		}
 
 		return $this->active_policies;
@@ -213,17 +213,17 @@ class PolicyEngine {
 	 */
 	public function can_user_play( $user_id, $course_id = null ) {
 		$policies = $this->get_active_policies();
-		$context = $this->get_user_context( $user_id, $course_id );
+		$context  = $this->get_user_context( $user_id, $course_id );
 
 		foreach ( $policies as $policy ) {
 			$result = $this->evaluate_policy( $policy, $context );
 
 			if ( $result['block'] ) {
-				return [
+				return array(
 					'can_play' => false,
 					'reason'   => $result['message'],
 					'policy'   => $policy['name'],
-				];
+				);
 			}
 		}
 
@@ -238,13 +238,13 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function get_user_context( $user_id, $course_id = null ) {
-		$context = [
+		$context = array(
 			'user_id'      => $user_id,
 			'course_id'    => $course_id,
 			'current_time' => current_time( 'H:i' ),
 			'current_day'  => strtolower( current_time( 'D' ) ),
 			'timezone'     => wp_timezone_string(),
-		];
+		);
 
 		// Add user meta
 		$user = get_user_by( 'ID', $user_id );
@@ -255,12 +255,12 @@ class PolicyEngine {
 
 		// Add course progress if course ID provided
 		if ( $course_id && function_exists( 'learndash_course_progress' ) ) {
-			$progress = learndash_course_progress(
-				[
+			$progress                   = learndash_course_progress(
+				array(
 					'user_id'   => $user_id,
 					'course_id' => $course_id,
 					'array'     => true,
-				]
+				)
 			);
 			$context['course_progress'] = $progress;
 		}
@@ -284,11 +284,11 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function evaluate_policy( $policy, $context ) {
-		$result = [
+		$result = array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 
 		switch ( $policy['rule_type'] ) {
 			case 'free_play':
@@ -330,36 +330,36 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function evaluate_free_play( $policy, $context ) {
-		$conditions = $policy['conditions'];
+		$conditions   = $policy['conditions'];
 		$current_time = $context['current_time'];
-		$current_day = $context['current_day'];
+		$current_day  = $context['current_day'];
 
 		// Check if today is included in free play days
 		if ( ! empty( $conditions['days'] ) && ! in_array( $current_day, $conditions['days'], true ) ) {
-			return [
+			return array(
 				'block'   => false,
 				'message' => '',
-				'actions' => [],
-			];
+				'actions' => array(),
+			);
 		}
 
 		// Check if current time is within free play window
 		$start = $conditions['start_time'];
-		$end = $conditions['end_time'];
+		$end   = $conditions['end_time'];
 
 		if ( $this->is_time_between( $current_time, $start, $end ) ) {
-			return [
+			return array(
 				'block'   => false,
 				'message' => '',
 				'actions' => $policy['actions'],
-			];
+			);
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -370,38 +370,38 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function evaluate_quiet_hours( $policy, $context ) {
-		$conditions = $policy['conditions'];
+		$conditions   = $policy['conditions'];
 		$current_time = $context['current_time'];
 
 		$start = $conditions['start_time'];
-		$end = $conditions['end_time'];
+		$end   = $conditions['end_time'];
 
 		// Handle overnight quiet hours
 		if ( $start > $end ) {
 			// Quiet hours span midnight
 			if ( $current_time >= $start || $current_time <= $end ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => $policy['actions']['message'] ?? __( 'Games are not available during quiet hours.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		} else {
 			// Normal time range
 			if ( $this->is_time_between( $current_time, $start, $end ) ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => $policy['actions']['message'] ?? __( 'Games are not available during quiet hours.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -413,11 +413,11 @@ class PolicyEngine {
 	 */
 	private function evaluate_study_first( $policy, $context ) {
 		if ( ! $context['course_id'] ) {
-			return [
+			return array(
 				'block'   => false,
 				'message' => '',
-				'actions' => [],
-			];
+				'actions' => array(),
+			);
 		}
 
 		$conditions = $policy['conditions'];
@@ -425,13 +425,13 @@ class PolicyEngine {
 		// Check if lesson view is required
 		if ( ! empty( $conditions['require_lesson_view'] ) ) {
 			$last_lesson_view = $this->get_last_lesson_view( $context['user_id'], $context['course_id'] );
-			
+
 			if ( ! $last_lesson_view ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => $policy['actions']['message'] ?? __( 'Please complete a lesson before playing games.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 
 			// Check minimum time requirement
@@ -439,7 +439,7 @@ class PolicyEngine {
 				$time_spent = time() - $last_lesson_view;
 				if ( $time_spent < $conditions['minimum_time'] ) {
 					$remaining = $conditions['minimum_time'] - $time_spent;
-					return [
+					return array(
 						'block'   => true,
 						'message' => sprintf(
 							/* translators: %d: number of minutes to study */
@@ -447,16 +447,16 @@ class PolicyEngine {
 							ceil( $remaining / 60 )
 						),
 						'actions' => $policy['actions'],
-					];
+					);
 				}
 			}
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -468,32 +468,32 @@ class PolicyEngine {
 	 */
 	private function evaluate_parent_control( $policy, $context ) {
 		if ( empty( $context['parent_controls'] ) ) {
-			return [
+			return array(
 				'block'   => false,
 				'message' => '',
-				'actions' => [],
-			];
+				'actions' => array(),
+			);
 		}
 
 		$controls = $context['parent_controls'];
 
 		// Check if parent has blocked games
 		if ( ! empty( $controls['games_blocked'] ) ) {
-			return [
+			return array(
 				'block'   => true,
 				'message' => __( 'Games have been disabled by your parent/guardian.', 'ea-gaming-engine' ),
 				'actions' => $policy['actions'],
-			];
+			);
 		}
 
 		// Check time restrictions
 		if ( ! empty( $controls['time_restrictions'] ) ) {
-			$current_time = $context['current_time'];
+			$current_time  = $context['current_time'];
 			$allowed_start = $controls['time_restrictions']['start'];
-			$allowed_end = $controls['time_restrictions']['end'];
+			$allowed_end   = $controls['time_restrictions']['end'];
 
 			if ( ! $this->is_time_between( $current_time, $allowed_start, $allowed_end ) ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => sprintf(
 						/* translators: %1$s: start time, %2$s: end time */
@@ -502,7 +502,7 @@ class PolicyEngine {
 						$allowed_end
 					),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
@@ -510,19 +510,19 @@ class PolicyEngine {
 		if ( ! empty( $controls['require_tickets'] ) ) {
 			$tickets = $this->get_user_tickets( $context['user_id'] );
 			if ( $tickets <= 0 ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => __( 'You need tickets to play. Ask your parent/guardian for more.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -533,36 +533,36 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function evaluate_daily_limit( $policy, $context ) {
-		$conditions = $policy['conditions'];
+		$conditions  = $policy['conditions'];
 		$today_stats = $context['today_stats'];
 
 		// Check games played limit
 		if ( ! empty( $conditions['max_games_per_day'] ) ) {
 			if ( $today_stats['games_played'] >= $conditions['max_games_per_day'] ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => __( 'You have reached your daily game limit.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
 		// Check time played limit
 		if ( ! empty( $conditions['max_time_per_day'] ) ) {
 			if ( $today_stats['time_played'] >= $conditions['max_time_per_day'] ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => __( 'You have reached your daily play time limit.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -574,11 +574,11 @@ class PolicyEngine {
 	 */
 	private function evaluate_course_specific( $policy, $context ) {
 		if ( ! $context['course_id'] ) {
-			return [
+			return array(
 				'block'   => false,
 				'message' => '',
-				'actions' => [],
-			];
+				'actions' => array(),
+			);
 		}
 
 		$conditions = $policy['conditions'];
@@ -586,11 +586,11 @@ class PolicyEngine {
 		// Check if course is in blocked list
 		if ( ! empty( $conditions['blocked_courses'] ) ) {
 			if ( in_array( $context['course_id'], $conditions['blocked_courses'], true ) ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => __( 'Games are not available for this course.', 'ea-gaming-engine' ),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
@@ -598,7 +598,7 @@ class PolicyEngine {
 		if ( ! empty( $conditions['minimum_progress'] ) && ! empty( $context['course_progress'] ) ) {
 			$progress = $context['course_progress']['percentage'] ?? 0;
 			if ( $progress < $conditions['minimum_progress'] ) {
-				return [
+				return array(
 					'block'   => true,
 					'message' => sprintf(
 						/* translators: %d: percentage of course completion required */
@@ -606,15 +606,15 @@ class PolicyEngine {
 						$conditions['minimum_progress']
 					),
 					'actions' => $policy['actions'],
-				];
+				);
 			}
 		}
 
-		return [
+		return array(
 			'block'   => false,
 			'message' => '',
-			'actions' => [],
-		];
+			'actions' => array(),
+		);
 	}
 
 	/**
@@ -627,8 +627,8 @@ class PolicyEngine {
 	 */
 	private function is_time_between( $current, $start, $end ) {
 		$current = strtotime( $current );
-		$start = strtotime( $start );
-		$end = strtotime( $end );
+		$start   = strtotime( $start );
+		$end     = strtotime( $end );
 
 		return ( $current >= $start && $current <= $end );
 	}
@@ -644,7 +644,7 @@ class PolicyEngine {
 		$table = $wpdb->prefix . 'ea_game_sessions';
 
 		$today_start = current_time( 'Y-m-d 00:00:00' );
-		$today_end = current_time( 'Y-m-d 23:59:59' );
+		$today_end   = current_time( 'Y-m-d 23:59:59' );
 
 		$stats = $wpdb->get_row(
 			$wpdb->prepare(
@@ -660,10 +660,10 @@ class PolicyEngine {
 			)
 		);
 
-		return [
+		return array(
 			'games_played' => $stats->games_played ?? 0,
 			'time_played'  => $stats->time_played ?? 0,
-		];
+		);
 	}
 
 	/**
@@ -688,7 +688,7 @@ class PolicyEngine {
 	 */
 	private function get_parent_controls( $user_id ) {
 		// This would integrate with Student-Parent Access plugin
-		return apply_filters( 'ea_gaming_parent_controls', [], $user_id );
+		return apply_filters( 'ea_gaming_parent_controls', array(), $user_id );
 	}
 
 	/**

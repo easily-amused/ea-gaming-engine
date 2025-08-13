@@ -42,8 +42,8 @@ class QuestionGate {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_ajax_ea_gaming_get_question', [ $this, 'ajax_get_question' ] );
-		add_action( 'wp_ajax_ea_gaming_validate_answer', [ $this, 'ajax_validate_answer' ] );
+		add_action( 'wp_ajax_ea_gaming_get_question', array( $this, 'ajax_get_question' ) );
+		add_action( 'wp_ajax_ea_gaming_validate_answer', array( $this, 'ajax_validate_answer' ) );
 	}
 
 	/**
@@ -53,7 +53,7 @@ class QuestionGate {
 	 * @param array $options Options.
 	 * @return array|false
 	 */
-	public function get_question( $quiz_id, $options = [] ) {
+	public function get_question( $quiz_id, $options = array() ) {
 		if ( ! function_exists( 'learndash_get_quiz_questions' ) ) {
 			return false;
 		}
@@ -68,7 +68,7 @@ class QuestionGate {
 
 		// Exclude answered
 		if ( ! empty( $options['exclude'] ) && is_array( $options['exclude'] ) ) {
-			$exclude = array_map( 'intval', $options['exclude'] );
+			$exclude      = array_map( 'intval', $options['exclude'] );
 			$question_ids = array_values( array_diff( $question_ids, $exclude ) );
 		}
 
@@ -113,17 +113,17 @@ class QuestionGate {
 	}
 
 	/**
-		* Format question for frontend by Post ID
-		*
-		* @param int $question_id Question Post ID.
-		* @param int $quiz_id Quiz ID.
-		* @return array
-		*/
+	 * Format question for frontend by Post ID
+	 *
+	 * @param int $question_id Question Post ID.
+	 * @param int $quiz_id Quiz ID.
+	 * @return array
+	 */
 	private function format_question( $question_id, $quiz_id ) {
 		$question_post = get_post( $question_id );
 
 		if ( ! $question_post ) {
-			return [];
+			return array();
 		}
 
 		// Load ProQuiz question model
@@ -131,26 +131,26 @@ class QuestionGate {
 		$question_pro_id = (int) $question_pro_id;
 
 		if ( empty( $question_pro_id ) ) {
-			return [];
+			return array();
 		}
 
 		$question_mapper = new \WpProQuiz_Model_QuestionMapper();
 		$question_model  = $question_mapper->fetch( $question_pro_id );
 
 		if ( ! $question_model ) {
-			return [];
+			return array();
 		}
 
 		$answer_data = $question_model->getAnswerData();
-		$answers = [];
+		$answers     = array();
 
 		// Build answers list with stable IDs (index from model)
 		foreach ( $answer_data as $index => $answer ) {
-			$answers[] = [
+			$answers[] = array(
 				'id'   => $index,
 				'text' => $answer->getAnswer(),
 				'html' => $answer->isHtml(),
-			];
+			);
 		}
 
 		// Shuffle answers if ProQuiz indicates random order
@@ -158,7 +158,7 @@ class QuestionGate {
 			shuffle( $answers );
 		}
 
-		$formatted = [
+		$formatted = array(
 			'id'       => $question_id,
 			'quiz_id'  => $quiz_id,
 			'title'    => $question_model->getTitle(),
@@ -166,7 +166,7 @@ class QuestionGate {
 			'type'     => $this->get_question_type( $question_model ),
 			'points'   => (int) $question_model->getPoints(),
 			'answers'  => $answers,
-		];
+		);
 
 		// For validation server-side
 		$formatted['correct_answer'] = $this->get_correct_answers( $question_model );
@@ -181,7 +181,7 @@ class QuestionGate {
 	 * @param array $options Options.
 	 * @return array|null
 	 */
-	private function get_random_question( $questions, $options = [] ) {
+	private function get_random_question( $questions, $options = array() ) {
 		if ( empty( $questions ) ) {
 			return null;
 		}
@@ -226,16 +226,16 @@ class QuestionGate {
 	 * @return string
 	 */
 	private function get_question_type( $question_model ) {
-		$type_mapping = [
-			'single'        => 'single_choice',
-			'multiple'      => 'multiple_choice',
-			'free_answer'   => 'free_text',
-			'sort_answer'   => 'sort',
-			'matrix_sort'   => 'matrix',
-			'cloze_answer'  => 'fill_blank',
-			'assessment'    => 'assessment',
-			'essay'         => 'essay',
-		];
+		$type_mapping = array(
+			'single'       => 'single_choice',
+			'multiple'     => 'multiple_choice',
+			'free_answer'  => 'free_text',
+			'sort_answer'  => 'sort',
+			'matrix_sort'  => 'matrix',
+			'cloze_answer' => 'fill_blank',
+			'assessment'   => 'assessment',
+			'essay'        => 'essay',
+		);
 
 		$type = $question_model->getAnswerType();
 		return $type_mapping[ $type ] ?? 'single_choice';
@@ -248,7 +248,7 @@ class QuestionGate {
 	 * @return array
 	 */
 	private function get_correct_answers( $question_model ) {
-		$correct = [];
+		$correct     = array();
 		$answer_data = $question_model->getAnswerData();
 
 		foreach ( $answer_data as $index => $answer ) {
@@ -298,11 +298,11 @@ class QuestionGate {
 		$question = $this->get_cached_question( $question_id );
 
 		if ( ! $question ) {
-			return [
+			return array(
 				'valid'   => false,
 				'correct' => false,
 				'message' => __( 'Question expired or not found', 'ea-gaming-engine' ),
-			];
+			);
 		}
 
 		$is_correct = false;
@@ -340,12 +340,12 @@ class QuestionGate {
 		$cache_key = 'ea_gaming_question_' . $question_id . '_' . get_current_user_id();
 		delete_transient( $cache_key );
 
-		return [
+		return array(
 			'valid'   => true,
 			'correct' => $is_correct,
 			'points'  => $is_correct ? (int) $question['points'] : 0,
 			'message' => $is_correct ? __( 'Correct!', 'ea-gaming-engine' ) : __( 'Incorrect', 'ea-gaming-engine' ),
-		];
+		);
 	}
 
 	/**
@@ -359,13 +359,13 @@ class QuestionGate {
 		// This would need to be implemented based on LearnDash's free text validation
 		// For now, simple string comparison
 		$correct_answers = $question['correct_answer'];
-		
+
 		foreach ( $correct_answers as $correct ) {
 			if ( strcasecmp( trim( $answer ), trim( $correct ) ) === 0 ) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -385,14 +385,14 @@ class QuestionGate {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_question_attempts';
 
-		$data = [
-			'session_id'   => $this->session_id,
-			'question_id'  => $question_id,
-			'quiz_id'      => $this->current_question['quiz_id'] ?? 0,
-			'user_answer'  => maybe_serialize( $answer ),
-			'is_correct'   => $is_correct ? 1 : 0,
+		$data = array(
+			'session_id'    => $this->session_id,
+			'question_id'   => $question_id,
+			'quiz_id'       => $this->current_question['quiz_id'] ?? 0,
+			'user_answer'   => maybe_serialize( $answer ),
+			'is_correct'    => $is_correct ? 1 : 0,
 			'points_earned' => $is_correct ? ( $this->current_question['points'] ?? 0 ) : 0,
-		];
+		);
 
 		$wpdb->insert( $table, $data );
 	}
@@ -407,15 +407,15 @@ class QuestionGate {
 		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
 
 		$quiz_id = intval( $_POST['quiz_id'] ?? 0 );
-		
+
 		if ( ! $quiz_id ) {
 			wp_send_json_error( __( 'Invalid quiz ID', 'ea-gaming-engine' ) );
 		}
 
-		$options = [
+		$options = array(
 			'difficulty' => sanitize_text_field( $_POST['difficulty'] ?? '' ),
-			'exclude'    => array_map( 'intval', $_POST['exclude'] ?? [] ),
-		];
+			'exclude'    => array_map( 'intval', $_POST['exclude'] ?? array() ),
+		);
 
 		$question = $this->get_question( $quiz_id, $options );
 
@@ -454,5 +454,4 @@ class QuestionGate {
 			wp_send_json_error( $result['message'] );
 		}
 	}
-
 }

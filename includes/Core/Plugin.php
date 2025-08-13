@@ -34,7 +34,7 @@ class Plugin {
 	 *
 	 * @var array
 	 */
-	private $components = [];
+	private $components = array();
 
 	/**
 	 * Get instance
@@ -62,9 +62,9 @@ class Plugin {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'init', [ $this, 'init' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
+		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 	}
 
 	/**
@@ -74,11 +74,11 @@ class Plugin {
 	 */
 	private function init_components() {
 		// Core components
-		$this->components['game_engine']    = GameEngine::get_instance();
-		$this->components['policy_engine']  = PolicyEngine::get_instance();
-		$this->components['theme_manager']  = ThemeManager::get_instance();
-		$this->components['hint_system']    = new HintSystem();
-		
+		$this->components['game_engine']   = GameEngine::get_instance();
+		$this->components['policy_engine'] = PolicyEngine::get_instance();
+		$this->components['theme_manager'] = ThemeManager::get_instance();
+		$this->components['hint_system']   = new HintSystem();
+
 		// Integrations
 		if ( class_exists( 'SFWD_LMS' ) ) {
 			$this->components['learndash'] = new LearnDash();
@@ -128,23 +128,23 @@ class Plugin {
 		// Game Sessions CPT
 		register_post_type(
 			'ea_game_session',
-			[
-				'labels'              => [
+			array(
+				'labels'                => array(
 					'name'          => __( 'Game Sessions', 'ea-gaming-engine' ),
 					'singular_name' => __( 'Game Session', 'ea-gaming-engine' ),
-				],
-				'public'              => false,
-				'show_ui'             => false,
-				'show_in_menu'        => false,
-				'show_in_rest'        => true,
-				'rest_base'           => 'game-sessions',
+				),
+				'public'                => false,
+				'show_ui'               => false,
+				'show_in_menu'          => false,
+				'show_in_rest'          => true,
+				'rest_base'             => 'game-sessions',
 				'rest_controller_class' => 'WP_REST_Posts_Controller',
-				'capability_type'     => 'post',
-				'map_meta_cap'        => true,
-				'supports'            => [ 'title', 'author', 'custom-fields' ],
-				'rewrite'             => false,
-				'query_var'           => false,
-			]
+				'capability_type'       => 'post',
+				'map_meta_cap'          => true,
+				'supports'              => array( 'title', 'author', 'custom-fields' ),
+				'rewrite'               => false,
+				'query_var'             => false,
+			)
 		);
 	}
 
@@ -157,22 +157,22 @@ class Plugin {
 		// Game Type taxonomy
 		register_taxonomy(
 			'ea_game_type',
-			[ 'ea_game_session' ],
-			[
-				'labels'              => [
+			array( 'ea_game_session' ),
+			array(
+				'labels'                => array(
 					'name'          => __( 'Game Types', 'ea-gaming-engine' ),
 					'singular_name' => __( 'Game Type', 'ea-gaming-engine' ),
-				],
-				'public'              => false,
-				'show_ui'             => false,
-				'show_in_menu'        => false,
-				'show_in_rest'        => true,
-				'rest_base'           => 'game-types',
+				),
+				'public'                => false,
+				'show_ui'               => false,
+				'show_in_menu'          => false,
+				'show_in_rest'          => true,
+				'rest_base'             => 'game-types',
 				'rest_controller_class' => 'WP_REST_Terms_Controller',
-				'hierarchical'        => false,
-				'rewrite'             => false,
-				'query_var'           => false,
-			]
+				'hierarchical'          => false,
+				'rewrite'               => false,
+				'query_var'             => false,
+			)
 		);
 	}
 
@@ -198,7 +198,7 @@ class Plugin {
 		wp_enqueue_style(
 			'ea-gaming-engine',
 			EA_GAMING_ENGINE_URL . 'assets/css/frontend.css',
-			[],
+			array(),
 			EA_GAMING_ENGINE_VERSION
 		);
 
@@ -206,7 +206,7 @@ class Plugin {
 		wp_enqueue_script(
 			'ea-gaming-engine',
 			EA_GAMING_ENGINE_URL . 'assets/js/frontend.js',
-			[ 'jquery', 'wp-api-fetch', 'wp-i18n' ],
+			array( 'jquery', 'wp-api-fetch', 'wp-i18n' ),
 			EA_GAMING_ENGINE_VERSION,
 			true
 		);
@@ -215,23 +215,23 @@ class Plugin {
 		wp_localize_script(
 			'ea-gaming-engine',
 			'eaGamingEngine',
-			[
-				'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-				'apiUrl'    => home_url( '/wp-json/ea-gaming/v1/' ),
-				'nonce'     => wp_create_nonce( 'ea-gaming-engine' ),
-				'userId'    => get_current_user_id(),
+			array(
+				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+				'apiUrl'     => home_url( '/wp-json/ea-gaming/v1/' ),
+				'nonce'      => wp_create_nonce( 'ea-gaming-engine' ),
+				'userId'     => get_current_user_id(),
 				'isLoggedIn' => is_user_logged_in(),
-				'i18n'      => [
-					'loading'    => __( 'Loading...', 'ea-gaming-engine' ),
-					'error'      => __( 'An error occurred', 'ea-gaming-engine' ),
-					'tryAgain'   => __( 'Try Again', 'ea-gaming-engine' ),
-					'correct'    => __( 'Correct!', 'ea-gaming-engine' ),
-					'incorrect'  => __( 'Incorrect', 'ea-gaming-engine' ),
-					'gameOver'   => __( 'Game Over', 'ea-gaming-engine' ),
-					'score'      => __( 'Score', 'ea-gaming-engine' ),
-					'playAgain'  => __( 'Play Again', 'ea-gaming-engine' ),
-				],
-			]
+				'i18n'       => array(
+					'loading'   => __( 'Loading...', 'ea-gaming-engine' ),
+					'error'     => __( 'An error occurred', 'ea-gaming-engine' ),
+					'tryAgain'  => __( 'Try Again', 'ea-gaming-engine' ),
+					'correct'   => __( 'Correct!', 'ea-gaming-engine' ),
+					'incorrect' => __( 'Incorrect', 'ea-gaming-engine' ),
+					'gameOver'  => __( 'Game Over', 'ea-gaming-engine' ),
+					'score'     => __( 'Score', 'ea-gaming-engine' ),
+					'playAgain' => __( 'Play Again', 'ea-gaming-engine' ),
+				),
+			)
 		);
 
 		// Load games bundle built by Webpack
@@ -242,7 +242,7 @@ class Plugin {
 			wp_enqueue_script(
 				'ea-gaming-engine-games',
 				EA_GAMING_ENGINE_URL . $games_rel,
-				[ 'ea-gaming-engine' ],
+				array( 'ea-gaming-engine' ),
 				EA_GAMING_ENGINE_VERSION,
 				true
 			);
@@ -260,7 +260,7 @@ class Plugin {
 		wp_enqueue_style(
 			'ea-gaming-engine-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
-			[ 'wp-components' ],
+			array( 'wp-components' ),
 			EA_GAMING_ENGINE_VERSION
 		);
 
@@ -268,7 +268,7 @@ class Plugin {
 		wp_enqueue_script(
 			'ea-gaming-engine-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
-			[ 'jquery', 'wp-api-fetch', 'wp-i18n', 'wp-components', 'wp-element' ],
+			array( 'jquery', 'wp-api-fetch', 'wp-i18n', 'wp-components', 'wp-element' ),
 			EA_GAMING_ENGINE_VERSION,
 			true
 		);
@@ -277,16 +277,16 @@ class Plugin {
 		wp_localize_script(
 			'ea-gaming-engine-admin',
 			'eaGamingEngineAdmin',
-			[
+			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'apiUrl'  => home_url( '/wp-json/ea-gaming/v1/' ),
 				'nonce'   => wp_create_nonce( 'ea-gaming-engine-admin' ),
-				'i18n'    => [
-					'saved'       => __( 'Settings saved', 'ea-gaming-engine' ),
-					'saveError'   => __( 'Error saving settings', 'ea-gaming-engine' ),
+				'i18n'    => array(
+					'saved'         => __( 'Settings saved', 'ea-gaming-engine' ),
+					'saveError'     => __( 'Error saving settings', 'ea-gaming-engine' ),
 					'confirmDelete' => __( 'Are you sure you want to delete this?', 'ea-gaming-engine' ),
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -302,7 +302,7 @@ class Plugin {
 		}
 
 		// Load on lesson/topic/quiz pages
-		if ( is_singular( [ 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ] ) ) {
+		if ( is_singular( array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) {
 			return true;
 		}
 

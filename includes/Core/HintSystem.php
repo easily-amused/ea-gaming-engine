@@ -31,11 +31,11 @@ class HintSystem {
 	 *
 	 * @var array
 	 */
-	private $hint_levels = [
+	private $hint_levels = array(
 		1 => 'subtle',
 		2 => 'guided',
 		3 => 'obvious',
-	];
+	);
 
 	/**
 	 * Constructor
@@ -51,10 +51,10 @@ class HintSystem {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_ajax_ea_gaming_get_hint', [ $this, 'ajax_get_hint' ] );
-		add_action( 'wp_ajax_nopriv_ea_gaming_get_hint', [ $this, 'ajax_get_hint' ] );
-		add_filter( 'ea_gaming_question_data', [ $this, 'add_hint_capability' ], 10, 2 );
-		add_action( 'ea_gaming_engine_daily_cleanup', [ $this, 'cleanup_old_hint_records' ] );
+		add_action( 'wp_ajax_ea_gaming_get_hint', array( $this, 'ajax_get_hint' ) );
+		add_action( 'wp_ajax_nopriv_ea_gaming_get_hint', array( $this, 'ajax_get_hint' ) );
+		add_filter( 'ea_gaming_question_data', array( $this, 'add_hint_capability' ), 10, 2 );
+		add_action( 'ea_gaming_engine_daily_cleanup', array( $this, 'cleanup_old_hint_records' ) );
 	}
 
 	/**
@@ -63,9 +63,9 @@ class HintSystem {
 	 * @return void
 	 */
 	private function load_settings() {
-		$settings = get_option( 'ea_gaming_engine_hint_settings', [] );
-		
-		$this->hint_cooldown = $settings['cooldown'] ?? 30;
+		$settings = get_option( 'ea_gaming_engine_hint_settings', array() );
+
+		$this->hint_cooldown          = $settings['cooldown'] ?? 30;
 		$this->max_hints_per_question = $settings['max_hints'] ?? 3;
 	}
 
@@ -81,44 +81,44 @@ class HintSystem {
 	public function get_hint( $question_id, $user_id, $course_id, $session_id = null ) {
 		// Check if hints are enabled
 		if ( ! $this->are_hints_enabled( $user_id ) ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'Hints are not available for your current profile.', 'ea-gaming-engine' ),
-			];
+			);
 		}
 
 		// Check cooldown
 		if ( ! $this->check_cooldown( $question_id, $user_id ) ) {
 			$remaining = $this->get_remaining_cooldown( $question_id, $user_id );
-			return [
-				'success' => false,
-				'message' => sprintf(
+			return array(
+				'success'  => false,
+				'message'  => sprintf(
 					/* translators: %d: number of seconds to wait */
 					__( 'Please wait %d seconds before requesting another hint.', 'ea-gaming-engine' ),
 					$remaining
 				),
 				'cooldown' => $remaining,
-			];
+			);
 		}
 
 		// Check hint limit
 		$hint_count = $this->get_hint_count( $question_id, $user_id );
 		if ( $hint_count >= $this->max_hints_per_question ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'Maximum hints reached for this question.', 'ea-gaming-engine' ),
-			];
+			);
 		}
 
 		// Get question data
 		$question_gate = new QuestionGate( $session_id );
-		$question = $this->get_question_data( $question_id );
-		
+		$question      = $this->get_question_data( $question_id );
+
 		if ( ! $question ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'Question not found or expired.', 'ea-gaming-engine' ),
-			];
+			);
 		}
 
 		// Get lesson content for context
@@ -133,13 +133,13 @@ class HintSystem {
 		// Record hint usage
 		$this->record_hint_usage( $question_id, $user_id, $session_id, $hint_level, $hint_text );
 
-		return [
-			'success' => true,
-			'hint' => $hint_text,
-			'level' => $this->hint_levels[ $hint_level ],
+		return array(
+			'success'         => true,
+			'hint'            => $hint_text,
+			'level'           => $this->hint_levels[ $hint_level ],
 			'remaining_hints' => $this->max_hints_per_question - $hint_level,
-			'cooldown' => $this->hint_cooldown,
-		];
+			'cooldown'        => $this->hint_cooldown,
+		);
 	}
 
 	/**
@@ -150,8 +150,8 @@ class HintSystem {
 	 */
 	private function are_hints_enabled( $user_id ) {
 		$theme_manager = ThemeManager::get_instance();
-		$preset_data = $theme_manager->get_preset_data( $user_id );
-		
+		$preset_data   = $theme_manager->get_preset_data( $user_id );
+
 		return $preset_data['hints'] ?? false;
 	}
 
@@ -163,9 +163,9 @@ class HintSystem {
 	 * @return bool
 	 */
 	private function check_cooldown( $question_id, $user_id ) {
-		$cache_key = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
+		$cache_key      = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
 		$last_hint_time = get_transient( $cache_key );
-		
+
 		if ( $last_hint_time === false ) {
 			return true;
 		}
@@ -181,9 +181,9 @@ class HintSystem {
 	 * @return int
 	 */
 	private function get_remaining_cooldown( $question_id, $user_id ) {
-		$cache_key = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
+		$cache_key      = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
 		$last_hint_time = get_transient( $cache_key );
-		
+
 		if ( $last_hint_time === false ) {
 			return 0;
 		}
@@ -201,9 +201,9 @@ class HintSystem {
 	 */
 	private function get_hint_count( $question_id, $user_id ) {
 		global $wpdb;
-		
+
 		$table = $wpdb->prefix . 'ea_hint_usage';
-		
+
 		$count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table} 
@@ -226,8 +226,8 @@ class HintSystem {
 	private function get_question_data( $question_id ) {
 		// Try to get from cache first
 		$cache_key = 'ea_gaming_question_' . $question_id . '_' . get_current_user_id();
-		$question = get_transient( $cache_key );
-		
+		$question  = get_transient( $cache_key );
+
 		if ( $question !== false ) {
 			return $question;
 		}
@@ -244,20 +244,20 @@ class HintSystem {
 		}
 
 		$question_mapper = new \WpProQuiz_Model_QuestionMapper();
-		$question_model = $question_mapper->fetch( $question_pro_id );
-		
+		$question_model  = $question_mapper->fetch( $question_pro_id );
+
 		if ( ! $question_model ) {
 			return false;
 		}
 
-		return [
-			'id' => $question_id,
-			'title' => $question_model->getTitle(),
+		return array(
+			'id'       => $question_id,
+			'title'    => $question_model->getTitle(),
 			'question' => $question_model->getQuestion(),
-			'type' => $this->get_question_type( $question_model ),
-			'answers' => $this->format_answers( $question_model->getAnswerData() ),
+			'type'     => $this->get_question_type( $question_model ),
+			'answers'  => $this->format_answers( $question_model->getAnswerData() ),
 			'category' => $question_model->getCategoryName(),
-		];
+		);
 	}
 
 	/**
@@ -268,20 +268,20 @@ class HintSystem {
 	 * @return array
 	 */
 	private function get_lesson_context( $question_id, $course_id ) {
-		$context = [
-			'content' => '',
-			'keywords' => [],
-			'concepts' => [],
-		];
+		$context = array(
+			'content'  => '',
+			'keywords' => array(),
+			'concepts' => array(),
+		);
 
 		// Find associated lesson
 		$lesson_id = $this->find_associated_lesson( $question_id, $course_id );
-		
+
 		if ( $lesson_id ) {
 			$lesson = get_post( $lesson_id );
 			if ( $lesson ) {
-				$context['content'] = wp_strip_all_tags( $lesson->post_content );
-				$context['title'] = $lesson->post_title;
+				$context['content']  = wp_strip_all_tags( $lesson->post_content );
+				$context['title']    = $lesson->post_title;
 				$context['keywords'] = $this->extract_keywords( $context['content'] );
 				$context['concepts'] = $this->extract_concepts( $context['content'] );
 			}
@@ -290,7 +290,7 @@ class HintSystem {
 		// Also check course content
 		$course = get_post( $course_id );
 		if ( $course ) {
-			$course_content = wp_strip_all_tags( $course->post_content );
+			$course_content             = wp_strip_all_tags( $course->post_content );
 			$context['course_keywords'] = $this->extract_keywords( $course_content );
 		}
 
@@ -307,7 +307,7 @@ class HintSystem {
 	private function find_associated_lesson( $question_id, $course_id ) {
 		// Get quiz ID from question
 		$quiz_id = get_post_meta( $question_id, 'quiz_id', true );
-		
+
 		if ( ! $quiz_id ) {
 			// Try to find from question mapping
 			global $wpdb;
@@ -328,10 +328,10 @@ class HintSystem {
 
 		// Find lesson that contains this quiz
 		$lessons = learndash_get_course_lessons_list( $course_id );
-		
+
 		foreach ( $lessons as $lesson ) {
 			$lesson_quizzes = learndash_get_lesson_quiz_list( $lesson['post']->ID, get_current_user_id(), $course_id );
-			
+
 			foreach ( $lesson_quizzes as $lesson_quiz ) {
 				if ( $lesson_quiz['post']->ID == $quiz_id ) {
 					return $lesson['post']->ID;
@@ -351,7 +351,7 @@ class HintSystem {
 	 * @return string
 	 */
 	private function generate_contextual_hint( $question, $lesson_context, $hint_level ) {
-		$hints = [];
+		$hints = array();
 
 		// Level 1: Subtle hints
 		if ( $hint_level === 1 ) {
@@ -383,7 +383,7 @@ class HintSystem {
 	 * @return array
 	 */
 	private function generate_subtle_hints( $question, $lesson_context ) {
-		$hints = [];
+		$hints = array();
 
 		// Context-based hints
 		if ( ! empty( $lesson_context['title'] ) ) {
@@ -430,11 +430,11 @@ class HintSystem {
 	 * @return array
 	 */
 	private function generate_guided_hints( $question, $lesson_context ) {
-		$hints = [];
+		$hints = array();
 
 		// Extract question keywords and match with lesson content
 		$question_keywords = $this->extract_keywords( $question['question'] );
-		
+
 		foreach ( $question_keywords as $keyword ) {
 			if ( ! empty( $lesson_context['content'] ) && stripos( $lesson_context['content'], $keyword ) !== false ) {
 				// Extract sentence containing the keyword from lesson
@@ -462,9 +462,9 @@ class HintSystem {
 		}
 
 		// Answer elimination hints for multiple choice
-		if ( in_array( $question['type'], [ 'single_choice', 'multiple_choice' ] ) && ! empty( $question['answers'] ) ) {
+		if ( in_array( $question['type'], array( 'single_choice', 'multiple_choice' ) ) && ! empty( $question['answers'] ) ) {
 			$hints[] = __( 'Try to eliminate answers that seem obviously wrong first.', 'ea-gaming-engine' );
-			
+
 			if ( count( $question['answers'] ) > 2 ) {
 				$hints[] = sprintf(
 					/* translators: %d: number of answer options */
@@ -485,12 +485,12 @@ class HintSystem {
 	 * @return array
 	 */
 	private function generate_obvious_hints( $question, $lesson_context ) {
-		$hints = [];
+		$hints = array();
 
 		// Direct concept matching
-		$concepts = $lesson_context['concepts'] ?? [];
+		$concepts      = $lesson_context['concepts'] ?? array();
 		$question_text = strtolower( $question['question'] );
-		
+
 		foreach ( $concepts as $concept ) {
 			if ( stripos( $question_text, strtolower( $concept ) ) !== false ) {
 				$hints[] = sprintf(
@@ -502,14 +502,14 @@ class HintSystem {
 		}
 
 		// Process of elimination for multiple choice
-		if ( in_array( $question['type'], [ 'single_choice', 'multiple_choice' ] ) ) {
+		if ( in_array( $question['type'], array( 'single_choice', 'multiple_choice' ) ) ) {
 			$hints[] = __( 'Read each answer choice and ask yourself: "Does this make sense based on what I learned?"', 'ea-gaming-engine' );
 			$hints[] = __( 'The correct answer should directly relate to the main concept discussed in the lesson.', 'ea-gaming-engine' );
 		}
 
 		// Fill in the blank hints
 		if ( $question['type'] === 'fill_blank' ) {
-			$keywords = $lesson_context['keywords'] ?? [];
+			$keywords = $lesson_context['keywords'] ?? array();
 			if ( ! empty( $keywords ) ) {
 				$hints[] = sprintf(
 					/* translators: %s: comma-separated list of important keywords */
@@ -529,23 +529,23 @@ class HintSystem {
 	 * @return string
 	 */
 	private function get_fallback_hint( $hint_level ) {
-		$fallbacks = [
-			1 => [
+		$fallbacks = array(
+			1 => array(
 				__( 'Take a moment to think about what you learned.', 'ea-gaming-engine' ),
 				__( 'Consider the key concepts from the lesson.', 'ea-gaming-engine' ),
 				__( 'Look for clues in the question wording.', 'ea-gaming-engine' ),
-			],
-			2 => [
+			),
+			2 => array(
 				__( 'Break down the question into smaller parts.', 'ea-gaming-engine' ),
 				__( 'Think about the main topic you studied recently.', 'ea-gaming-engine' ),
 				__( 'Which answer choice seems most logical?', 'ea-gaming-engine' ),
-			],
-			3 => [
+			),
+			3 => array(
 				__( 'Focus on the key terms in the question and match them to what you learned.', 'ea-gaming-engine' ),
 				__( 'Eliminate answers that clearly don\'t fit, then choose from the remaining options.', 'ea-gaming-engine' ),
 				__( 'The correct answer should be something specifically covered in your recent lesson.', 'ea-gaming-engine' ),
-			],
-		];
+			),
+		);
 
 		$level_hints = $fallbacks[ $hint_level ] ?? $fallbacks[1];
 		return $level_hints[ array_rand( $level_hints ) ];
@@ -559,25 +559,75 @@ class HintSystem {
 	 */
 	private function extract_keywords( $text ) {
 		// Remove common stop words
-		$stop_words = [
-			'the', 'is', 'at', 'which', 'on', 'a', 'an', 'as', 'are', 'was', 'were', 'been', 'be',
-			'have', 'has', 'had', 'what', 'when', 'where', 'who', 'why', 'how', 'this', 'that',
-			'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'and', 'or', 'but',
-			'if', 'then', 'else', 'when', 'while', 'for', 'to', 'of', 'in', 'by', 'with', 'from'
-		];
+		$stop_words = array(
+			'the',
+			'is',
+			'at',
+			'which',
+			'on',
+			'a',
+			'an',
+			'as',
+			'are',
+			'was',
+			'were',
+			'been',
+			'be',
+			'have',
+			'has',
+			'had',
+			'what',
+			'when',
+			'where',
+			'who',
+			'why',
+			'how',
+			'this',
+			'that',
+			'these',
+			'those',
+			'i',
+			'you',
+			'he',
+			'she',
+			'it',
+			'we',
+			'they',
+			'and',
+			'or',
+			'but',
+			'if',
+			'then',
+			'else',
+			'when',
+			'while',
+			'for',
+			'to',
+			'of',
+			'in',
+			'by',
+			'with',
+			'from',
+		);
 
-		$words = str_word_count( strtolower( $text ), 1 );
+		$words    = str_word_count( strtolower( $text ), 1 );
 		$keywords = array_diff( $words, $stop_words );
 
 		// Filter by length (meaningful words are usually 3+ characters)
-		$keywords = array_filter( $keywords, function( $word ) {
-			return strlen( $word ) >= 3;
-		});
+		$keywords = array_filter(
+			$keywords,
+			function ( $word ) {
+				return strlen( $word ) >= 3;
+			}
+		);
 
 		// Sort by length (longer words are often more meaningful)
-		usort( $keywords, function( $a, $b ) {
-			return strlen( $b ) - strlen( $a );
-		});
+		usort(
+			$keywords,
+			function ( $a, $b ) {
+				return strlen( $b ) - strlen( $a );
+			}
+		);
 
 		return array_slice( array_unique( $keywords ), 0, 10 );
 	}
@@ -589,7 +639,7 @@ class HintSystem {
 	 * @return array
 	 */
 	private function extract_concepts( $content ) {
-		$concepts = [];
+		$concepts = array();
 
 		// Look for text in quotes (often definitions or key concepts)
 		if ( preg_match_all( '/"([^"]+)"/', $content, $matches ) ) {
@@ -621,16 +671,16 @@ class HintSystem {
 	 * @return string
 	 */
 	private function get_question_type( $question_model ) {
-		$type_mapping = [
-			'single'        => 'single_choice',
-			'multiple'      => 'multiple_choice',
-			'free_answer'   => 'free_text',
-			'sort_answer'   => 'sort',
-			'matrix_sort'   => 'matrix',
-			'cloze_answer'  => 'fill_blank',
-			'assessment'    => 'assessment',
-			'essay'         => 'essay',
-		];
+		$type_mapping = array(
+			'single'       => 'single_choice',
+			'multiple'     => 'multiple_choice',
+			'free_answer'  => 'free_text',
+			'sort_answer'  => 'sort',
+			'matrix_sort'  => 'matrix',
+			'cloze_answer' => 'fill_blank',
+			'assessment'   => 'assessment',
+			'essay'        => 'essay',
+		);
 
 		$type = $question_model->getAnswerType();
 		return $type_mapping[ $type ] ?? 'single_choice';
@@ -643,14 +693,14 @@ class HintSystem {
 	 * @return array
 	 */
 	private function format_answers( $answer_data ) {
-		$answers = [];
-		
+		$answers = array();
+
 		foreach ( $answer_data as $index => $answer ) {
-			$answers[] = [
-				'id' => $index,
+			$answers[] = array(
+				'id'   => $index,
 				'text' => $answer->getAnswer(),
 				'html' => $answer->isHtml(),
-			];
+			);
 		}
 
 		return $answers;
@@ -671,14 +721,14 @@ class HintSystem {
 
 		$table = $wpdb->prefix . 'ea_hint_usage';
 
-		$data = [
+		$data = array(
 			'question_id' => $question_id,
-			'user_id' => $user_id,
-			'session_id' => $session_id,
-			'hint_level' => $hint_level,
-			'hint_text' => $hint_text,
-			'created_at' => current_time( 'mysql' ),
-		];
+			'user_id'     => $user_id,
+			'session_id'  => $session_id,
+			'hint_level'  => $hint_level,
+			'hint_text'   => $hint_text,
+			'created_at'  => current_time( 'mysql' ),
+		);
 
 		$wpdb->insert( $table, $data );
 
@@ -696,14 +746,14 @@ class HintSystem {
 	 */
 	public function add_hint_capability( $question_data, $question_id ) {
 		$user_id = get_current_user_id();
-		
+
 		if ( ! $user_id ) {
 			return $question_data;
 		}
 
 		$question_data['hints_available'] = $this->are_hints_enabled( $user_id );
 		$question_data['hints_remaining'] = $this->max_hints_per_question - $this->get_hint_count( $question_id, $user_id );
-		$question_data['hint_cooldown'] = $this->get_remaining_cooldown( $question_id, $user_id );
+		$question_data['hint_cooldown']   = $this->get_remaining_cooldown( $question_id, $user_id );
 
 		return $question_data;
 	}
@@ -717,9 +767,9 @@ class HintSystem {
 		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
 
 		$question_id = intval( $_POST['question_id'] ?? 0 );
-		$course_id = intval( $_POST['course_id'] ?? 0 );
-		$session_id = intval( $_POST['session_id'] ?? 0 );
-		$user_id = get_current_user_id();
+		$course_id   = intval( $_POST['course_id'] ?? 0 );
+		$session_id  = intval( $_POST['session_id'] ?? 0 );
+		$user_id     = get_current_user_id();
 
 		if ( ! $question_id || ! $user_id ) {
 			wp_send_json_error( __( 'Invalid parameters', 'ea-gaming-engine' ) );
@@ -759,7 +809,7 @@ class HintSystem {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();
-		$table = $wpdb->prefix . 'ea_hint_usage';
+		$table           = $wpdb->prefix . 'ea_hint_usage';
 
 		$sql = "CREATE TABLE IF NOT EXISTS $table (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,

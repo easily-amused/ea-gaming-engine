@@ -29,24 +29,24 @@ class Admin {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-		add_filter( 'plugin_action_links_' . EA_GAMING_ENGINE_BASENAME, [ $this, 'add_action_links' ] );
-		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
-		
+		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_filter( 'plugin_action_links_' . EA_GAMING_ENGINE_BASENAME, array( $this, 'add_action_links' ) );
+		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+
 		// AJAX handlers
-		add_action( 'wp_ajax_ea_gaming_save_settings', [ $this, 'ajax_save_settings' ] );
-		add_action( 'wp_ajax_ea_gaming_get_settings', [ $this, 'ajax_get_settings' ] );
-		add_action( 'wp_ajax_ea_gaming_reset_settings', [ $this, 'ajax_reset_settings' ] );
-		add_action( 'wp_ajax_ea_gaming_get_analytics', [ $this, 'ajax_get_analytics' ] );
-		add_action( 'wp_ajax_ea_gaming_export_data', [ $this, 'ajax_export_data' ] );
-		
+		add_action( 'wp_ajax_ea_gaming_save_settings', array( $this, 'ajax_save_settings' ) );
+		add_action( 'wp_ajax_ea_gaming_get_settings', array( $this, 'ajax_get_settings' ) );
+		add_action( 'wp_ajax_ea_gaming_reset_settings', array( $this, 'ajax_reset_settings' ) );
+		add_action( 'wp_ajax_ea_gaming_get_analytics', array( $this, 'ajax_get_analytics' ) );
+		add_action( 'wp_ajax_ea_gaming_export_data', array( $this, 'ajax_export_data' ) );
+
 		// Policy AJAX handlers
-		add_action( 'wp_ajax_ea_gaming_get_policy', [ $this, 'ajax_get_policy' ] );
-		add_action( 'wp_ajax_ea_gaming_save_policy', [ $this, 'ajax_save_policy' ] );
-		add_action( 'wp_ajax_ea_gaming_toggle_policy', [ $this, 'ajax_toggle_policy' ] );
-		add_action( 'wp_ajax_ea_gaming_delete_policy', [ $this, 'ajax_delete_policy' ] );
+		add_action( 'wp_ajax_ea_gaming_get_policy', array( $this, 'ajax_get_policy' ) );
+		add_action( 'wp_ajax_ea_gaming_save_policy', array( $this, 'ajax_save_policy' ) );
+		add_action( 'wp_ajax_ea_gaming_toggle_policy', array( $this, 'ajax_toggle_policy' ) );
+		add_action( 'wp_ajax_ea_gaming_delete_policy', array( $this, 'ajax_delete_policy' ) );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Admin {
 			__( 'Gaming Engine', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-engine',
-			[ $this, 'render_dashboard_page' ],
+			array( $this, 'render_dashboard_page' ),
 			'dashicons-games',
 			30
 		);
@@ -73,7 +73,7 @@ class Admin {
 			__( 'Dashboard', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-engine',
-			[ $this, 'render_dashboard_page' ]
+			array( $this, 'render_dashboard_page' )
 		);
 
 		// Settings submenu
@@ -83,7 +83,7 @@ class Admin {
 			__( 'Settings', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-settings',
-			[ $this, 'render_settings_page' ]
+			array( $this, 'render_settings_page' )
 		);
 
 		// Policies submenu
@@ -93,7 +93,7 @@ class Admin {
 			__( 'Policies', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-policies',
-			[ $this, 'render_policies_page' ]
+			array( $this, 'render_policies_page' )
 		);
 
 		// Analytics submenu
@@ -103,7 +103,7 @@ class Admin {
 			__( 'Analytics', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-analytics',
-			[ $this, 'render_analytics_page' ]
+			array( $this, 'render_analytics_page' )
 		);
 
 		// Games submenu
@@ -113,9 +113,9 @@ class Admin {
 			__( 'Games', 'ea-gaming-engine' ),
 			'manage_options',
 			'ea-gaming-games',
-			[ $this, 'render_games_page' ]
+			array( $this, 'render_games_page' )
 		);
-		
+
 		// Parent Controls submenu (only if Student-Parent Access plugin is active)
 		// This hook allows the StudentParentAccess integration to add its menu item
 		do_action( 'ea_gaming_engine_add_admin_menus' );
@@ -141,7 +141,7 @@ class Admin {
 		wp_enqueue_script( 'wp-api-fetch' );
 		wp_enqueue_script( 'wp-data' );
 		wp_enqueue_script( 'wp-notices' );
-		
+
 		// Enqueue WordPress styles
 		wp_enqueue_style( 'wp-components' );
 		wp_enqueue_style( 'wp-notices' );
@@ -150,7 +150,7 @@ class Admin {
 		wp_enqueue_script(
 			'chartjs',
 			'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
-			[],
+			array(),
 			'4.4.0',
 			true
 		);
@@ -159,7 +159,7 @@ class Admin {
 		wp_enqueue_script(
 			'ea-gaming-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
-			[ 'wp-api', 'wp-i18n', 'wp-components', 'wp-element', 'wp-api-fetch', 'wp-data', 'wp-notices', 'chartjs' ],
+			array( 'wp-api', 'wp-i18n', 'wp-components', 'wp-element', 'wp-api-fetch', 'wp-data', 'wp-notices', 'chartjs' ),
 			EA_GAMING_ENGINE_VERSION,
 			true
 		);
@@ -168,7 +168,7 @@ class Admin {
 		wp_enqueue_style(
 			'ea-gaming-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
-			[ 'wp-components' ],
+			array( 'wp-components' ),
 			EA_GAMING_ENGINE_VERSION
 		);
 
@@ -176,31 +176,31 @@ class Admin {
 		wp_localize_script(
 			'ea-gaming-admin',
 			'eaGamingAdmin',
-			[
-				'apiUrl'     => home_url( '/wp-json/ea-gaming/v1/' ),
-				'nonce'      => wp_create_nonce( 'ea-gaming-engine-admin' ),
-				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+			array(
+				'apiUrl'      => home_url( '/wp-json/ea-gaming/v1/' ),
+				'nonce'       => wp_create_nonce( 'ea-gaming-engine-admin' ),
+				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
 				'currentPage' => $hook,
-				'settings'   => $this->get_all_settings(),
-				'i18n'       => [
-					'save'             => __( 'Save Settings', 'ea-gaming-engine' ),
-					'saving'           => __( 'Saving...', 'ea-gaming-engine' ),
-					'saved'            => __( 'Settings Saved', 'ea-gaming-engine' ),
-					'error'            => __( 'Error saving settings', 'ea-gaming-engine' ),
-					'reset'            => __( 'Reset to Defaults', 'ea-gaming-engine' ),
-					'confirmReset'     => __( 'Are you sure you want to reset all settings to defaults?', 'ea-gaming-engine' ),
-					'noData'           => __( 'No data available', 'ea-gaming-engine' ),
-					'loading'          => __( 'Loading...', 'ea-gaming-engine' ),
-					'exportData'       => __( 'Export Data', 'ea-gaming-engine' ),
-					'exporting'        => __( 'Exporting...', 'ea-gaming-engine' ),
-					'exported'         => __( 'Data Exported', 'ea-gaming-engine' ),
-					'confirmExport'    => __( 'This will create a backup file with all plugin data. Continue?', 'ea-gaming-engine' ),
-					'keepDataLabel'    => __( 'Keep data when uninstalling plugin', 'ea-gaming-engine' ),
-					'keepDataHelp'     => __( 'If enabled, plugin data will be preserved when the plugin is deleted.', 'ea-gaming-engine' ),
-					'exportDataLabel'  => __( 'Export data before uninstalling', 'ea-gaming-engine' ),
-					'exportDataHelp'   => __( 'If enabled, a backup file will be created before deleting plugin data.', 'ea-gaming-engine' ),
-				],
-			]
+				'settings'    => $this->get_all_settings(),
+				'i18n'        => array(
+					'save'            => __( 'Save Settings', 'ea-gaming-engine' ),
+					'saving'          => __( 'Saving...', 'ea-gaming-engine' ),
+					'saved'           => __( 'Settings Saved', 'ea-gaming-engine' ),
+					'error'           => __( 'Error saving settings', 'ea-gaming-engine' ),
+					'reset'           => __( 'Reset to Defaults', 'ea-gaming-engine' ),
+					'confirmReset'    => __( 'Are you sure you want to reset all settings to defaults?', 'ea-gaming-engine' ),
+					'noData'          => __( 'No data available', 'ea-gaming-engine' ),
+					'loading'         => __( 'Loading...', 'ea-gaming-engine' ),
+					'exportData'      => __( 'Export Data', 'ea-gaming-engine' ),
+					'exporting'       => __( 'Exporting...', 'ea-gaming-engine' ),
+					'exported'        => __( 'Data Exported', 'ea-gaming-engine' ),
+					'confirmExport'   => __( 'This will create a backup file with all plugin data. Continue?', 'ea-gaming-engine' ),
+					'keepDataLabel'   => __( 'Keep data when uninstalling plugin', 'ea-gaming-engine' ),
+					'keepDataHelp'    => __( 'If enabled, plugin data will be preserved when the plugin is deleted.', 'ea-gaming-engine' ),
+					'exportDataLabel' => __( 'Export data before uninstalling', 'ea-gaming-engine' ),
+					'exportDataHelp'  => __( 'If enabled, a backup file will be created before deleting plugin data.', 'ea-gaming-engine' ),
+				),
+			)
 		);
 
 		// Add inline script for React mount point
@@ -249,16 +249,16 @@ class Admin {
 	 */
 	public function render_dashboard_page() {
 		global $wpdb;
-		
+
 		// Get stats
 		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
-		$stats_table = $wpdb->prefix . 'ea_player_stats';
-		
+		$stats_table    = $wpdb->prefix . 'ea_player_stats';
+
 		$total_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
 		$active_players = $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$sessions_table}" );
-		$total_score = $wpdb->get_var( "SELECT SUM(score) FROM {$sessions_table}" );
-		$avg_score = $wpdb->get_var( "SELECT AVG(score) FROM {$sessions_table}" );
-		
+		$total_score    = $wpdb->get_var( "SELECT SUM(score) FROM {$sessions_table}" );
+		$avg_score      = $wpdb->get_var( "SELECT AVG(score) FROM {$sessions_table}" );
+
 		// Get recent sessions
 		$recent_sessions = $wpdb->get_results(
 			$wpdb->prepare(
@@ -270,7 +270,7 @@ class Admin {
 				5
 			)
 		);
-		
+
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
 			<div class="ea-gaming-admin-header">
@@ -376,21 +376,24 @@ class Admin {
 	 * @return void
 	 */
 	public function render_settings_page() {
-		$theme_manager = ThemeManager::get_instance();
-		$current_theme = $theme_manager->get_current_theme();
+		$theme_manager  = ThemeManager::get_instance();
+		$current_theme  = $theme_manager->get_current_theme();
 		$current_preset = $theme_manager->get_current_preset();
-		$themes = $theme_manager->get_all_themes();
-		$presets = $theme_manager->get_all_presets();
-		
+		$themes         = $theme_manager->get_all_themes();
+		$presets        = $theme_manager->get_all_presets();
+
 		// Get current settings
-		$enabled = get_option( 'ea_gaming_engine_enabled', true );
+		$enabled       = get_option( 'ea_gaming_engine_enabled', true );
 		$cache_enabled = get_option( 'ea_gaming_engine_cache_enabled', true );
-		$debug_mode = get_option( 'ea_gaming_engine_debug_mode', false );
-		$hint_settings = get_option( 'ea_gaming_engine_hint_settings', [
-			'enabled' => true,
-			'cooldown' => 30,
-			'max_per_session' => 3
-		]);
+		$debug_mode    = get_option( 'ea_gaming_engine_debug_mode', false );
+		$hint_settings = get_option(
+			'ea_gaming_engine_hint_settings',
+			array(
+				'enabled'         => true,
+				'cooldown'        => 30,
+				'max_per_session' => 3,
+			)
+		);
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
 			<div class="ea-gaming-admin-header">
@@ -576,12 +579,12 @@ class Admin {
 	public function render_policies_page() {
 		global $wpdb;
 		$policies_table = $wpdb->prefix . 'ea_game_policies';
-		
+
 		// Get all policies
 		$policies = $wpdb->get_results(
 			"SELECT * FROM {$policies_table} ORDER BY priority ASC, id DESC"
 		);
-		
+
 		$policy_types = PolicyEngine::get_policy_types();
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
@@ -733,13 +736,13 @@ class Admin {
 	public function render_analytics_page() {
 		global $wpdb;
 		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
-		$stats_table = $wpdb->prefix . 'ea_player_stats';
-		
+		$stats_table    = $wpdb->prefix . 'ea_player_stats';
+
 		// Get analytics data
-		$total_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
+		$total_sessions     = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
 		$completed_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table} WHERE status = 'completed'" );
-		$avg_duration = $wpdb->get_var( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" );
-		$top_players = $wpdb->get_results(
+		$avg_duration       = $wpdb->get_var( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" );
+		$top_players        = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT u.display_name, ps.total_score, ps.games_played, ps.avg_score
 				FROM {$stats_table} ps
@@ -749,7 +752,7 @@ class Admin {
 				10
 			)
 		);
-		
+
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
 			<div class="ea-gaming-admin-header">
@@ -824,8 +827,8 @@ class Admin {
 	 */
 	public function render_games_page() {
 		$game_engine = GameEngine::get_instance();
-		$game_types = $game_engine->get_game_types();
-		
+		$game_types  = $game_engine->get_game_types();
+
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
 			<div class="ea-gaming-admin-header">
@@ -905,10 +908,10 @@ class Admin {
 	 * @return array
 	 */
 	public function add_action_links( $links ) {
-		$action_links = [
+		$action_links = array(
 			'settings' => '<a href="' . admin_url( 'admin.php?page=ea-gaming-settings' ) . '">' . __( 'Settings', 'ea-gaming-engine' ) . '</a>',
 			'docs'     => '<a href="https://honorswp.com/docs/ea-gaming-engine" target="_blank">' . __( 'Docs', 'ea-gaming-engine' ) . '</a>',
-		];
+		);
 
 		return array_merge( $action_links, $links );
 	}
@@ -961,24 +964,24 @@ class Admin {
 	 * @return array
 	 */
 	private function get_all_settings() {
-		return [
-			'general'  => [
+		return array(
+			'general'  => array(
 				'enabled'        => get_option( 'ea_gaming_engine_enabled', true ),
 				'default_theme'  => get_option( 'ea_gaming_engine_default_theme', 'playful' ),
 				'default_preset' => get_option( 'ea_gaming_engine_default_preset', 'classic' ),
-			],
+			),
 			'policies' => get_option( 'ea_gaming_engine_policies', $this->get_default_policies() ),
 			'games'    => get_option( 'ea_gaming_engine_games', $this->get_default_games() ),
-			'themes'   => get_option( 'ea_gaming_engine_themes', [] ),
+			'themes'   => get_option( 'ea_gaming_engine_themes', array() ),
 			'hints'    => get_option( 'ea_gaming_engine_hint_settings', $this->get_default_hint_settings() ),
-			'advanced' => [
-				'cache_enabled'           => get_option( 'ea_gaming_engine_cache_enabled', true ),
-				'debug_mode'              => get_option( 'ea_gaming_engine_debug_mode', false ),
-				'api_rate_limit'          => get_option( 'ea_gaming_engine_api_rate_limit', 100 ),
-				'keep_data_on_uninstall'  => get_option( 'ea_gaming_engine_keep_data_on_uninstall', false ),
+			'advanced' => array(
+				'cache_enabled'            => get_option( 'ea_gaming_engine_cache_enabled', true ),
+				'debug_mode'               => get_option( 'ea_gaming_engine_debug_mode', false ),
+				'api_rate_limit'           => get_option( 'ea_gaming_engine_api_rate_limit', 100 ),
+				'keep_data_on_uninstall'   => get_option( 'ea_gaming_engine_keep_data_on_uninstall', false ),
 				'export_data_on_uninstall' => get_option( 'ea_gaming_engine_export_data_on_uninstall', false ),
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -987,7 +990,7 @@ class Admin {
 	 * @return array
 	 */
 	private function get_default_policies() {
-		return [
+		return array(
 			'free_play_enabled'   => false,
 			'free_play_start'     => '15:00',
 			'free_play_end'       => '17:00',
@@ -999,7 +1002,7 @@ class Admin {
 			'daily_limit_enabled' => false,
 			'daily_limit_games'   => 10,
 			'daily_limit_time'    => 60,
-		];
+		);
 	}
 
 	/**
@@ -1008,22 +1011,22 @@ class Admin {
 	 * @return array
 	 */
 	private function get_default_games() {
-		return [
-			'whack_a_question' => [
+		return array(
+			'whack_a_question' => array(
 				'enabled'    => true,
 				'difficulty' => 'medium',
 				'time_limit' => 60,
-			],
-			'tic_tac_tactics'  => [
+			),
+			'tic_tac_tactics'  => array(
 				'enabled'    => true,
 				'difficulty' => 'medium',
-			],
-			'target_trainer'   => [
+			),
+			'target_trainer'   => array(
 				'enabled'    => true,
 				'difficulty' => 'medium',
 				'targets'    => 10,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -1032,14 +1035,14 @@ class Admin {
 	 * @return array
 	 */
 	private function get_default_hint_settings() {
-		return [
-			'enabled' => true,
-			'cooldown' => 30,
-			'max_hints' => 3,
-			'ai_integration' => false,
-			'context_analysis' => true,
+		return array(
+			'enabled'            => true,
+			'cooldown'           => 30,
+			'max_hints'          => 3,
+			'ai_integration'     => false,
+			'context_analysis'   => true,
 			'lesson_integration' => true,
-		];
+		);
 	}
 
 	/**
@@ -1054,7 +1057,7 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$settings = $_POST['settings'] ?? [];
+		$settings = $_POST['settings'] ?? array();
 
 		if ( empty( $settings ) ) {
 			wp_send_json_error( __( 'Invalid settings data', 'ea-gaming-engine' ) );
@@ -1064,48 +1067,48 @@ class Admin {
 		if ( isset( $settings['enabled'] ) ) {
 			update_option( 'ea_gaming_engine_enabled', filter_var( $settings['enabled'], FILTER_VALIDATE_BOOLEAN ) );
 		}
-		
+
 		if ( isset( $settings['cache_enabled'] ) ) {
 			update_option( 'ea_gaming_engine_cache_enabled', filter_var( $settings['cache_enabled'], FILTER_VALIDATE_BOOLEAN ) );
 		}
-		
+
 		if ( isset( $settings['debug_mode'] ) ) {
 			update_option( 'ea_gaming_engine_debug_mode', filter_var( $settings['debug_mode'], FILTER_VALIDATE_BOOLEAN ) );
 		}
-		
+
 		if ( isset( $settings['default_theme'] ) ) {
 			update_option( 'ea_gaming_engine_default_theme', sanitize_text_field( $settings['default_theme'] ) );
 		}
-		
+
 		if ( isset( $settings['default_preset'] ) ) {
 			update_option( 'ea_gaming_engine_default_preset', sanitize_text_field( $settings['default_preset'] ) );
 		}
 
 		// Save hint settings
 		if ( isset( $settings['hint_settings'] ) ) {
-			$hint_settings = [
-				'enabled' => filter_var( $settings['hint_settings']['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
-				'cooldown' => intval( $settings['hint_settings']['cooldown'] ?? 30 ),
-				'max_per_session' => intval( $settings['hint_settings']['max_per_session'] ?? 3 )
-			];
+			$hint_settings = array(
+				'enabled'         => filter_var( $settings['hint_settings']['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+				'cooldown'        => intval( $settings['hint_settings']['cooldown'] ?? 30 ),
+				'max_per_session' => intval( $settings['hint_settings']['max_per_session'] ?? 3 ),
+			);
 			update_option( 'ea_gaming_engine_hint_settings', $hint_settings );
 		}
 
 		// Save integration settings
 		if ( isset( $settings['integration_settings'] ) ) {
-			$integration_settings = [
-				'learndash_enabled' => filter_var( $settings['integration_settings']['learndash_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+			$integration_settings = array(
+				'learndash_enabled'       => filter_var( $settings['integration_settings']['learndash_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
 				'parent_controls_enabled' => filter_var( $settings['integration_settings']['parent_controls_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN ),
-				'flashcards_enabled' => filter_var( $settings['integration_settings']['flashcards_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN )
-			];
+				'flashcards_enabled'      => filter_var( $settings['integration_settings']['flashcards_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN ),
+			);
 			update_option( 'ea_gaming_engine_integration_settings', $integration_settings );
 		}
 
 		wp_send_json_success(
-			[
+			array(
 				'message'  => __( 'Settings saved successfully', 'ea-gaming-engine' ),
 				'settings' => $this->get_all_settings(),
-			]
+			)
 		);
 	}
 
@@ -1142,7 +1145,7 @@ class Admin {
 		update_option( 'ea_gaming_engine_default_preset', 'classic' );
 		update_option( 'ea_gaming_engine_policies', $this->get_default_policies() );
 		update_option( 'ea_gaming_engine_games', $this->get_default_games() );
-		update_option( 'ea_gaming_engine_themes', [] );
+		update_option( 'ea_gaming_engine_themes', array() );
 		update_option( 'ea_gaming_engine_hint_settings', $this->get_default_hint_settings() );
 		update_option( 'ea_gaming_engine_cache_enabled', true );
 		update_option( 'ea_gaming_engine_debug_mode', false );
@@ -1151,10 +1154,10 @@ class Admin {
 		update_option( 'ea_gaming_engine_export_data_on_uninstall', false );
 
 		wp_send_json_success(
-			[
+			array(
 				'message'  => __( 'Settings reset to defaults', 'ea-gaming-engine' ),
 				'settings' => $this->get_all_settings(),
-			]
+			)
 		);
 	}
 
@@ -1173,7 +1176,7 @@ class Admin {
 		global $wpdb;
 
 		// Get analytics data
-		$period = sanitize_text_field( $_POST['period'] ?? '7days' );
+		$period    = sanitize_text_field( $_POST['period'] ?? '7days' );
 		$course_id = intval( $_POST['course_id'] ?? 0 );
 
 		// Calculate date range
@@ -1205,10 +1208,10 @@ class Admin {
 		FROM {$wpdb->prefix}ea_game_sessions
 		WHERE created_at BETWEEN %s AND %s";
 
-		$params = [ $start_date, $end_date ];
+		$params = array( $start_date, $end_date );
 
 		if ( $course_id ) {
-			$query .= ' AND course_id = %d';
+			$query   .= ' AND course_id = %d';
 			$params[] = $course_id;
 		}
 
@@ -1230,7 +1233,7 @@ class Admin {
 		}
 
 		$top_players_query .= ' ORDER BY ps.total_score DESC LIMIT 10';
-		$top_players = $wpdb->get_results( $top_players_query );
+		$top_players        = $wpdb->get_results( $top_players_query );
 
 		// Get game type distribution
 		$game_distribution_query = "SELECT 
@@ -1239,25 +1242,25 @@ class Admin {
 		FROM {$wpdb->prefix}ea_game_sessions
 		WHERE created_at BETWEEN %s AND %s";
 
-		$dist_params = [ $start_date, $end_date ];
+		$dist_params = array( $start_date, $end_date );
 
 		if ( $course_id ) {
 			$game_distribution_query .= ' AND course_id = %d';
-			$dist_params[] = $course_id;
+			$dist_params[]            = $course_id;
 		}
 
 		$game_distribution_query .= ' GROUP BY game_type';
-		$game_distribution = $wpdb->get_results( $wpdb->prepare( $game_distribution_query, $dist_params ) );
+		$game_distribution        = $wpdb->get_results( $wpdb->prepare( $game_distribution_query, $dist_params ) );
 
 		wp_send_json_success(
-			[
+			array(
 				'sessions'          => $results,
 				'top_players'       => $top_players,
 				'game_distribution' => $game_distribution,
 				'period'            => $period,
 				'start_date'        => $start_date,
 				'end_date'          => $end_date,
-			]
+			)
 		);
 	}
 
@@ -1275,57 +1278,62 @@ class Admin {
 
 		global $wpdb;
 
-		$export_data = [
+		$export_data = array(
 			'export_date'    => current_time( 'mysql' ),
 			'plugin_version' => EA_GAMING_ENGINE_VERSION,
 			'site_url'       => get_site_url(),
 			'wp_version'     => get_bloginfo( 'version' ),
-			'options'        => [],
-			'tables'         => [],
-		];
+			'options'        => array(),
+			'tables'         => array(),
+		);
 
 		// Export all plugin options
-		$options = $wpdb->get_results( $wpdb->prepare(
-			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
-			'ea_gaming_engine_%'
-		), ARRAY_A );
+		$options = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+				'ea_gaming_engine_%'
+			),
+			ARRAY_A
+		);
 
 		foreach ( $options as $option ) {
 			$export_data['options'][ $option['option_name'] ] = maybe_unserialize( $option['option_value'] );
 		}
 
 		// Export table data
-		$tables = [
+		$tables = array(
 			'ea_game_sessions',
-			'ea_game_policies', 
+			'ea_game_policies',
 			'ea_question_attempts',
 			'ea_player_stats',
 			'ea_hint_usage',
-		];
+		);
 
 		foreach ( $tables as $table ) {
 			$table_name = $wpdb->prefix . $table;
-			
-			$table_exists = $wpdb->get_var( $wpdb->prepare( 
-				"SHOW TABLES LIKE %s", 
-				$table_name 
-			) );
+
+			$table_exists = $wpdb->get_var(
+				$wpdb->prepare(
+					'SHOW TABLES LIKE %s',
+					$table_name
+				)
+			);
 
 			if ( $table_exists ) {
-				$export_data['tables'][ $table ] = $wpdb->get_results( 
-					"SELECT * FROM {$table_name}", 
-					ARRAY_A 
+				$export_data['tables'][ $table ] = $wpdb->get_results(
+					"SELECT * FROM {$table_name}",
+					ARRAY_A
 				);
 			}
 		}
 
 		// Create export file
 		$upload_dir = wp_upload_dir();
-		$filename = 'ea-gaming-export-' . date( 'Y-m-d-H-i-s' ) . '.json';
-		$file_path = $upload_dir['basedir'] . '/' . $filename;
-		
+		$filename   = 'ea-gaming-export-' . date( 'Y-m-d-H-i-s' ) . '.json';
+		$file_path  = $upload_dir['basedir'] . '/' . $filename;
+
 		$json_data = json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-		
+
 		if ( false === file_put_contents( $file_path, $json_data ) ) {
 			wp_send_json_error( __( 'Failed to create export file', 'ea-gaming-engine' ) );
 		}
@@ -1334,16 +1342,16 @@ class Admin {
 		$file_size = size_format( filesize( $file_path ) );
 
 		wp_send_json_success(
-			[
-				'message'     => __( 'Data exported successfully', 'ea-gaming-engine' ),
-				'filename'    => $filename,
-				'file_size'   => $file_size,
+			array(
+				'message'      => __( 'Data exported successfully', 'ea-gaming-engine' ),
+				'filename'     => $filename,
+				'file_size'    => $file_size,
 				'download_url' => $upload_dir['baseurl'] . '/' . $filename,
-				'records'     => [
+				'records'      => array(
 					'options' => count( $export_data['options'] ),
 					'tables'  => array_sum( array_map( 'count', $export_data['tables'] ) ),
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -1367,7 +1375,7 @@ class Admin {
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_policies';
-		
+
 		$policy = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM $table WHERE id = %d",
@@ -1394,8 +1402,8 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$policy = $_POST['policy'] ?? [];
-		
+		$policy = $_POST['policy'] ?? array();
+
 		if ( empty( $policy ) ) {
 			wp_send_json_error( __( 'Invalid policy data', 'ea-gaming-engine' ) );
 		}
@@ -1403,14 +1411,14 @@ class Admin {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_policies';
 
-		$data = [
+		$data = array(
 			'name'       => sanitize_text_field( $policy['name'] ?? '' ),
 			'rule_type'  => sanitize_text_field( $policy['rule_type'] ?? '' ),
 			'priority'   => intval( $policy['priority'] ?? 10 ),
 			'conditions' => wp_unslash( $policy['conditions'] ?? '{}' ),
 			'actions'    => wp_unslash( $policy['actions'] ?? '{}' ),
 			'active'     => intval( $policy['active'] ?? 0 ),
-		];
+		);
 
 		// Validate JSON
 		if ( json_decode( $data['conditions'] ) === null || json_decode( $data['actions'] ) === null ) {
@@ -1422,7 +1430,7 @@ class Admin {
 			$result = $wpdb->update(
 				$table,
 				$data,
-				[ 'id' => intval( $policy['policy_id'] ) ]
+				array( 'id' => intval( $policy['policy_id'] ) )
 			);
 		} else {
 			// Insert new policy
@@ -1433,10 +1441,12 @@ class Admin {
 			wp_send_json_error( __( 'Failed to save policy', 'ea-gaming-engine' ) );
 		}
 
-		wp_send_json_success( [
-			'message' => __( 'Policy saved successfully', 'ea-gaming-engine' ),
-			'policy_id' => ! empty( $policy['policy_id'] ) ? intval( $policy['policy_id'] ) : $wpdb->insert_id,
-		] );
+		wp_send_json_success(
+			array(
+				'message'   => __( 'Policy saved successfully', 'ea-gaming-engine' ),
+				'policy_id' => ! empty( $policy['policy_id'] ) ? intval( $policy['policy_id'] ) : $wpdb->insert_id,
+			)
+		);
 	}
 
 	/**
@@ -1452,7 +1462,7 @@ class Admin {
 		}
 
 		$policy_id = intval( $_POST['policy_id'] ?? 0 );
-		$active = intval( $_POST['active'] ?? 0 );
+		$active    = intval( $_POST['active'] ?? 0 );
 
 		if ( ! $policy_id ) {
 			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
@@ -1463,17 +1473,19 @@ class Admin {
 
 		$result = $wpdb->update(
 			$table,
-			[ 'active' => $active ],
-			[ 'id' => $policy_id ]
+			array( 'active' => $active ),
+			array( 'id' => $policy_id )
 		);
 
 		if ( $result === false ) {
 			wp_send_json_error( __( 'Failed to update policy status', 'ea-gaming-engine' ) );
 		}
 
-		wp_send_json_success( [
-			'message' => __( 'Policy status updated', 'ea-gaming-engine' ),
-		] );
+		wp_send_json_success(
+			array(
+				'message' => __( 'Policy status updated', 'ea-gaming-engine' ),
+			)
+		);
 	}
 
 	/**
@@ -1499,15 +1511,17 @@ class Admin {
 
 		$result = $wpdb->delete(
 			$table,
-			[ 'id' => $policy_id ]
+			array( 'id' => $policy_id )
 		);
 
 		if ( $result === false ) {
 			wp_send_json_error( __( 'Failed to delete policy', 'ea-gaming-engine' ) );
 		}
 
-		wp_send_json_success( [
-			'message' => __( 'Policy deleted successfully', 'ea-gaming-engine' ),
-		] );
+		wp_send_json_success(
+			array(
+				'message' => __( 'Policy deleted successfully', 'ea-gaming-engine' ),
+			)
+		);
 	}
 }

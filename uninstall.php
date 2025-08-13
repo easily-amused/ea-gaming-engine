@@ -25,13 +25,13 @@ class EAGamingEngineUninstaller {
 	/**
 	 * Database table names
 	 */
-	private static $tables = [
+	private static $tables = array(
 		'ea_game_sessions',
-		'ea_game_policies', 
+		'ea_game_policies',
 		'ea_question_attempts',
 		'ea_player_stats',
 		'ea_hint_usage',
-	];
+	);
 
 	/**
 	 * Run the uninstall process
@@ -43,7 +43,7 @@ class EAGamingEngineUninstaller {
 
 		// Check if we should keep data
 		$keep_data = get_option( self::OPTION_PREFIX . 'keep_data_on_uninstall', false );
-		
+
 		if ( $keep_data ) {
 			// Only clean up temporary data, keep user data
 			self::cleanup_temporary_data();
@@ -94,17 +94,19 @@ class EAGamingEngineUninstaller {
 
 		foreach ( self::$tables as $table ) {
 			$table_name = $wpdb->prefix . $table;
-			
+
 			// Check if table exists before dropping
-			$table_exists = $wpdb->get_var( $wpdb->prepare( 
-				"SHOW TABLES LIKE %s", 
-				$table_name 
-			) );
+			$table_exists = $wpdb->get_var(
+				$wpdb->prepare(
+					'SHOW TABLES LIKE %s',
+					$table_name
+				)
+			);
 
 			if ( $table_exists ) {
 				// Drop the table
 				$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
-				
+
 				// Log table removal
 				error_log( "EA Gaming Engine: Removed table {$table_name}" );
 			}
@@ -123,10 +125,12 @@ class EAGamingEngineUninstaller {
 		global $wpdb;
 
 		// Get all options with our prefix
-		$options = $wpdb->get_col( $wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-			self::OPTION_PREFIX . '%'
-		) );
+		$options = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+				self::OPTION_PREFIX . '%'
+			)
+		);
 
 		// Remove each option
 		foreach ( $options as $option ) {
@@ -134,12 +138,12 @@ class EAGamingEngineUninstaller {
 		}
 
 		// Remove specific known options that might not follow the prefix pattern
-		$specific_options = [
+		$specific_options = array(
 			'ea_gaming_arcade_settings',
 			'ea_gaming_launcher_settings',
 			'ea_gaming_stats_settings',
 			'ea_gaming_leaderboard_settings',
-		];
+		);
 
 		foreach ( $specific_options as $option ) {
 			delete_option( $option );
@@ -196,13 +200,13 @@ class EAGamingEngineUninstaller {
 			return;
 		}
 
-		$custom_capabilities = [
+		$custom_capabilities = array(
 			'ea_gaming_manage_games',
 			'ea_gaming_view_analytics',
 			'ea_gaming_manage_policies',
 			'ea_gaming_play_games',
 			'ea_gaming_access_advanced',
-		];
+		);
 
 		// Remove capabilities from all roles
 		foreach ( $roles->roles as $role_name => $role_info ) {
@@ -215,10 +219,10 @@ class EAGamingEngineUninstaller {
 		}
 
 		// Remove any custom roles we might have created
-		$custom_roles = [
+		$custom_roles = array(
 			'ea_gaming_instructor',
 			'ea_gaming_student',
-		];
+		);
 
 		foreach ( $custom_roles as $role ) {
 			remove_role( $role );
@@ -236,7 +240,7 @@ class EAGamingEngineUninstaller {
 		global $wpdb;
 
 		// Remove all plugin-related user meta
-		$user_meta_keys = [
+		$user_meta_keys = array(
 			'ea_gaming_theme_preference',
 			'ea_gaming_profile_preset',
 			'ea_gaming_game_settings',
@@ -244,17 +248,19 @@ class EAGamingEngineUninstaller {
 			'ea_gaming_stats_cache',
 			'ea_gaming_last_activity',
 			'ea_gaming_preferences',
-		];
+		);
 
 		foreach ( $user_meta_keys as $meta_key ) {
-			$wpdb->delete( $wpdb->usermeta, [ 'meta_key' => $meta_key ] );
+			$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $meta_key ) );
 		}
 
 		// Remove meta keys with our prefix pattern
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
-			self::OPTION_PREFIX . '%'
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
+				self::OPTION_PREFIX . '%'
+			)
+		);
 
 		error_log( 'EA Gaming Engine: Cleaned up user meta data.' );
 	}
@@ -266,12 +272,12 @@ class EAGamingEngineUninstaller {
 	 */
 	private static function remove_cron_events() {
 		// Clear all plugin cron events
-		$cron_events = [
+		$cron_events = array(
 			'ea_gaming_engine_daily_cleanup',
 			'ea_gaming_engine_policy_check',
 			'ea_gaming_engine_stats_update',
 			'ea_gaming_engine_cache_cleanup',
-		];
+		);
 
 		foreach ( $cron_events as $event ) {
 			wp_clear_scheduled_hook( $event );
@@ -286,7 +292,7 @@ class EAGamingEngineUninstaller {
 	 * @return void
 	 */
 	private static function cleanup_uploads() {
-		$upload_dir = wp_upload_dir();
+		$upload_dir        = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/ea-gaming-engine';
 
 		if ( is_dir( $plugin_upload_dir ) ) {
@@ -314,8 +320,8 @@ class EAGamingEngineUninstaller {
 			return false;
 		}
 
-		$files = array_diff( scandir( $dir ), [ '.', '..' ] );
-		
+		$files = array_diff( scandir( $dir ), array( '.', '..' ) );
+
 		foreach ( $files as $file ) {
 			$path = $dir . '/' . $file;
 			if ( is_dir( $path ) ) {
@@ -337,16 +343,24 @@ class EAGamingEngineUninstaller {
 		global $wpdb;
 
 		// Remove any custom indexes we might have added to existing tables
-		$custom_indexes = [
-			[ 'table' => $wpdb->posts, 'index' => 'ea_gaming_post_type' ],
-			[ 'table' => $wpdb->postmeta, 'index' => 'ea_gaming_meta_key' ],
-		];
+		$custom_indexes = array(
+			array(
+				'table' => $wpdb->posts,
+				'index' => 'ea_gaming_post_type',
+			),
+			array(
+				'table' => $wpdb->postmeta,
+				'index' => 'ea_gaming_meta_key',
+			),
+		);
 
 		foreach ( $custom_indexes as $index_info ) {
-			$index_exists = $wpdb->get_var( $wpdb->prepare(
-				"SHOW INDEX FROM {$index_info['table']} WHERE Key_name = %s",
-				$index_info['index']
-			) );
+			$index_exists = $wpdb->get_var(
+				$wpdb->prepare(
+					"SHOW INDEX FROM {$index_info['table']} WHERE Key_name = %s",
+					$index_info['index']
+				)
+			);
 
 			if ( $index_exists ) {
 				$wpdb->query( "DROP INDEX {$index_info['index']} ON {$index_info['table']}" );
@@ -362,18 +376,21 @@ class EAGamingEngineUninstaller {
 	private static function export_plugin_data() {
 		global $wpdb;
 
-		$export_data = [
-			'export_date' => current_time( 'mysql' ),
+		$export_data = array(
+			'export_date'    => current_time( 'mysql' ),
 			'plugin_version' => get_option( self::OPTION_PREFIX . 'version', '1.0.0' ),
-			'options' => [],
-			'tables' => [],
-		];
+			'options'        => array(),
+			'tables'         => array(),
+		);
 
 		// Export all plugin options
-		$options = $wpdb->get_results( $wpdb->prepare(
-			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
-			self::OPTION_PREFIX . '%'
-		), ARRAY_A );
+		$options = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+				self::OPTION_PREFIX . '%'
+			),
+			ARRAY_A
+		);
 
 		foreach ( $options as $option ) {
 			$export_data['options'][ $option['option_name'] ] = maybe_unserialize( $option['option_value'] );
@@ -382,27 +399,29 @@ class EAGamingEngineUninstaller {
 		// Export table data
 		foreach ( self::$tables as $table ) {
 			$table_name = $wpdb->prefix . $table;
-			
-			$table_exists = $wpdb->get_var( $wpdb->prepare( 
-				"SHOW TABLES LIKE %s", 
-				$table_name 
-			) );
+
+			$table_exists = $wpdb->get_var(
+				$wpdb->prepare(
+					'SHOW TABLES LIKE %s',
+					$table_name
+				)
+			);
 
 			if ( $table_exists ) {
-				$export_data['tables'][ $table ] = $wpdb->get_results( 
-					"SELECT * FROM {$table_name}", 
-					ARRAY_A 
+				$export_data['tables'][ $table ] = $wpdb->get_results(
+					"SELECT * FROM {$table_name}",
+					ARRAY_A
 				);
 			}
 		}
 
 		// Save export file
-		$upload_dir = wp_upload_dir();
+		$upload_dir  = wp_upload_dir();
 		$export_file = $upload_dir['basedir'] . '/ea-gaming-export-' . date( 'Y-m-d-H-i-s' ) . '.json';
-		
-		file_put_contents( 
-			$export_file, 
-			json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) 
+
+		file_put_contents(
+			$export_file,
+			json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE )
 		);
 
 		error_log( "EA Gaming Engine: Data exported to {$export_file}" );

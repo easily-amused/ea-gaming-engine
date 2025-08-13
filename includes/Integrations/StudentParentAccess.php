@@ -1,17 +1,17 @@
 <?php
 /**
-	* Student-Parent Access Integration (optional)
-	*
-	* Integrates EA Gaming Engine with EA Student-Parent Access (SPA) plugin when available.
-	* Provides:
-	* - Detection of SPA availability
-	* - Parent control data via ea_gaming_parent_controls
-	* - Enforcement via ea_gaming_can_user_play
-	* - Time window checks and ticket requirement validation
-	* - Simple fallback admin settings (when SPA is not active)
-	*
-	* @package EAGamingEngine
-	*/
+ * Student-Parent Access Integration (optional)
+ *
+ * Integrates EA Gaming Engine with EA Student-Parent Access (SPA) plugin when available.
+ * Provides:
+ * - Detection of SPA availability
+ * - Parent control data via ea_gaming_parent_controls
+ * - Enforcement via ea_gaming_can_user_play
+ * - Time window checks and ticket requirement validation
+ * - Simple fallback admin settings (when SPA is not active)
+ *
+ * @package EAGamingEngine
+ */
 
 namespace EAGamingEngine\Integrations;
 
@@ -22,48 +22,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 class StudentParentAccess {
 
 	/**
-		* Whether Student-Parent Access plugin (SPA) appears active.
-		*
-		* @var bool
-		*/
+	 * Whether Student-Parent Access plugin (SPA) appears active.
+	 *
+	 * @var bool
+	 */
 	private $spa_active = false;
 
 	/**
-		* Option key for fallback parent controls settings.
-		*/
+	 * Option key for fallback parent controls settings.
+	 */
 	private const OPTION_KEY = 'ea_gaming_engine_parent_controls';
 
 	/**
-		* Constructor.
-		* Wires up filters/actions and detects SPA.
-		*/
+	 * Constructor.
+	 * Wires up filters/actions and detects SPA.
+	 */
 	public function __construct() {
 		$this->spa_active = $this->detect_spa();
 
 		// Provide parent control data to PolicyEngine context.
-		add_filter( 'ea_gaming_parent_controls', [ $this, 'filter_parent_controls' ], 10, 2 );
+		add_filter( 'ea_gaming_parent_controls', array( $this, 'filter_parent_controls' ), 10, 2 );
 
 		// Enforce parent controls at the PolicyEngine decision point.
 		// Run early enough (8) to short-circuit if needed, but allow other integrations even earlier if any.
-		add_filter( 'ea_gaming_can_user_play', [ $this, 'filter_can_user_play' ], 8, 3 );
+		add_filter( 'ea_gaming_can_user_play', array( $this, 'filter_can_user_play' ), 8, 3 );
 
 		// Simple fallback admin settings (optional; used if SPA is not active or returns no data).
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-		
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+
 		// Hook into our custom action to add menu at the right place
-		add_action( 'ea_gaming_engine_add_admin_menus', [ $this, 'add_admin_menu' ] );
-		
+		add_action( 'ea_gaming_engine_add_admin_menus', array( $this, 'add_admin_menu' ) );
+
 		// Listen for plugin activation/deactivation
-		add_action( 'activated_plugin', [ $this, 'check_plugin_activation' ], 10, 2 );
-		add_action( 'deactivated_plugin', [ $this, 'check_plugin_deactivation' ], 10, 2 );
+		add_action( 'activated_plugin', array( $this, 'check_plugin_activation' ), 10, 2 );
+		add_action( 'deactivated_plugin', array( $this, 'check_plugin_deactivation' ), 10, 2 );
 	}
 
 	/**
-		* Detect if the EA Student-Parent Access plugin is available.
-		*
-		* @return bool
-		*/
-	private function detect_spa() : bool {
+	 * Detect if the EA Student-Parent Access plugin is available.
+	 *
+	 * @return bool
+	 */
+	private function detect_spa(): bool {
 		// Heuristics: class existence or dedicated filter/function exposed by SPA.
 		if ( class_exists( 'EA_Student_Parent_Access' ) ) {
 			return true;
@@ -82,13 +82,13 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Parent controls provider for PolicyEngine.
-		*
-		* @param array $controls Existing controls (from other providers).
-		* @param int   $user_id  User ID.
-		* @return array
-		*/
-	public function filter_parent_controls( array $controls, int $user_id ) : array {
+	 * Parent controls provider for PolicyEngine.
+	 *
+	 * @param array $controls Existing controls (from other providers).
+	 * @param int   $user_id  User ID.
+	 * @return array
+	 */
+	public function filter_parent_controls( array $controls, int $user_id ): array {
 		$spa = $this->get_spa_controls( $user_id );
 
 		// If SPA didn't provide data, optionally use fallback settings.
@@ -106,28 +106,28 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Enforce parent controls (games blocked, time window, tickets).
-		*
-		* @param bool|array $can_play Boolean true/false or an array with can_play=false and reason from a previous integration.
-		* @param int        $user_id  User ID.
-		* @param int        $course_id Course ID.
-		* @return bool|array
-		*/
+	 * Enforce parent controls (games blocked, time window, tickets).
+	 *
+	 * @param bool|array $can_play Boolean true/false or an array with can_play=false and reason from a previous integration.
+	 * @param int        $user_id  User ID.
+	 * @param int        $course_id Course ID.
+	 * @return bool|array
+	 */
 	public function filter_can_user_play( $can_play, int $user_id, int $course_id ) {
 		// If already blocked by another rule, keep the result.
 		if ( is_array( $can_play ) && isset( $can_play['can_play'] ) && false === $can_play['can_play'] ) {
 			return $can_play;
 		}
 
-		$controls = apply_filters( 'ea_gaming_parent_controls', [], $user_id );
+		$controls = apply_filters( 'ea_gaming_parent_controls', array(), $user_id );
 
 		// 1) Hard block from parent/guardian.
 		if ( ! empty( $controls['games_blocked'] ) ) {
-			return [
+			return array(
 				'can_play' => false,
 				'reason'   => __( 'Games have been disabled by your parent/guardian.', 'ea-gaming-engine' ),
 				'policy'   => 'parent_control',
-			];
+			);
 		}
 
 		// 2) Time restriction window check.
@@ -137,7 +137,7 @@ class StudentParentAccess {
 			$end     = $controls['time_restrictions']['end'];
 
 			if ( ! $this->is_time_between( $current, $start, $end ) ) {
-				return [
+				return array(
 					'can_play' => false,
 					'reason'   => sprintf(
 						/* translators: %1$s: start time, %2$s: end time */
@@ -146,7 +146,7 @@ class StudentParentAccess {
 						$end
 					),
 					'policy'   => 'parent_control',
-				];
+				);
 			}
 		}
 
@@ -154,11 +154,11 @@ class StudentParentAccess {
 		if ( ! empty( $controls['require_tickets'] ) ) {
 			$tickets = $this->get_user_tickets( $user_id );
 			if ( $tickets <= 0 ) {
-				return [
+				return array(
 					'can_play' => false,
 					'reason'   => __( 'You need tickets to play. Please ask your parent/guardian for more.', 'ea-gaming-engine' ),
 					'policy'   => 'parent_control',
-				];
+				);
 			}
 		}
 
@@ -166,45 +166,45 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Pull controls from SPA if possible and normalize to EA Gaming Engine's structure.
-		*
-		* Structure returned:
-		* [
-		*   'games_blocked'     => bool,
-		*   'time_restrictions' => [ 'start' => 'HH:MM', 'end' => 'HH:MM' ],
-		*   'require_tickets'   => bool,
-		* ]
-		*
-		* @param int $user_id User ID.
-		* @return array
-		*/
-	private function get_spa_controls( int $user_id ) : array {
+	 * Pull controls from SPA if possible and normalize to EA Gaming Engine's structure.
+	 *
+	 * Structure returned:
+	 * [
+	 *   'games_blocked'     => bool,
+	 *   'time_restrictions' => [ 'start' => 'HH:MM', 'end' => 'HH:MM' ],
+	 *   'require_tickets'   => bool,
+	 * ]
+	 *
+	 * @param int $user_id User ID.
+	 * @return array
+	 */
+	private function get_spa_controls( int $user_id ): array {
 		if ( ! $this->spa_active ) {
-			return [];
+			return array();
 		}
 
-		$spa_controls = [];
+		$spa_controls = array();
 
 		// Preferred: dedicated function.
 		if ( function_exists( 'ea_spa_get_child_controls' ) ) {
 			$spa_controls = (array) call_user_func( 'ea_spa_get_child_controls', $user_id );
 		} elseif ( has_filter( 'ea_spa_get_child_controls' ) ) {
 			// Or via filter.
-			$spa_controls = (array) apply_filters( 'ea_spa_get_child_controls', [], $user_id );
+			$spa_controls = (array) apply_filters( 'ea_spa_get_child_controls', array(), $user_id );
 		} else {
 			// Fallback to a common user meta key if SPA stores structured data there.
 			$spa_controls = (array) get_user_meta( $user_id, 'ea_spa_parent_controls', true );
 		}
 
 		if ( empty( $spa_controls ) ) {
-			return [];
+			return array();
 		}
 
-		$normalized = [
+		$normalized = array(
 			'games_blocked'     => false,
-			'time_restrictions' => [],
+			'time_restrictions' => array(),
 			'require_tickets'   => false,
-		];
+		);
 
 		// Normalize "games blocked".
 		if ( isset( $spa_controls['games_blocked'] ) ) {
@@ -232,10 +232,10 @@ class StudentParentAccess {
 		}
 
 		if ( $start && $end ) {
-			$normalized['time_restrictions'] = [
+			$normalized['time_restrictions'] = array(
 				'start' => $start,
 				'end'   => $end,
-			];
+			);
 		}
 
 		// Normalize ticket requirement.
@@ -255,12 +255,12 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Retrieve SPA user tickets, if SPA exposes them.
-		*
-		* @param int $user_id User ID.
-		* @return int|null
-		*/
-	private function get_spa_user_tickets( int $user_id ) : ?int {
+	 * Retrieve SPA user tickets, if SPA exposes them.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int|null
+	 */
+	private function get_spa_user_tickets( int $user_id ): ?int {
 		if ( ! $this->spa_active ) {
 			return null;
 		}
@@ -287,53 +287,53 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Get fallback controls from plugin options (used when SPA is not active or no data provided).
-		*
-		* @return array
-		*/
-	private function get_fallback_controls() : array {
+	 * Get fallback controls from plugin options (used when SPA is not active or no data provided).
+	 *
+	 * @return array
+	 */
+	private function get_fallback_controls(): array {
 		$opt = get_option(
 			self::OPTION_KEY,
-			[
+			array(
 				'enabled'         => false,
 				'block_games'     => false,
 				'time_start'      => '',
 				'time_end'        => '',
 				'require_tickets' => false,
 				'default_tickets' => 0,
-			]
+			)
 		);
 
 		if ( empty( $opt['enabled'] ) ) {
-			return [];
+			return array();
 		}
 
-		$controls = [
+		$controls = array(
 			'games_blocked'     => (bool) ( $opt['block_games'] ?? false ),
-			'time_restrictions' => [],
+			'time_restrictions' => array(),
 			'require_tickets'   => (bool) ( $opt['require_tickets'] ?? false ),
-		];
+		);
 
 		$start = isset( $opt['time_start'] ) ? trim( (string) $opt['time_start'] ) : '';
 		$end   = isset( $opt['time_end'] ) ? trim( (string) $opt['time_end'] ) : '';
 
 		if ( $start && $end ) {
-			$controls['time_restrictions'] = [
+			$controls['time_restrictions'] = array(
 				'start' => $start,
 				'end'   => $end,
-			];
+			);
 		}
 
 		return $controls;
 	}
 
 	/**
-		* Get user tickets from EA Gaming (synced from SPA if present).
-		*
-		* @param int $user_id User ID.
-		* @return int
-		*/
-	private function get_user_tickets( int $user_id ) : int {
+	 * Get user tickets from EA Gaming (synced from SPA if present).
+	 *
+	 * @param int $user_id User ID.
+	 * @return int
+	 */
+	private function get_user_tickets( int $user_id ): int {
 		$tickets = get_user_meta( $user_id, 'ea_gaming_tickets', true );
 		if ( '' === $tickets || null === $tickets ) {
 			return 0;
@@ -342,14 +342,14 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Check if a time falls between start and end, supporting overnight windows.
-		*
-		* @param string $current Current time (H:i).
-		* @param string $start   Start time (H:i).
-		* @param string $end     End time (H:i).
-		* @return bool
-		*/
-	private function is_time_between( string $current, string $start, string $end ) : bool {
+	 * Check if a time falls between start and end, supporting overnight windows.
+	 *
+	 * @param string $current Current time (H:i).
+	 * @param string $start   Start time (H:i).
+	 * @param string $end     End time (H:i).
+	 * @return bool
+	 */
+	private function is_time_between( string $current, string $start, string $end ): bool {
 		$cur = strtotime( $current );
 		$st  = strtotime( $start );
 		$en  = strtotime( $end );
@@ -363,74 +363,74 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Register fallback settings to WP options.
-		*
-		* @return void
-		*/
-	public function register_settings() : void {
+	 * Register fallback settings to WP options.
+	 *
+	 * @return void
+	 */
+	public function register_settings(): void {
 		register_setting(
 			'ea_gaming_parent',
 			self::OPTION_KEY,
-			[
+			array(
 				'type'              => 'array',
-				'sanitize_callback' => [ $this, 'sanitize_settings' ],
-				'default'           => [
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
+				'default'           => array(
 					'enabled'         => false,
 					'block_games'     => false,
 					'time_start'      => '',
 					'time_end'        => '',
 					'require_tickets' => false,
 					'default_tickets' => 0,
-				],
-			]
+				),
+			)
 		);
 	}
 
 	/**
-		* Add submenu for Parent Controls under EA Gaming Engine.
-		* Only shows when Student-Parent Access plugin is active.
-		*
-		* @return void
-		*/
-	public function add_admin_menu() : void {
+	 * Add submenu for Parent Controls under EA Gaming Engine.
+	 * Only shows when Student-Parent Access plugin is active.
+	 *
+	 * @return void
+	 */
+	public function add_admin_menu(): void {
 		// Only add menu if SPA is active
 		if ( ! $this->spa_active ) {
 			return;
 		}
-		
+
 		// Get dynamic label from SPA plugin
 		$parent_label = $this->get_parent_label();
-		$menu_title = sprintf( __( '%s Controls', 'ea-gaming-engine' ), $parent_label );
-		
+		$menu_title   = sprintf( __( '%s Controls', 'ea-gaming-engine' ), $parent_label );
+
 		add_submenu_page(
 			'ea-gaming-engine',
 			$menu_title,
 			$menu_title,
 			'manage_options',
 			'ea-gaming-parent-controls',
-			[ $this, 'render_admin_page' ]
+			array( $this, 'render_admin_page' )
 		);
 	}
 
 	/**
-		* Render the Parent Controls settings page.
-		*
-		* @return void
-		*/
-	public function render_admin_page() : void {
+	 * Render the Parent Controls settings page.
+	 *
+	 * @return void
+	 */
+	public function render_admin_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
 		// Get dynamic labels
-		$parent_label = $this->get_parent_label();
+		$parent_label  = $this->get_parent_label();
 		$parent_plural = $this->get_parent_plural_label();
-		$child_label = $this->get_child_label();
-		$child_plural = $this->get_child_plural_label();
+		$child_label   = $this->get_child_label();
+		$child_plural  = $this->get_child_plural_label();
 
 		// Get current users with parent controls enabled
 		$controlled_users = $this->get_controlled_users();
-		
+
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
 			<div class="ea-gaming-admin-header">
@@ -447,7 +447,7 @@ class StudentParentAccess {
 						<strong><?php esc_html_e( 'EA Student-Parent Access:', 'ea-gaming-engine' ); ?></strong>
 						<?php if ( $this->spa_active ) : ?>
 							<span class="dashicons dashicons-yes-alt" style="color: #46b450;"></span>
-							<?php 
+							<?php
 							/* translators: %1$s: Parent label, %2$s: Child label */
 							printf(
 								esc_html__( 'Connected! Gaming controls are synchronized with %1$s settings for %2$s accounts.', 'ea-gaming-engine' ),
@@ -512,14 +512,16 @@ class StudentParentAccess {
 							</tbody>
 						</table>
 					<?php else : ?>
-						<p><?php 
+						<p>
+						<?php
 						/* translators: %1$s: Parent label, %2$s: Child label */
 						printf(
 							esc_html__( 'No %2$s accounts have %1$s controls configured yet.', 'ea-gaming-engine' ),
 							esc_html( strtolower( $parent_label ) ),
 							esc_html( strtolower( $child_label ) )
 						);
-						?></p>
+						?>
+						</p>
 					<?php endif; ?>
 				</div>
 
@@ -527,7 +529,7 @@ class StudentParentAccess {
 					<h2><?php esc_html_e( 'How It Works', 'ea-gaming-engine' ); ?></h2>
 					<ol style="line-height: 1.8;">
 						<li>
-							<?php 
+							<?php
 							/* translators: %s: Parent label plural */
 							printf(
 								esc_html__( '%s configure gaming restrictions in the Student-Parent Access settings', 'ea-gaming-engine' ),
@@ -538,7 +540,7 @@ class StudentParentAccess {
 						<li><?php esc_html_e( 'Gaming Engine automatically enforces these restrictions when games are launched', 'ea-gaming-engine' ); ?></li>
 						<li><?php esc_html_e( 'Time windows, ticket requirements, and access blocks are checked in real-time', 'ea-gaming-engine' ); ?></li>
 						<li>
-							<?php 
+							<?php
 							/* translators: %s: Child label plural */
 							printf(
 								esc_html__( '%s see appropriate messages when restrictions apply', 'ea-gaming-engine' ),
@@ -570,29 +572,29 @@ class StudentParentAccess {
 	}
 
 	/**
-		* Sanitize fallback settings.
-		*
-		* @param array $input Raw input.
-		* @return array
-		*/
-	public function sanitize_settings( $input ) : array {
-		$out                     = [];
-		$out['enabled']          = ! empty( $input['enabled'] ) ? true : false;
-		$out['block_games']      = ! empty( $input['block_games'] ) ? true : false;
-		$out['time_start']       = isset( $input['time_start'] ) ? preg_replace( '/[^0-9:]/', '', (string) $input['time_start'] ) : '';
-		$out['time_end']         = isset( $input['time_end'] ) ? preg_replace( '/[^0-9:]/', '', (string) $input['time_end'] ) : '';
-		$out['require_tickets']  = ! empty( $input['require_tickets'] ) ? true : false;
-		$out['default_tickets']  = isset( $input['default_tickets'] ) ? (int) $input['default_tickets'] : 0;
+	 * Sanitize fallback settings.
+	 *
+	 * @param array $input Raw input.
+	 * @return array
+	 */
+	public function sanitize_settings( $input ): array {
+		$out                    = array();
+		$out['enabled']         = ! empty( $input['enabled'] ) ? true : false;
+		$out['block_games']     = ! empty( $input['block_games'] ) ? true : false;
+		$out['time_start']      = isset( $input['time_start'] ) ? preg_replace( '/[^0-9:]/', '', (string) $input['time_start'] ) : '';
+		$out['time_end']        = isset( $input['time_end'] ) ? preg_replace( '/[^0-9:]/', '', (string) $input['time_end'] ) : '';
+		$out['require_tickets'] = ! empty( $input['require_tickets'] ) ? true : false;
+		$out['default_tickets'] = isset( $input['default_tickets'] ) ? (int) $input['default_tickets'] : 0;
 
 		return $out;
 	}
-	
+
 	/**
 	 * Get the "Parent" label from SPA plugin (could be Teacher, Guardian, etc).
 	 *
 	 * @return string
 	 */
-	private function get_parent_label() : string {
+	private function get_parent_label(): string {
 		// Try to use the SPA Custom Label class if available
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'parent' );
@@ -600,17 +602,17 @@ class StudentParentAccess {
 				return $label;
 			}
 		}
-		
+
 		// Fallback to default
 		return __( 'Parent', 'ea-gaming-engine' );
 	}
-	
+
 	/**
 	 * Get the "Child" label from SPA plugin (could be Student, Learner, etc).
 	 *
 	 * @return string
 	 */
-	private function get_child_label() : string {
+	private function get_child_label(): string {
 		// Try to use the SPA Custom Label class if available
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'child' );
@@ -618,17 +620,17 @@ class StudentParentAccess {
 				return $label;
 			}
 		}
-		
+
 		// Fallback to default
 		return __( 'Child', 'ea-gaming-engine' );
 	}
-	
+
 	/**
 	 * Get the "Parents" plural label from SPA plugin.
 	 *
 	 * @return string
 	 */
-	private function get_parent_plural_label() : string {
+	private function get_parent_plural_label(): string {
 		// Try to use the SPA Custom Label class if available
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'parents' );
@@ -636,17 +638,17 @@ class StudentParentAccess {
 				return $label;
 			}
 		}
-		
+
 		// Fallback to default
 		return __( 'Parents', 'ea-gaming-engine' );
 	}
-	
+
 	/**
 	 * Get the "Children" plural label from SPA plugin.
 	 *
 	 * @return string
 	 */
-	private function get_child_plural_label() : string {
+	private function get_child_plural_label(): string {
 		// Try to use the SPA Custom Label class if available
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'children' );
@@ -654,97 +656,97 @@ class StudentParentAccess {
 				return $label;
 			}
 		}
-		
+
 		// Fallback to default
 		return __( 'Children', 'ea-gaming-engine' );
 	}
-	
+
 	/**
 	 * Get list of users with parent controls.
 	 *
 	 * @return array
 	 */
-	private function get_controlled_users() : array {
-		$controlled_users = [];
-		
+	private function get_controlled_users(): array {
+		$controlled_users = array();
+
 		// Check if SPA has a function to get parent-child relationships
 		if ( function_exists( 'ea_spa_get_parent_child_relationships' ) ) {
 			$relationships = ea_spa_get_parent_child_relationships();
-			
+
 			foreach ( $relationships as $relationship ) {
-				$child_id = $relationship['child_id'] ?? 0;
+				$child_id  = $relationship['child_id'] ?? 0;
 				$parent_id = $relationship['parent_id'] ?? 0;
-				
+
 				if ( $child_id && $parent_id ) {
-					$child = get_userdata( $child_id );
+					$child  = get_userdata( $child_id );
 					$parent = get_userdata( $parent_id );
-					
+
 					if ( $child && $parent ) {
 						$controls = $this->get_spa_controls( $child_id );
-						$tickets = $this->get_user_tickets( $child_id );
-						
-						$controlled_users[] = [
-							'child_id' => $child_id,
-							'child_name' => $child->display_name,
-							'child_email' => $child->user_email,
-							'parent_id' => $parent_id,
-							'parent_name' => $parent->display_name,
-							'games_blocked' => $controls['games_blocked'] ?? false,
-							'time_restrictions' => $controls['time_restrictions'] ?? [],
-							'require_tickets' => $controls['require_tickets'] ?? false,
-							'tickets' => $tickets,
-						];
+						$tickets  = $this->get_user_tickets( $child_id );
+
+						$controlled_users[] = array(
+							'child_id'          => $child_id,
+							'child_name'        => $child->display_name,
+							'child_email'       => $child->user_email,
+							'parent_id'         => $parent_id,
+							'parent_name'       => $parent->display_name,
+							'games_blocked'     => $controls['games_blocked'] ?? false,
+							'time_restrictions' => $controls['time_restrictions'] ?? array(),
+							'require_tickets'   => $controls['require_tickets'] ?? false,
+							'tickets'           => $tickets,
+						);
 					}
 				}
 			}
 		} else {
 			// Fallback: Check for users with parent control meta
-			$args = [
-				'meta_query' => [
-					[
-						'key' => 'ea_spa_parent_controls',
+			$args = array(
+				'meta_query' => array(
+					array(
+						'key'     => 'ea_spa_parent_controls',
 						'compare' => 'EXISTS',
-					],
-				],
-				'number' => 50,
-			];
-			
+					),
+				),
+				'number'     => 50,
+			);
+
 			$users = get_users( $args );
-			
+
 			foreach ( $users as $user ) {
 				$controls = $this->get_spa_controls( $user->ID );
-				$tickets = $this->get_user_tickets( $user->ID );
-				
+				$tickets  = $this->get_user_tickets( $user->ID );
+
 				// Try to get parent info
-				$parent_id = get_user_meta( $user->ID, 'ea_spa_parent_id', true );
+				$parent_id   = get_user_meta( $user->ID, 'ea_spa_parent_id', true );
 				$parent_name = __( 'Unknown', 'ea-gaming-engine' );
-				
+
 				if ( $parent_id ) {
 					$parent = get_userdata( $parent_id );
 					if ( $parent ) {
 						$parent_name = $parent->display_name;
 					}
 				}
-				
+
 				if ( ! empty( $controls ) ) {
-					$controlled_users[] = [
-						'child_id' => $user->ID,
-						'child_name' => $user->display_name,
-						'child_email' => $user->user_email,
-						'parent_id' => $parent_id,
-						'parent_name' => $parent_name,
-						'games_blocked' => $controls['games_blocked'] ?? false,
-						'time_restrictions' => $controls['time_restrictions'] ?? [],
-						'require_tickets' => $controls['require_tickets'] ?? false,
-						'tickets' => $tickets,
-					];
+					$controlled_users[] = array(
+						'child_id'          => $user->ID,
+						'child_name'        => $user->display_name,
+						'child_email'       => $user->user_email,
+						'parent_id'         => $parent_id,
+						'parent_name'       => $parent_name,
+						'games_blocked'     => $controls['games_blocked'] ?? false,
+						'time_restrictions' => $controls['time_restrictions'] ?? array(),
+						'require_tickets'   => $controls['require_tickets'] ?? false,
+						'tickets'           => $tickets,
+					);
 				}
 			}
 		}
-		
+
 		return $controlled_users;
 	}
-	
+
 	/**
 	 * Check plugin activation and refresh SPA active status.
 	 *
@@ -752,7 +754,7 @@ class StudentParentAccess {
 	 * @param bool   $network_wide Network-wide activation.
 	 * @return void
 	 */
-	public function check_plugin_activation( $plugin, $network_wide ) : void {
+	public function check_plugin_activation( $plugin, $network_wide ): void {
 		// Check if it's the SPA plugin being activated
 		if ( strpos( $plugin, 'ea-student-parent-access' ) !== false ) {
 			$this->spa_active = true;
@@ -760,7 +762,7 @@ class StudentParentAccess {
 			wp_cache_delete( 'ea_gaming_admin_menu', 'ea_gaming_engine' );
 		}
 	}
-	
+
 	/**
 	 * Check plugin deactivation and refresh SPA active status.
 	 *
@@ -768,7 +770,7 @@ class StudentParentAccess {
 	 * @param bool   $network_wide Network-wide deactivation.
 	 * @return void
 	 */
-	public function check_plugin_deactivation( $plugin, $network_wide ) : void {
+	public function check_plugin_deactivation( $plugin, $network_wide ): void {
 		// Check if it's the SPA plugin being deactivated
 		if ( strpos( $plugin, 'ea-student-parent-access' ) !== false ) {
 			$this->spa_active = false;

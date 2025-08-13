@@ -46,7 +46,7 @@ class Activator {
 
 		// Game sessions table
 		$table_sessions = $wpdb->prefix . 'ea_game_sessions';
-		$sql_sessions = "CREATE TABLE IF NOT EXISTS $table_sessions (
+		$sql_sessions   = "CREATE TABLE IF NOT EXISTS $table_sessions (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) UNSIGNED NOT NULL,
 			course_id bigint(20) UNSIGNED NOT NULL,
@@ -71,7 +71,7 @@ class Activator {
 
 		// Policy rules table
 		$table_policies = $wpdb->prefix . 'ea_game_policies';
-		$sql_policies = "CREATE TABLE IF NOT EXISTS $table_policies (
+		$sql_policies   = "CREATE TABLE IF NOT EXISTS $table_policies (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name varchar(100) NOT NULL,
 			rule_type varchar(50) NOT NULL,
@@ -89,7 +89,7 @@ class Activator {
 
 		// Question attempts table
 		$table_attempts = $wpdb->prefix . 'ea_question_attempts';
-		$sql_attempts = "CREATE TABLE IF NOT EXISTS $table_attempts (
+		$sql_attempts   = "CREATE TABLE IF NOT EXISTS $table_attempts (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			session_id bigint(20) UNSIGNED NOT NULL,
 			question_id bigint(20) UNSIGNED NOT NULL,
@@ -107,7 +107,7 @@ class Activator {
 
 		// Player stats table
 		$table_stats = $wpdb->prefix . 'ea_player_stats';
-		$sql_stats = "CREATE TABLE IF NOT EXISTS $table_stats (
+		$sql_stats   = "CREATE TABLE IF NOT EXISTS $table_stats (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) UNSIGNED NOT NULL,
 			course_id bigint(20) UNSIGNED DEFAULT NULL,
@@ -130,7 +130,7 @@ class Activator {
 
 		// Hint usage table
 		$table_hints = $wpdb->prefix . 'ea_hint_usage';
-		$sql_hints = "CREATE TABLE IF NOT EXISTS $table_hints (
+		$sql_hints   = "CREATE TABLE IF NOT EXISTS $table_hints (
 			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			question_id bigint(20) UNSIGNED NOT NULL,
 			user_id bigint(20) UNSIGNED NOT NULL,
@@ -170,114 +170,114 @@ class Activator {
 		// Policy settings
 		add_option(
 			'ea_gaming_engine_policies',
-			[
-				'free_play_enabled' => false,
-				'free_play_start'   => '15:00',
-				'free_play_end'     => '17:00',
+			array(
+				'free_play_enabled'   => false,
+				'free_play_start'     => '15:00',
+				'free_play_end'       => '17:00',
 				'quiet_hours_enabled' => false,
-				'quiet_hours_start' => '22:00',
-				'quiet_hours_end'   => '07:00',
+				'quiet_hours_start'   => '22:00',
+				'quiet_hours_end'     => '07:00',
 				'study_first_enabled' => true,
 				'study_first_minutes' => 10,
-			]
+			)
 		);
 
 		// Game settings
 		add_option(
 			'ea_gaming_engine_games',
-			[
-				'whack_a_question' => [
-					'enabled' => true,
+			array(
+				'whack_a_question' => array(
+					'enabled'    => true,
 					'difficulty' => 'medium',
 					'time_limit' => 60,
-				],
-				'tic_tac_tactics' => [
-					'enabled' => true,
+				),
+				'tic_tac_tactics'  => array(
+					'enabled'    => true,
 					'difficulty' => 'medium',
-				],
-				'target_trainer' => [
-					'enabled' => true,
+				),
+				'target_trainer'   => array(
+					'enabled'    => true,
 					'difficulty' => 'medium',
-					'targets' => 10,
-				],
-			]
+					'targets'    => 10,
+				),
+			)
 		);
 
 		// Theme settings
 		add_option(
 			'ea_gaming_engine_themes',
-			[
-				'playful' => [
-					'name' => __( 'Playful', 'ea-gaming-engine' ),
-					'colors' => [
+			array(
+				'playful'     => array(
+					'name'   => __( 'Playful', 'ea-gaming-engine' ),
+					'colors' => array(
 						'primary'   => '#7C3AED',
 						'secondary' => '#EC4899',
 						'success'   => '#10B981',
 						'danger'    => '#EF4444',
 						'warning'   => '#F59E0B',
-					],
-				],
-				'minimal_pro' => [
-					'name' => __( 'Minimal Pro', 'ea-gaming-engine' ),
-					'colors' => [
+					),
+				),
+				'minimal_pro' => array(
+					'name'   => __( 'Minimal Pro', 'ea-gaming-engine' ),
+					'colors' => array(
 						'primary'   => '#1F2937',
 						'secondary' => '#6B7280',
 						'success'   => '#059669',
 						'danger'    => '#DC2626',
 						'warning'   => '#D97706',
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 
 		// Profile presets
 		add_option(
 			'ea_gaming_engine_presets',
-			[
-				'chill' => [
-					'name' => __( 'Chill', 'ea-gaming-engine' ),
-					'speed' => 0.8,
+			array(
+				'chill'      => array(
+					'name'          => __( 'Chill', 'ea-gaming-engine' ),
+					'speed'         => 0.8,
 					'ai_difficulty' => 'easy',
-					'effects' => true,
-					'hints' => true,
-				],
-				'classic' => [
-					'name' => __( 'Classic', 'ea-gaming-engine' ),
-					'speed' => 1.0,
+					'effects'       => true,
+					'hints'         => true,
+				),
+				'classic'    => array(
+					'name'          => __( 'Classic', 'ea-gaming-engine' ),
+					'speed'         => 1.0,
 					'ai_difficulty' => 'medium',
-					'effects' => true,
-					'hints' => false,
-				],
-				'pro' => [
-					'name' => __( 'Pro', 'ea-gaming-engine' ),
-					'speed' => 1.5,
+					'effects'       => true,
+					'hints'         => false,
+				),
+				'pro'        => array(
+					'name'          => __( 'Pro', 'ea-gaming-engine' ),
+					'speed'         => 1.5,
 					'ai_difficulty' => 'hard',
-					'effects' => false,
-					'hints' => false,
-				],
-				'accessible' => [
-					'name' => __( 'Accessible', 'ea-gaming-engine' ),
-					'speed' => 0.6,
+					'effects'       => false,
+					'hints'         => false,
+				),
+				'accessible' => array(
+					'name'          => __( 'Accessible', 'ea-gaming-engine' ),
+					'speed'         => 0.6,
 					'ai_difficulty' => 'easy',
-					'effects' => false,
-					'hints' => true,
+					'effects'       => false,
+					'hints'         => true,
 					'high_contrast' => true,
-					'large_text' => true,
-				],
-			]
+					'large_text'    => true,
+				),
+			)
 		);
 
 		// Hint system settings
 		add_option(
 			'ea_gaming_engine_hint_settings',
-			[
-				'enabled' => true,
-				'cooldown' => 30,
-				'max_hints' => 3,
-				'ai_integration' => false,
-				'context_analysis' => true,
+			array(
+				'enabled'            => true,
+				'cooldown'           => 30,
+				'max_hints'          => 3,
+				'ai_integration'     => false,
+				'context_analysis'   => true,
 				'lesson_integration' => true,
-			]
+			)
 		);
 	}
 
