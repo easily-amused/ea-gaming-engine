@@ -44,7 +44,6 @@ class QuestionGate {
 	private function init_hooks() {
 		add_action( 'wp_ajax_ea_gaming_get_question', [ $this, 'ajax_get_question' ] );
 		add_action( 'wp_ajax_ea_gaming_validate_answer', [ $this, 'ajax_validate_answer' ] );
-		add_action( 'wp_ajax_ea_gaming_get_hint', [ $this, 'ajax_get_hint' ] );
 	}
 
 	/**
@@ -106,6 +105,9 @@ class QuestionGate {
 
 		// Remove correctness details before sending to client
 		unset( $formatted['correct_answer'], $formatted['correct_answers'] );
+
+		// Add hint capability information
+		$formatted = apply_filters( 'ea_gaming_question_data', $formatted, $chosen_id );
 
 		return $formatted;
 	}
@@ -216,61 +218,6 @@ class QuestionGate {
 		return null;
 	}
 
-	/**
-	 * Format question for frontend
-	 *
-	 * @param array $question Raw question data.
-	 * @return array
-	 */
-	private function format_question( $question ) {
-		$question_post = get_post( $question['question_id'] );
-		
-		if ( ! $question_post ) {
-			return [];
-		}
-
-		// Get question meta
-		$question_pro_id = get_post_meta( $question['question_id'], 'question_pro_id', true );
-		
-		// Get the actual question data from LearnDash
-		$question_mapper = new \WpProQuiz_Model_QuestionMapper();
-		$question_model  = $question_mapper->fetch( $question_pro_id );
-
-		if ( ! $question_model ) {
-			return [];
-		}
-
-		$formatted = [
-			'id'       => $question['question_id'],
-			'quiz_id'  => $question['quiz_id'] ?? 0,
-			'title'    => $question_model->getTitle(),
-			'question' => $question_model->getQuestion(),
-			'type'     => $this->get_question_type( $question_model ),
-			'points'   => $question_model->getPoints(),
-			'answers'  => [],
-		];
-
-		// Format answers based on question type
-		$answer_data = $question_model->getAnswerData();
-		
-		foreach ( $answer_data as $index => $answer ) {
-			$formatted['answers'][] = [
-				'id'     => $index,
-				'text'   => $answer->getAnswer(),
-				'html'   => $answer->isHtml(),
-			];
-		}
-
-		// Shuffle answers if needed
-		if ( $question_model->isAnswerPointsActivated() ) {
-			shuffle( $formatted['answers'] );
-		}
-
-		// Store correct answer(s) for validation (will be removed before sending)
-		$formatted['correct_answer'] = $this->get_correct_answers( $question_model );
-
-		return $formatted;
-	}
 
 	/**
 	 * Get question type
@@ -450,94 +397,6 @@ class QuestionGate {
 		$wpdb->insert( $table, $data );
 	}
 
-	/**
-	 * Generate AI hint for question
-	 *
-	 * @param int $question_id Question ID.
-	 * @param int $lesson_id Associated lesson ID.
-	 * @return string
-	 */
-	public function generate_hint( $question_id, $lesson_id = null ) {
-		$question = $this->get_cached_question( $question_id );
-		
-		if ( ! $question ) {
-			return __( 'No hints available', 'ea-gaming-engine' );
-		}
-
-		// Get lesson content if available
-		$lesson_content = '';
-		if ( $lesson_id ) {
-			$lesson = get_post( $lesson_id );
-			if ( $lesson ) {
-				$lesson_content = wp_strip_all_tags( $lesson->post_content );
-			}
-		}
-
-		// Generate contextual hint
-		$hint = $this->generate_contextual_hint( $question, $lesson_content );
-
-		return apply_filters( 'ea_gaming_question_hint', $hint, $question_id, $lesson_id );
-	}
-
-	/**
-	 * Generate contextual hint based on question and lesson
-	 *
-	 * @param array  $question Question data.
-	 * @param string $lesson_content Lesson content.
-	 * @return string
-	 */
-	private function generate_contextual_hint( $question, $lesson_content ) {
-		// This is a simplified version - in production, you might use AI
-		$hints = [
-			__( 'Think about what you learned in the lesson.', 'ea-gaming-engine' ),
-			__( 'Consider all the options carefully.', 'ea-gaming-engine' ),
-			__( 'The answer is in the material you studied.', 'ea-gaming-engine' ),
-			__( 'Review the key concepts from the lesson.', 'ea-gaming-engine' ),
-		];
-
-		// If we have lesson content, try to find relevant hint
-		if ( $lesson_content ) {
-			// Extract keywords from question
-			$keywords = $this->extract_keywords( $question['question'] );
-			
-			// Search for keywords in lesson content
-			foreach ( $keywords as $keyword ) {
-				if ( stripos( $lesson_content, $keyword ) !== false ) {
-					return sprintf(
-						__( 'Remember what you learned about "%s" in the lesson.', 'ea-gaming-engine' ),
-						$keyword
-					);
-				}
-			}
-		}
-
-		// Return random generic hint
-		return $hints[ array_rand( $hints ) ];
-	}
-
-	/**
-	 * Extract keywords from text
-	 *
-	 * @param string $text Text to extract from.
-	 * @return array
-	 */
-	private function extract_keywords( $text ) {
-		// Remove common words and extract meaningful keywords
-		$stop_words = [ 'the', 'is', 'at', 'which', 'on', 'a', 'an', 'as', 'are', 'was', 'were', 'been', 'be', 'have', 'has', 'had', 'what', 'when', 'where', 'who', 'why', 'how' ];
-		
-		$words = str_word_count( strtolower( $text ), 1 );
-		$keywords = array_diff( $words, $stop_words );
-		
-		// Return top 3 longest words (usually more meaningful)
-		usort(
-			$keywords,
-			function ( $a, $b ) {
-				return strlen( $b ) - strlen( $a );
-			}
-		);
-		
-		return array_slice( $keywords, 0, 3 );
-	}
 
 	/**
 	 * AJAX handler for getting question
@@ -596,27 +455,4 @@ class QuestionGate {
 		}
 	}
 
-	/**
-	 * AJAX handler for getting hint
-	 *
-	 * @return void
-	 */
-	public function ajax_get_hint() {
-		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
-
-		$question_id = intval( $_POST['question_id'] ?? 0 );
-		$lesson_id   = intval( $_POST['lesson_id'] ?? 0 );
-
-		if ( ! $question_id ) {
-			wp_send_json_error( __( 'Invalid question ID', 'ea-gaming-engine' ) );
-		}
-
-		$hint = $this->generate_hint( $question_id, $lesson_id );
-
-		wp_send_json_success(
-			[
-				'hint' => $hint,
-			]
-		);
-	}
 }

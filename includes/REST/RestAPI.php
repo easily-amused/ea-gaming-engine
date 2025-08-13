@@ -11,6 +11,7 @@ use EAGamingEngine\Core\GameEngine;
 use EAGamingEngine\Core\QuestionGate;
 use EAGamingEngine\Core\PolicyEngine;
 use EAGamingEngine\Core\ThemeManager;
+use EAGamingEngine\Core\HintSystem;
 use EAGamingEngine\Integrations\LearnDash;
 
 /**
@@ -117,6 +118,22 @@ class RestAPI {
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'get_hint' ],
 				'permission_callback' => [ $this, 'check_logged_in' ],
+				'args'                => [
+					'question_id' => [
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param );
+						},
+					],
+					'course_id' => [
+						'required' => false,
+						'type'     => 'integer',
+					],
+					'session_id' => [
+						'required' => false,
+						'type'     => 'integer',
+					],
+				],
 			]
 		);
 
@@ -609,16 +626,22 @@ class RestAPI {
 	 */
 	public function get_hint( $request ) {
 		$question_id = $request->get_param( 'question_id' );
-		$lesson_id = $request->get_param( 'lesson_id' );
+		$course_id = $request->get_param( 'course_id' );
+		$session_id = $request->get_param( 'session_id' );
+		$user_id = get_current_user_id();
 
-		$question_gate = new QuestionGate();
-		$hint = $question_gate->generate_hint( $question_id, $lesson_id );
+		$hint_system = new HintSystem();
+		$result = $hint_system->get_hint( $question_id, $user_id, $course_id, $session_id );
 
-		return rest_ensure_response(
-			[
-				'hint' => $hint,
-			]
-		);
+		if ( ! $result['success'] ) {
+			return new \WP_Error(
+				'hint_error',
+				$result['message'],
+				[ 'status' => 400 ]
+			);
+		}
+
+		return rest_ensure_response( $result );
 	}
 
 	/**

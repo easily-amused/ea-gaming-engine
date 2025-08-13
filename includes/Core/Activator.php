@@ -128,14 +128,32 @@ class Activator {
 			KEY course_id (course_id)
 		) $charset_collate;";
 
+		// Hint usage table
+		$table_hints = $wpdb->prefix . 'ea_hint_usage';
+		$sql_hints = "CREATE TABLE IF NOT EXISTS $table_hints (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			question_id bigint(20) UNSIGNED NOT NULL,
+			user_id bigint(20) UNSIGNED NOT NULL,
+			session_id bigint(20) UNSIGNED DEFAULT NULL,
+			hint_level tinyint(1) NOT NULL DEFAULT 1,
+			hint_text longtext NOT NULL,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY question_id (question_id),
+			KEY user_id (user_id),
+			KEY session_id (session_id),
+			KEY created_at (created_at)
+		) $charset_collate;";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql_sessions );
 		dbDelta( $sql_policies );
 		dbDelta( $sql_attempts );
 		dbDelta( $sql_stats );
+		dbDelta( $sql_hints );
 
 		// Store database version
-		update_option( 'ea_gaming_engine_db_version', '1.0.0' );
+		update_option( 'ea_gaming_engine_db_version', '1.1.0' );
 	}
 
 	/**
@@ -237,6 +255,28 @@ class Activator {
 					'effects' => false,
 					'hints' => false,
 				],
+				'accessible' => [
+					'name' => __( 'Accessible', 'ea-gaming-engine' ),
+					'speed' => 0.6,
+					'ai_difficulty' => 'easy',
+					'effects' => false,
+					'hints' => true,
+					'high_contrast' => true,
+					'large_text' => true,
+				],
+			]
+		);
+
+		// Hint system settings
+		add_option(
+			'ea_gaming_engine_hint_settings',
+			[
+				'enabled' => true,
+				'cooldown' => 30,
+				'max_hints' => 3,
+				'ai_integration' => false,
+				'context_analysis' => true,
+				'lesson_integration' => true,
 			]
 		);
 	}

@@ -208,6 +208,9 @@ class Admin {
 		// Theme settings
 		register_setting( 'ea_gaming_themes', 'ea_gaming_engine_themes' );
 
+		// Hint system settings
+		register_setting( 'ea_gaming_hints', 'ea_gaming_engine_hint_settings' );
+
 		// Advanced settings
 		register_setting( 'ea_gaming_advanced', 'ea_gaming_engine_cache_enabled' );
 		register_setting( 'ea_gaming_advanced', 'ea_gaming_engine_debug_mode' );
@@ -386,6 +389,7 @@ class Admin {
 			'policies' => get_option( 'ea_gaming_engine_policies', $this->get_default_policies() ),
 			'games'    => get_option( 'ea_gaming_engine_games', $this->get_default_games() ),
 			'themes'   => get_option( 'ea_gaming_engine_themes', [] ),
+			'hints'    => get_option( 'ea_gaming_engine_hint_settings', $this->get_default_hint_settings() ),
 			'advanced' => [
 				'cache_enabled'  => get_option( 'ea_gaming_engine_cache_enabled', true ),
 				'debug_mode'     => get_option( 'ea_gaming_engine_debug_mode', false ),
@@ -436,6 +440,22 @@ class Admin {
 				'difficulty' => 'medium',
 				'targets'    => 10,
 			],
+		];
+	}
+
+	/**
+	 * Get default hint settings
+	 *
+	 * @return array
+	 */
+	private function get_default_hint_settings() {
+		return [
+			'enabled' => true,
+			'cooldown' => 30,
+			'max_hints' => 3,
+			'ai_integration' => false,
+			'context_analysis' => true,
+			'lesson_integration' => true,
 		];
 	}
 
@@ -524,6 +544,7 @@ class Admin {
 		update_option( 'ea_gaming_engine_policies', $this->get_default_policies() );
 		update_option( 'ea_gaming_engine_games', $this->get_default_games() );
 		update_option( 'ea_gaming_engine_themes', [] );
+		update_option( 'ea_gaming_engine_hint_settings', $this->get_default_hint_settings() );
 		update_option( 'ea_gaming_engine_cache_enabled', true );
 		update_option( 'ea_gaming_engine_debug_mode', false );
 		update_option( 'ea_gaming_engine_api_rate_limit', 100 );

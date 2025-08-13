@@ -12,6 +12,7 @@ use EAGamingEngine\Frontend\Frontend;
 use EAGamingEngine\Core\GameEngine;
 use EAGamingEngine\Core\PolicyEngine;
 use EAGamingEngine\Core\ThemeManager;
+use EAGamingEngine\Core\HintSystem;
 use EAGamingEngine\Integrations\LearnDash;
 use EAGamingEngine\REST\RestAPI;
 use EAGamingEngine\Blocks\Blocks;
@@ -76,6 +77,7 @@ class Plugin {
 		$this->components['game_engine']    = new GameEngine();
 		$this->components['policy_engine']  = new PolicyEngine();
 		$this->components['theme_manager']  = new ThemeManager();
+		$this->components['hint_system']    = new HintSystem();
 		
 		// Integrations
 		if ( class_exists( 'SFWD_LMS' ) ) {
