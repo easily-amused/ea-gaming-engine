@@ -1,5 +1,6 @@
 import { EAGameBase, GameConfig } from './index';
 import { WhackAQuestion } from './games/WhackAQuestion';
+import { TicTacTactics } from './games/TicTacTactics';
 
 /**
  * Game Factory - Creates game instances based on game type
@@ -13,8 +14,7 @@ export class GameFactory {
 			case 'whack_a_question':
 				return new WhackAQuestion('whack-a-question', config);
 			case 'tic_tac_tactics':
-				// TODO: Implement TicTacTactics
-				throw new Error('TicTacTactics not implemented yet');
+				return new TicTacTactics('tic-tac-tactics', config);
 			case 'target_trainer':
 				// TODO: Implement TargetTrainer
 				throw new Error('TargetTrainer not implemented yet');
