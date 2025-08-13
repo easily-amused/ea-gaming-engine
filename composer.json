@@ -1,0 +1,45 @@
+{
+    "name": "honorswp/ea-gaming-engine",
+    "description": "Transform LearnDash courses into interactive educational games",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0+",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "HonorsWP",
+            "email": "support@honorswp.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "easily-amused/php-packages": "dev-main"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpcompatibility/php-compatibility": "dev-develop as 9.99.99",
+        "wp-coding-standards/wpcs": "^3.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/easily-amused/php-packages.git"
+        }
+    ],
+    "scripts": {
+        "phpcs": "phpcs",
+        "phpcbf": "phpcbf",
+        "php-check": "phpcs . --standard=PHPCompatibilityWP --severity=1 --runtime-set testVersion 7.4- --extensions=php --ignore=vendor,node_modules,assets/games/dist"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "EAGamingEngine\\": "includes/"
+        }
+    }
+}

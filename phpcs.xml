@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="EA Gaming Engine" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
+	<description>EA Gaming Engine Coding Standards</description>
+
+	<!-- Exclude paths -->
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/assets/games/dist/*</exclude-pattern>
+	<exclude-pattern>*/build/*</exclude-pattern>
+	<exclude-pattern>*.min.js</exclude-pattern>
+	<exclude-pattern>*.min.css</exclude-pattern>
+
+	<!-- Check all PHP files in directory tree by default -->
+	<arg name="extensions" value="php"/>
+	<file>.</file>
+
+	<!-- Show progress and sniff codes -->
+	<arg value="ps"/>
+
+	<!-- Parallel processing -->
+	<arg name="parallel" value="8"/>
+
+	<!-- Use WordPress coding standards -->
+	<rule ref="WordPress">
+		<!-- Allow short array syntax -->
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+		
+		<!-- Allow lack of translator comments in some cases -->
+		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment"/>
+		
+		<!-- We use nonces extensively -->
+		<exclude name="WordPress.Security.NonceVerification.Recommended"/>
+	</rule>
+
+	<!-- PHP Compatibility -->
+	<rule ref="PHPCompatibilityWP"/>
+	<config name="minimum_supported_wp_version" value="5.9"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<!-- Use PSR-4 autoloading -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/includes/*</exclude-pattern>
+	</rule>
+
+	<!-- Allow use of namespaces -->
+	<rule ref="PSR1.Classes.ClassDeclaration"/>
+	
+	<!-- Text domain -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="ea-gaming-engine"/>
+		</properties>
+	</rule>
+
+	<!-- Prefixes -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="ea_gaming_engine"/>
+				<element value="EA_GAMING_ENGINE"/>
+				<element value="EAGamingEngine"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>
