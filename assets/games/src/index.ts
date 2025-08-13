@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
+import { GameFactory } from './GameFactory';
 
 export interface GameConfig {
 	courseId: number;
 	sessionId: number;
 	theme: string;
 	preset: string;
+	gameType?: string;
 }
 
 export class EAGameBase extends Phaser.Scene {
@@ -32,22 +34,44 @@ export class EAGameBase extends Phaser.Scene {
 }
 
 /**
-	* Launches a Phaser game instance
-	*/
-export function launchGame(config: GameConfig, sceneClass: typeof EAGameBase) {
+ * Launches a Phaser game instance
+ */
+export function launchGame(config: GameConfig, gameType?: string): Phaser.Game {
+	let sceneClass: EAGameBase;
+	
+	if (gameType) {
+		try {
+			sceneClass = GameFactory.createGame(gameType, config);
+		} catch (error) {
+			console.error('Failed to create game:', error);
+			sceneClass = new EAGameBase('default', config);
+		}
+	} else {
+		sceneClass = new EAGameBase('default', config);
+	}
+
 	const game = new Phaser.Game({
 		type: Phaser.AUTO,
 		width: 800,
 		height: 600,
-		scene: [new sceneClass('default', config)],
-		parent: 'ea-gaming-container'
+		scene: [sceneClass],
+		parent: 'ea-gaming-container',
+		physics: {
+			default: 'arcade',
+			arcade: {
+				gravity: { y: 0 },
+				debug: false
+			}
+		}
 	});
+	
 	return game;
 }
 
 // Expose launcher for frontend/index.js
 (window as any).EAGameEngine = {
-	launch: (config: GameConfig) => {
-		launchGame(config, EAGameBase);
-	}
+	launch: (config: GameConfig, gameType?: string) => {
+		return launchGame(config, gameType);
+	},
+	GameFactory: GameFactory
 };

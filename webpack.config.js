@@ -1,7 +1,5 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
@@ -122,20 +120,6 @@ module.exports = (env, argv) => {
     
     optimization: {
       minimize: isProduction,
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-          terserOptions: {
-            compress: {
-              drop_console: isProduction,
-            },
-            format: {
-              comments: false,
-            },
-          },
-        }),
-        new CssMinimizerPlugin(),
-      ],
       splitChunks: {
         chunks: 'all',
         cacheGroups: {
