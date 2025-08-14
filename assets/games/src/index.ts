@@ -28,8 +28,9 @@ export class EAGameBase extends Phaser.Scene {
 		this.game.events.emit('game-started', this.configData);
 	}
 
-	update(time: number, delta: number) {
+	update() {
 		// Override for specific game update logic
+		// time and delta parameters removed as they're not used
 	}
 }
 

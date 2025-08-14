@@ -155,7 +155,8 @@ domReady(() => {
 	// 5) Lesson mini-game (.ea-gaming-mini-game-btn)
 	$$('.ea-gaming-mini-game-btn').forEach((btn) => {
 		btn.addEventListener('click', () => {
-			const lessonId = btn.getAttribute('data-lesson-id') || '0';
+			// Lesson ID available for future use if needed
+			// const lessonId = btn.getAttribute('data-lesson-id') || '0';
 			let courseId = '0';
 			const courseEl = document.querySelector('[data-course-id]');
 			if (courseEl) {
@@ -185,6 +186,8 @@ domReady(() => {
 	});
 });
 
+// Unused function - kept for potential future use
+/*
 async function startGame(courseId, theme, preset) {
 	try {
 		// Create session via EA Gaming Engine REST API
@@ -212,3 +215,4 @@ async function startGame(courseId, theme, preset) {
 		alert('Could not start game. Please try again.');
 	}
 }
+*/

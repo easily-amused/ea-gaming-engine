@@ -11,7 +11,7 @@ registerBlockType('ea-gaming-engine/arcade', {
 		theme: { type: 'string', default: 'playful' },
 		preset: { type: 'string', default: 'classic' }
 	},
-	edit: ({ attributes, setAttributes }) => {
+	edit: function Edit({ attributes, setAttributes }) {
 		const { courseId, theme, preset } = attributes;
 		return (
 			<div {...useBlockProps()}>

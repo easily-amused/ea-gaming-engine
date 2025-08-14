@@ -687,9 +687,10 @@ export class TargetTrainer extends EAGameBase {
 	/**
 	 * Update bullets (placeholder for future bullet physics)
 	 */
-	private updateBullets(delta: number): void {
+	private updateBullets(): void {
 		// Currently using tween animations instead of physics
 		// This method is for future enhancement if needed
+		// delta parameter removed as it's not used
 	}
 
 	/**
@@ -849,7 +850,7 @@ export class TargetTrainer extends EAGameBase {
 	 * Show message when no questions are available
 	 */
 	private showNoQuestionsAvailable(): void {
-		const message = this.add.text(400, 300, 'No more questions available!\nGame ending...', {
+		this.add.text(400, 300, 'No more questions available!\nGame ending...', {
 			fontSize: '24px',
 			color: '#EF4444',
 			align: 'center'
@@ -916,7 +917,7 @@ export class TargetTrainer extends EAGameBase {
 	 */
 	private showGameOverScreen(accuracy: number): void {
 		// Semi-transparent overlay
-		const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
+		this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
 
 		// Game over text
 		this.gameOverText = this.add.text(400, 150, 'Mission Complete!', {
@@ -926,7 +927,7 @@ export class TargetTrainer extends EAGameBase {
 		}).setOrigin(0.5);
 
 		// Stats
-		const statsText = this.add.text(400, 280, 
+		this.add.text(400, 280, 
 			`Final Score: ${this.score}\n` +
 			`Questions Correct: ${this.questionsCorrect}/${this.questionsTotal}\n` +
 			`Shooting Accuracy: ${accuracy}%\n` +
@@ -953,7 +954,7 @@ export class TargetTrainer extends EAGameBase {
 			ratingColor = '#3B82F6';
 		}
 
-		const ratingText = this.add.text(400, 220, rating, {
+		this.add.text(400, 220, rating, {
 			fontSize: '24px',
 			color: ratingColor,
 			align: 'center'

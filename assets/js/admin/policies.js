@@ -199,7 +199,7 @@
             try {
                 JSON.parse(formData.conditions);
                 JSON.parse(formData.actions);
-            } catch (error) {
+            } catch {
                 this.showNotice('Invalid JSON in conditions or actions', 'error');
                 return;
             }

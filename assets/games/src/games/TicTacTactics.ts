@@ -886,7 +886,7 @@ export class TicTacTactics extends EAGameBase {
 	 */
 	private showGameOverScreen(message: string, color: string): void {
 		// Semi-transparent overlay
-		const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
+		this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
 
 		// Game over text
 		this.gameOverText = this.add.text(400, 250, message, {
@@ -897,7 +897,7 @@ export class TicTacTactics extends EAGameBase {
 
 		// Stats
 		const accuracy = this.questionsTotal > 0 ? Math.round((this.questionsCorrect / this.questionsTotal) * 100) : 0;
-		const statsText = this.add.text(400, 320, 
+		this.add.text(400, 320, 
 			`Final Score: ${this.score}\n` +
 			`Games Won: ${this.gamesWon}/${this.gamesPlayed}\n` +
 			`Question Accuracy: ${accuracy}%`, {

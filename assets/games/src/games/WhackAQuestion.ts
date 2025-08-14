@@ -205,7 +205,7 @@ export class WhackAQuestion extends EAGameBase {
 		});
 
 		// Questions progress
-		const progressText = this.add.text(20, 80, `Questions: ${this.questionsCorrect}/${this.questionsTotal}`, {
+		this.add.text(20, 80, `Questions: ${this.questionsCorrect}/${this.questionsTotal}`, {
 			fontSize: '18px',
 			color: colors['text-secondary']
 		});
@@ -545,7 +545,7 @@ export class WhackAQuestion extends EAGameBase {
 	 * Show message when no questions are available
 	 */
 	private showNoQuestionsAvailable(): void {
-		const message = this.add.text(400, 300, 'No more questions available!\nGame ending...', {
+		this.add.text(400, 300, 'No more questions available!\nGame ending...', {
 			fontSize: '24px',
 			color: '#EF4444',
 			align: 'center'
@@ -605,7 +605,7 @@ export class WhackAQuestion extends EAGameBase {
 	 */
 	private showGameOverScreen(accuracy: number): void {
 		// Semi-transparent overlay
-		const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
+		this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7);
 
 		// Game over text
 		this.gameOverText = this.add.text(400, 200, 'Game Over!', {
@@ -615,7 +615,7 @@ export class WhackAQuestion extends EAGameBase {
 		}).setOrigin(0.5);
 
 		// Stats
-		const statsText = this.add.text(400, 280, 
+		this.add.text(400, 280, 
 			`Final Score: ${this.score}\n` +
 			`Questions Correct: ${this.questionsCorrect}/${this.questionsTotal}\n` +
 			`Accuracy: ${accuracy}%`, {
