@@ -268,7 +268,7 @@ class ThemeManager {
 					'speed_multiplier' => 0.8,
 					'ai_difficulty'    => 'easy',
 					'hints_enabled'    => true,
-					'hint_cooldown'    => 10, // seconds
+					'hint_cooldown'    => 10, // Seconds.
 					'effects_enabled'  => true,
 					'timer_enabled'    => false,
 					'lives'            => 5,

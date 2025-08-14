@@ -92,7 +92,7 @@ class LearnDash {
 				$level = array(
 					'id'        => $topic->ID,
 					'title'     => $topic->post_title,
-					'gates'     => array(), // Topic quizzes
+					'gates'     => array(), // Topic quizzes.
 					'completed' => $this->is_step_complete( get_current_user_id(), $course_id, $topic->ID ),
 				);
 
@@ -290,7 +290,7 @@ class LearnDash {
 		} elseif ( is_numeric( $pp2 ) ) {
 			$passing_percentage = (float) $pp2;
 		} else {
-			$passing_percentage = 80; // sane default
+			$passing_percentage = 80; // Sane default.
 		}
 
 		$correct          = (int) ( $stats['questions_correct'] ?? 0 );

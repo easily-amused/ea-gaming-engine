@@ -155,7 +155,7 @@ class PolicyEngine {
 				'conditions' => wp_json_encode(
 					array(
 						'require_lesson_view' => true,
-						'minimum_time'        => 600, // 10 minutes
+						'minimum_time'        => 600, // 10 minutes.
 					)
 				),
 				'actions'    => wp_json_encode(
