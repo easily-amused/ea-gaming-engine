@@ -38,8 +38,7 @@ wp-config.php
 composer.lock
 
 # Package manager
-package-lock.json
-yarn.lock
+# package-lock.json and yarn.lock should be committed for CI/CD
 
 # Testing
 /coverage/
