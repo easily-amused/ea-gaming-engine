@@ -35,14 +35,14 @@ class Admin {
 		add_filter( 'plugin_action_links_' . EA_GAMING_ENGINE_BASENAME, array( $this, 'add_action_links' ) );
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 
-		// AJAX handlers
+		// AJAX handlers.
 		add_action( 'wp_ajax_ea_gaming_save_settings', array( $this, 'ajax_save_settings' ) );
 		add_action( 'wp_ajax_ea_gaming_get_settings', array( $this, 'ajax_get_settings' ) );
 		add_action( 'wp_ajax_ea_gaming_reset_settings', array( $this, 'ajax_reset_settings' ) );
 		add_action( 'wp_ajax_ea_gaming_get_analytics', array( $this, 'ajax_get_analytics' ) );
 		add_action( 'wp_ajax_ea_gaming_export_data', array( $this, 'ajax_export_data' ) );
 
-		// Policy AJAX handlers
+		// Policy AJAX handlers.
 		add_action( 'wp_ajax_ea_gaming_get_policy', array( $this, 'ajax_get_policy' ) );
 		add_action( 'wp_ajax_ea_gaming_save_policy', array( $this, 'ajax_save_policy' ) );
 		add_action( 'wp_ajax_ea_gaming_toggle_policy', array( $this, 'ajax_toggle_policy' ) );
@@ -55,7 +55,7 @@ class Admin {
 	 * @return void
 	 */
 	public function add_admin_menu() {
-		// Main menu
+		// Main menu.
 		add_menu_page(
 			__( 'EA Gaming Engine', 'ea-gaming-engine' ),
 			__( 'Gaming Engine', 'ea-gaming-engine' ),
@@ -66,7 +66,7 @@ class Admin {
 			30
 		);
 
-		// Dashboard submenu
+		// Dashboard submenu.
 		add_submenu_page(
 			'ea-gaming-engine',
 			__( 'Dashboard', 'ea-gaming-engine' ),
@@ -76,7 +76,7 @@ class Admin {
 			array( $this, 'render_dashboard_page' )
 		);
 
-		// Settings submenu
+		// Settings submenu.
 		add_submenu_page(
 			'ea-gaming-engine',
 			__( 'Settings', 'ea-gaming-engine' ),
@@ -86,7 +86,7 @@ class Admin {
 			array( $this, 'render_settings_page' )
 		);
 
-		// Policies submenu
+		// Policies submenu.
 		add_submenu_page(
 			'ea-gaming-engine',
 			__( 'Policies', 'ea-gaming-engine' ),
@@ -96,7 +96,7 @@ class Admin {
 			array( $this, 'render_policies_page' )
 		);
 
-		// Analytics submenu
+		// Analytics submenu.
 		add_submenu_page(
 			'ea-gaming-engine',
 			__( 'Analytics', 'ea-gaming-engine' ),
@@ -106,7 +106,7 @@ class Admin {
 			array( $this, 'render_analytics_page' )
 		);
 
-		// Games submenu
+		// Games submenu.
 		add_submenu_page(
 			'ea-gaming-engine',
 			__( 'Games', 'ea-gaming-engine' ),
@@ -116,8 +116,8 @@ class Admin {
 			array( $this, 'render_games_page' )
 		);
 
-		// Parent Controls submenu (only if Student-Parent Access plugin is active)
-		// This hook allows the StudentParentAccess integration to add its menu item
+		// Parent Controls submenu (only if Student-Parent Access plugin is active).
+		// This hook allows the StudentParentAccess integration to add its menu item.
 		do_action( 'ea_gaming_engine_add_admin_menus' );
 	}
 
@@ -128,12 +128,12 @@ class Admin {
 	 * @return void
 	 */
 	public function enqueue_admin_assets( $hook ) {
-		// Only load on our admin pages
+		// Only load on our admin pages.
 		if ( strpos( $hook, 'ea-gaming' ) === false && $hook !== 'toplevel_page_ea-gaming-engine' ) {
 			return;
 		}
 
-		// Enqueue WordPress dependencies
+		// Enqueue WordPress dependencies.
 		wp_enqueue_script( 'wp-api' );
 		wp_enqueue_script( 'wp-i18n' );
 		wp_enqueue_script( 'wp-components' );
@@ -142,11 +142,11 @@ class Admin {
 		wp_enqueue_script( 'wp-data' );
 		wp_enqueue_script( 'wp-notices' );
 
-		// Enqueue WordPress styles
+		// Enqueue WordPress styles.
 		wp_enqueue_style( 'wp-components' );
 		wp_enqueue_style( 'wp-notices' );
 
-		// Enqueue Chart.js for analytics
+		// Enqueue Chart.js for analytics.
 		wp_enqueue_script(
 			'chartjs',
 			'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
@@ -155,7 +155,7 @@ class Admin {
 			true
 		);
 
-		// Enqueue our admin script
+		// Enqueue our admin script.
 		wp_enqueue_script(
 			'ea-gaming-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
@@ -164,7 +164,7 @@ class Admin {
 			true
 		);
 
-		// Enqueue admin styles
+		// Enqueue admin styles.
 		wp_enqueue_style(
 			'ea-gaming-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
@@ -172,7 +172,7 @@ class Admin {
 			EA_GAMING_ENGINE_VERSION
 		);
 
-		// Localize script
+		// Localize script.
 		wp_localize_script(
 			'ea-gaming-admin',
 			'eaGamingAdmin',
@@ -203,7 +203,7 @@ class Admin {
 			)
 		);
 
-		// Add inline script for React mount point
+		// Add inline script for React mount point.
 		wp_add_inline_script(
 			'ea-gaming-admin',
 			'window.eaGamingAdminReady = true;',
@@ -217,24 +217,24 @@ class Admin {
 	 * @return void
 	 */
 	public function register_settings() {
-		// General settings
+		// General settings.
 		register_setting( 'ea_gaming_general', 'ea_gaming_engine_enabled' );
 		register_setting( 'ea_gaming_general', 'ea_gaming_engine_default_theme' );
 		register_setting( 'ea_gaming_general', 'ea_gaming_engine_default_preset' );
 
-		// Policy settings
+		// Policy settings.
 		register_setting( 'ea_gaming_policies', 'ea_gaming_engine_policies' );
 
-		// Game settings
+		// Game settings.
 		register_setting( 'ea_gaming_games', 'ea_gaming_engine_games' );
 
-		// Theme settings
+		// Theme settings.
 		register_setting( 'ea_gaming_themes', 'ea_gaming_engine_themes' );
 
-		// Hint system settings
+		// Hint system settings.
 		register_setting( 'ea_gaming_hints', 'ea_gaming_engine_hint_settings' );
 
-		// Advanced settings
+		// Advanced settings.
 		register_setting( 'ea_gaming_advanced', 'ea_gaming_engine_cache_enabled' );
 		register_setting( 'ea_gaming_advanced', 'ea_gaming_engine_debug_mode' );
 		register_setting( 'ea_gaming_advanced', 'ea_gaming_engine_api_rate_limit' );
@@ -250,7 +250,7 @@ class Admin {
 	public function render_dashboard_page() {
 		global $wpdb;
 
-		// Get stats
+		// Get stats.
 		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
 		$stats_table    = $wpdb->prefix . 'ea_player_stats';
 
@@ -259,7 +259,7 @@ class Admin {
 		$total_score    = $wpdb->get_var( "SELECT SUM(score) FROM {$sessions_table}" );
 		$avg_score      = $wpdb->get_var( "SELECT AVG(score) FROM {$sessions_table}" );
 
-		// Get recent sessions
+		// Get recent sessions.
 		$recent_sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT s.*, u.display_name 
@@ -382,7 +382,7 @@ class Admin {
 		$themes         = $theme_manager->get_all_themes();
 		$presets        = $theme_manager->get_all_presets();
 
-		// Get current settings
+		// Get current settings.
 		$enabled       = get_option( 'ea_gaming_engine_enabled', true );
 		$cache_enabled = get_option( 'ea_gaming_engine_cache_enabled', true );
 		$debug_mode    = get_option( 'ea_gaming_engine_debug_mode', false );
@@ -580,7 +580,7 @@ class Admin {
 		global $wpdb;
 		$policies_table = $wpdb->prefix . 'ea_game_policies';
 
-		// Get all policies
+		// Get all policies.
 		$policies = $wpdb->get_results(
 			"SELECT * FROM {$policies_table} ORDER BY priority ASC, id DESC"
 		);
@@ -738,7 +738,7 @@ class Admin {
 		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
 		$stats_table    = $wpdb->prefix . 'ea_player_stats';
 
-		// Get analytics data
+		// Get analytics data.
 		$total_sessions     = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
 		$completed_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table} WHERE status = 'completed'" );
 		$avg_duration       = $wpdb->get_var( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" );
@@ -922,7 +922,7 @@ class Admin {
 	 * @return void
 	 */
 	public function admin_notices() {
-		// Check if LearnDash is active
+		// Check if LearnDash is active.
 		if ( ! class_exists( 'SFWD_LMS' ) ) {
 			?>
 			<div class="notice notice-warning">
@@ -939,7 +939,7 @@ class Admin {
 			<?php
 		}
 
-		// Check for first activation
+		// Check for first activation.
 		if ( get_transient( 'ea_gaming_engine_activation_notice' ) ) {
 			?>
 			<div class="notice notice-success is-dismissible">
@@ -1063,7 +1063,7 @@ class Admin {
 			wp_send_json_error( __( 'Invalid settings data', 'ea-gaming-engine' ) );
 		}
 
-		// Save general settings
+		// Save general settings.
 		if ( isset( $settings['enabled'] ) ) {
 			update_option( 'ea_gaming_engine_enabled', filter_var( $settings['enabled'], FILTER_VALIDATE_BOOLEAN ) );
 		}
@@ -1084,7 +1084,7 @@ class Admin {
 			update_option( 'ea_gaming_engine_default_preset', sanitize_text_field( $settings['default_preset'] ) );
 		}
 
-		// Save hint settings
+		// Save hint settings.
 		if ( isset( $settings['hint_settings'] ) ) {
 			$hint_settings = array(
 				'enabled'         => filter_var( $settings['hint_settings']['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
@@ -1094,7 +1094,7 @@ class Admin {
 			update_option( 'ea_gaming_engine_hint_settings', $hint_settings );
 		}
 
-		// Save integration settings
+		// Save integration settings.
 		if ( isset( $settings['integration_settings'] ) ) {
 			$integration_settings = array(
 				'learndash_enabled'       => filter_var( $settings['integration_settings']['learndash_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
@@ -1139,7 +1139,7 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		// Reset to defaults
+		// Reset to defaults.
 		update_option( 'ea_gaming_engine_enabled', true );
 		update_option( 'ea_gaming_engine_default_theme', 'playful' );
 		update_option( 'ea_gaming_engine_default_preset', 'classic' );
@@ -1175,11 +1175,11 @@ class Admin {
 
 		global $wpdb;
 
-		// Get analytics data
+		// Get analytics data.
 		$period    = sanitize_text_field( $_POST['period'] ?? '7days' );
 		$course_id = intval( $_POST['course_id'] ?? 0 );
 
-		// Calculate date range
+		// Calculate date range.
 		$end_date = current_time( 'Y-m-d 23:59:59' );
 		switch ( $period ) {
 			case '24hours':
@@ -1195,7 +1195,7 @@ class Admin {
 				$start_date = current_time( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
 		}
 
-		// Build query
+		// Build query.
 		$query = "SELECT 
 			COUNT(*) as total_sessions,
 			COUNT(DISTINCT user_id) as unique_players,
@@ -1219,7 +1219,7 @@ class Admin {
 
 		$results = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 
-		// Get top players
+		// Get top players.
 		$top_players_query = "SELECT 
 			u.display_name,
 			ps.total_score,
@@ -1235,7 +1235,7 @@ class Admin {
 		$top_players_query .= ' ORDER BY ps.total_score DESC LIMIT 10';
 		$top_players        = $wpdb->get_results( $top_players_query );
 
-		// Get game type distribution
+		// Get game type distribution.
 		$game_distribution_query = "SELECT 
 			game_type,
 			COUNT(*) as count
@@ -1287,7 +1287,7 @@ class Admin {
 			'tables'         => array(),
 		);
 
-		// Export all plugin options
+		// Export all plugin options.
 		$options = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
@@ -1300,7 +1300,7 @@ class Admin {
 			$export_data['options'][ $option['option_name'] ] = maybe_unserialize( $option['option_value'] );
 		}
 
-		// Export table data
+		// Export table data.
 		$tables = array(
 			'ea_game_sessions',
 			'ea_game_policies',
@@ -1327,7 +1327,7 @@ class Admin {
 			}
 		}
 
-		// Create export file
+		// Create export file.
 		$upload_dir = wp_upload_dir();
 		$filename   = 'ea-gaming-export-' . date( 'Y-m-d-H-i-s' ) . '.json';
 		$file_path  = $upload_dir['basedir'] . '/' . $filename;
@@ -1338,7 +1338,7 @@ class Admin {
 			wp_send_json_error( __( 'Failed to create export file', 'ea-gaming-engine' ) );
 		}
 
-		// Calculate file size
+		// Calculate file size.
 		$file_size = size_format( filesize( $file_path ) );
 
 		wp_send_json_success(
@@ -1420,20 +1420,20 @@ class Admin {
 			'active'     => intval( $policy['active'] ?? 0 ),
 		);
 
-		// Validate JSON
+		// Validate JSON.
 		if ( json_decode( $data['conditions'] ) === null || json_decode( $data['actions'] ) === null ) {
 			wp_send_json_error( __( 'Invalid JSON in conditions or actions', 'ea-gaming-engine' ) );
 		}
 
 		if ( ! empty( $policy['policy_id'] ) ) {
-			// Update existing policy
+			// Update existing policy.
 			$result = $wpdb->update(
 				$table,
 				$data,
 				array( 'id' => intval( $policy['policy_id'] ) )
 			);
 		} else {
-			// Insert new policy
+			// Insert new policy.
 			$result = $wpdb->insert( $table, $data );
 		}
 

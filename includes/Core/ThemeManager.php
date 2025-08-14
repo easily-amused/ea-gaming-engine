@@ -249,7 +249,7 @@ class ThemeManager {
 			),
 		);
 
-		// Allow themes to be filtered
+		// Allow themes to be filtered.
 		$this->themes = apply_filters( 'ea_gaming_themes', $this->themes );
 	}
 
@@ -354,7 +354,7 @@ class ThemeManager {
 			),
 		);
 
-		// Allow presets to be filtered
+		// Allow presets to be filtered.
 		$this->presets = apply_filters( 'ea_gaming_presets', $this->presets );
 	}
 
@@ -364,7 +364,7 @@ class ThemeManager {
 	 * @return string
 	 */
 	public function get_current_theme() {
-		// Check user preference first
+		// Check user preference first.
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
 			$user_theme = get_user_meta( $user_id, 'ea_gaming_theme', true );
@@ -373,7 +373,7 @@ class ThemeManager {
 			}
 		}
 
-		// Fall back to global setting
+		// Fall back to global setting.
 		return get_option( 'ea_gaming_engine_default_theme', 'playful' );
 	}
 
@@ -383,7 +383,7 @@ class ThemeManager {
 	 * @return string
 	 */
 	public function get_current_preset() {
-		// Check user preference first
+		// Check user preference first.
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
 			$user_preset = get_user_meta( $user_id, 'ea_gaming_preset', true );
@@ -392,7 +392,7 @@ class ThemeManager {
 			}
 		}
 
-		// Fall back to global setting
+		// Fall back to global setting.
 		return get_option( 'ea_gaming_engine_default_preset', 'classic' );
 	}
 
@@ -412,7 +412,7 @@ class ThemeManager {
 			return $this->themes[ $theme_id ];
 		}
 
-		// Return default theme if not found
+		// Return default theme if not found.
 		return $this->themes['playful'];
 	}
 
@@ -432,7 +432,7 @@ class ThemeManager {
 			return $this->presets[ $preset_id ];
 		}
 
-		// Return default preset if not found
+		// Return default preset if not found.
 		return $this->presets['classic'];
 	}
 
@@ -476,13 +476,13 @@ class ThemeManager {
 	public function enqueue_theme_styles() {
 		$theme = $this->get_theme_data( null );
 
-		// Generate CSS variables
+		// Generate CSS variables.
 		$css_vars = $this->generate_css_variables( $theme );
 
-		// Add inline styles
+		// Add inline styles.
 		wp_add_inline_style( 'ea-gaming-engine', $css_vars );
 
-		// Load Google Fonts if needed
+		// Load Google Fonts if needed.
 		$this->load_theme_fonts( $theme );
 	}
 
@@ -495,17 +495,17 @@ class ThemeManager {
 	private function generate_css_variables( $theme ) {
 		$css = ':root {';
 
-		// Add color variables
+		// Add color variables.
 		foreach ( $theme['colors'] as $name => $value ) {
 			$css .= '--ea-gaming-' . $name . ': ' . $value . ';';
 		}
 
-		// Add font variables
+		// Add font variables.
 		foreach ( $theme['fonts'] as $name => $value ) {
 			$css .= '--ea-gaming-font-' . $name . ': ' . $value . ';';
 		}
 
-		// Add UI variables
+		// Add UI variables.
 		foreach ( $theme['ui'] as $name => $value ) {
 			$name = str_replace( '_', '-', $name );
 			$css .= '--ea-gaming-' . $name . ': ' . $value . ';';
@@ -513,7 +513,7 @@ class ThemeManager {
 
 		$css .= '}';
 
-		// Add theme-specific styles
+		// Add theme-specific styles.
 		$css .= $this->get_theme_specific_styles( $theme['id'] );
 
 		return $css;
@@ -583,7 +583,7 @@ class ThemeManager {
 	private function load_theme_fonts( $theme ) {
 		$google_fonts = array();
 
-		// Map fonts to Google Fonts URLs
+		// Map fonts to Google Fonts URLs.
 		$font_map = array(
 			'Fredoka One'     => 'Fredoka+One',
 			'Nunito'          => 'Nunito:wght@400;700',

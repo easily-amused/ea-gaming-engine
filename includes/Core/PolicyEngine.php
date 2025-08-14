@@ -88,7 +88,7 @@ class PolicyEngine {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_policies';
 
-		// Check if default policies exist
+		// Check if default policies exist.
 		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table" );
 
 		if ( $count == 0 ) {
@@ -246,14 +246,14 @@ class PolicyEngine {
 			'timezone'     => wp_timezone_string(),
 		);
 
-		// Add user meta
+		// Add user meta.
 		$user = get_user_by( 'ID', $user_id );
 		if ( $user ) {
 			$context['user_roles'] = $user->roles;
 			$context['user_email'] = $user->user_email;
 		}
 
-		// Add course progress if course ID provided
+		// Add course progress if course ID provided.
 		if ( $course_id && function_exists( 'learndash_course_progress' ) ) {
 			$progress                   = learndash_course_progress(
 				array(
@@ -265,10 +265,10 @@ class PolicyEngine {
 			$context['course_progress'] = $progress;
 		}
 
-		// Add today's play stats
+		// Add today's play stats.
 		$context['today_stats'] = $this->get_today_stats( $user_id );
 
-		// Check parent controls if integration exists
+		// Check parent controls if integration exists.
 		if ( class_exists( 'EA_Student_Parent_Access' ) ) {
 			$context['parent_controls'] = $this->get_parent_controls( $user_id );
 		}
@@ -334,7 +334,7 @@ class PolicyEngine {
 		$current_time = $context['current_time'];
 		$current_day  = $context['current_day'];
 
-		// Check if today is included in free play days
+		// Check if today is included in free play days.
 		if ( ! empty( $conditions['days'] ) && ! in_array( $current_day, $conditions['days'], true ) ) {
 			return array(
 				'block'   => false,
@@ -343,7 +343,7 @@ class PolicyEngine {
 			);
 		}
 
-		// Check if current time is within free play window
+		// Check if current time is within free play window.
 		$start = $conditions['start_time'];
 		$end   = $conditions['end_time'];
 
@@ -376,9 +376,9 @@ class PolicyEngine {
 		$start = $conditions['start_time'];
 		$end   = $conditions['end_time'];
 
-		// Handle overnight quiet hours
+		// Handle overnight quiet hours.
 		if ( $start > $end ) {
-			// Quiet hours span midnight
+			// Quiet hours span midnight.
 			if ( $current_time >= $start || $current_time <= $end ) {
 				return array(
 					'block'   => true,
@@ -387,7 +387,7 @@ class PolicyEngine {
 				);
 			}
 		} else {
-			// Normal time range
+			// Normal time range.
 			if ( $this->is_time_between( $current_time, $start, $end ) ) {
 				return array(
 					'block'   => true,
@@ -422,7 +422,7 @@ class PolicyEngine {
 
 		$conditions = $policy['conditions'];
 
-		// Check if lesson view is required
+		// Check if lesson view is required.
 		if ( ! empty( $conditions['require_lesson_view'] ) ) {
 			$last_lesson_view = $this->get_last_lesson_view( $context['user_id'], $context['course_id'] );
 
@@ -434,7 +434,7 @@ class PolicyEngine {
 				);
 			}
 
-			// Check minimum time requirement
+			// Check minimum time requirement.
 			if ( ! empty( $conditions['minimum_time'] ) ) {
 				$time_spent = time() - $last_lesson_view;
 				if ( $time_spent < $conditions['minimum_time'] ) {
@@ -477,7 +477,7 @@ class PolicyEngine {
 
 		$controls = $context['parent_controls'];
 
-		// Check if parent has blocked games
+		// Check if parent has blocked games.
 		if ( ! empty( $controls['games_blocked'] ) ) {
 			return array(
 				'block'   => true,
@@ -486,7 +486,7 @@ class PolicyEngine {
 			);
 		}
 
-		// Check time restrictions
+		// Check time restrictions.
 		if ( ! empty( $controls['time_restrictions'] ) ) {
 			$current_time  = $context['current_time'];
 			$allowed_start = $controls['time_restrictions']['start'];
@@ -506,7 +506,7 @@ class PolicyEngine {
 			}
 		}
 
-		// Check ticket/token requirements
+		// Check ticket/token requirements.
 		if ( ! empty( $controls['require_tickets'] ) ) {
 			$tickets = $this->get_user_tickets( $context['user_id'] );
 			if ( $tickets <= 0 ) {
@@ -536,7 +536,7 @@ class PolicyEngine {
 		$conditions  = $policy['conditions'];
 		$today_stats = $context['today_stats'];
 
-		// Check games played limit
+		// Check games played limit.
 		if ( ! empty( $conditions['max_games_per_day'] ) ) {
 			if ( $today_stats['games_played'] >= $conditions['max_games_per_day'] ) {
 				return array(
@@ -547,7 +547,7 @@ class PolicyEngine {
 			}
 		}
 
-		// Check time played limit
+		// Check time played limit.
 		if ( ! empty( $conditions['max_time_per_day'] ) ) {
 			if ( $today_stats['time_played'] >= $conditions['max_time_per_day'] ) {
 				return array(
@@ -583,7 +583,7 @@ class PolicyEngine {
 
 		$conditions = $policy['conditions'];
 
-		// Check if course is in blocked list
+		// Check if course is in blocked list.
 		if ( ! empty( $conditions['blocked_courses'] ) ) {
 			if ( in_array( $context['course_id'], $conditions['blocked_courses'], true ) ) {
 				return array(
@@ -594,7 +594,7 @@ class PolicyEngine {
 			}
 		}
 
-		// Check minimum progress requirement
+		// Check minimum progress requirement.
 		if ( ! empty( $conditions['minimum_progress'] ) && ! empty( $context['course_progress'] ) ) {
 			$progress = $context['course_progress']['percentage'] ?? 0;
 			if ( $progress < $conditions['minimum_progress'] ) {
@@ -674,8 +674,8 @@ class PolicyEngine {
 	 * @return int|false Timestamp or false.
 	 */
 	private function get_last_lesson_view( $user_id, $course_id ) {
-		// This would integrate with LearnDash activity tracking
-		// For now, return a mock value
+		// This would integrate with LearnDash activity tracking.
+		// For now, return a mock value.
 		$key = 'ea_gaming_last_lesson_' . $user_id . '_' . $course_id;
 		return get_transient( $key );
 	}
@@ -687,7 +687,7 @@ class PolicyEngine {
 	 * @return array
 	 */
 	private function get_parent_controls( $user_id ) {
-		// This would integrate with Student-Parent Access plugin
+		// This would integrate with Student-Parent Access plugin.
 		return apply_filters( 'ea_gaming_parent_controls', array(), $user_id );
 	}
 
@@ -723,8 +723,8 @@ class PolicyEngine {
 	 * @return void
 	 */
 	public function evaluate_policies() {
-		// This would run periodic policy checks
-		// For example, sending notifications when free play starts
+		// This would run periodic policy checks.
+		// For example, sending notifications when free play starts.
 		do_action( 'ea_gaming_policies_evaluated' );
 	}
 }

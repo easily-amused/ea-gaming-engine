@@ -34,20 +34,20 @@ class LearnDash {
 	 * @return void
 	 */
 	private function init_hooks() {
-		// Course display hooks
+		// Course display hooks.
 		add_action( 'learndash-course-after', array( $this, 'display_game_launcher' ), 10, 2 );
 		add_action( 'learndash-lesson-after', array( $this, 'display_mini_game' ), 10, 2 );
 		add_action( 'learndash-quiz-before', array( $this, 'display_quiz_game_option' ), 10, 2 );
 
-		// Progress hooks
+		// Progress hooks.
 		add_action( 'ea_gaming_session_ended', array( $this, 'sync_progress_to_learndash' ), 10, 4 );
 		add_filter( 'learndash_completion_redirect', array( $this, 'handle_game_completion_redirect' ), 10, 2 );
 
-		// Content enhancement
+		// Content enhancement.
 		add_filter( 'learndash_content', array( $this, 'enhance_content_with_games' ), 10, 2 );
 		add_filter( 'learndash-focus-mode-can-complete', array( $this, 'check_game_completion' ), 10, 4 );
 
-		// AJAX handlers
+		// AJAX handlers.
 		add_action( 'wp_ajax_ea_gaming_get_course_structure', array( $this, 'ajax_get_course_structure' ) );
 		add_action( 'wp_ajax_ea_gaming_get_quiz_questions', array( $this, 'ajax_get_quiz_questions' ) );
 	}
@@ -59,7 +59,7 @@ class LearnDash {
 	 * @return array
 	 */
 	public function get_course_structure( $course_id ) {
-		// Check cache
+		// Check cache.
 		if ( isset( $this->course_cache[ $course_id ] ) ) {
 			return $this->course_cache[ $course_id ];
 		}
@@ -73,7 +73,7 @@ class LearnDash {
 			'final_boss'   => null, // Course quiz as final boss
 		);
 
-		// Get course lessons (worlds)
+		// Get course lessons (worlds).
 		$lessons = learndash_get_lesson_list( $course_id );
 
 		foreach ( $lessons as $lesson ) {
@@ -86,7 +86,7 @@ class LearnDash {
 				'completed'   => $this->is_step_complete( get_current_user_id(), $course_id, $lesson->ID ),
 			);
 
-			// Get topics (levels)
+			// Get topics (levels).
 			$topics = learndash_get_topic_list( $lesson->ID, $course_id );
 			foreach ( $topics as $topic ) {
 				$level = array(
@@ -96,7 +96,7 @@ class LearnDash {
 					'completed' => $this->is_step_complete( get_current_user_id(), $course_id, $topic->ID ),
 				);
 
-				// Get topic quizzes
+				// Get topic quizzes.
 				$topic_quizzes = learndash_get_topic_quiz_list( $topic->ID, get_current_user_id(), $course_id );
 				foreach ( $topic_quizzes as $quiz ) {
 					$level['gates'][] = $this->format_quiz_gate( $quiz );
@@ -105,7 +105,7 @@ class LearnDash {
 				$world['levels'][] = $level;
 			}
 
-			// Get lesson quizzes
+			// Get lesson quizzes.
 			$lesson_quizzes = learndash_get_lesson_quiz_list( $lesson->ID, get_current_user_id(), $course_id );
 			foreach ( $lesson_quizzes as $quiz ) {
 				$world['gates'][] = $this->format_quiz_gate( $quiz );
@@ -114,17 +114,17 @@ class LearnDash {
 			$structure['worlds'][] = $world;
 		}
 
-		// Get course quizzes (final boss)
+		// Get course quizzes (final boss).
 		$course_quizzes = learndash_get_course_quiz_list( $course_id, get_current_user_id() );
 		if ( ! empty( $course_quizzes ) ) {
 			foreach ( $course_quizzes as $quiz ) {
 				$structure['boss_battles'][] = $this->format_quiz_gate( $quiz );
 			}
-			// Set the last course quiz as final boss
+			// Set the last course quiz as final boss.
 			$structure['final_boss'] = end( $structure['boss_battles'] );
 		}
 
-		// Cache the structure
+		// Cache the structure.
 		$this->course_cache[ $course_id ] = $structure;
 
 		return $structure;
@@ -139,7 +139,7 @@ class LearnDash {
 	private function format_quiz_gate( $quiz ) {
 		$quiz_id = is_object( $quiz ) ? $quiz->ID : $quiz;
 
-		// Get quiz questions count
+		// Get quiz questions count.
 		$questions = learndash_get_quiz_questions( $quiz_id );
 
 		return array(
@@ -196,7 +196,7 @@ class LearnDash {
 			return array();
 		}
 
-		// Get answer data
+		// Get answer data.
 		$answers = array();
 		foreach ( $model->getAnswerData() as $index => $answer ) {
 			$answers[] = array(
@@ -255,7 +255,7 @@ class LearnDash {
 	public function sync_progress_to_learndash( $session_id, $user_id, $course_id, $stats ) {
 		global $wpdb;
 
-		// Get session data
+		// Get session data.
 		$session = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}ea_game_sessions WHERE id = %d",
@@ -267,7 +267,7 @@ class LearnDash {
 			return;
 		}
 
-		// Get metadata
+		// Get metadata.
 		$metadata = json_decode( $session->metadata, true );
 		$quiz_id  = $metadata['quiz_id'] ?? 0;
 
@@ -275,7 +275,7 @@ class LearnDash {
 			return;
 		}
 
-		// Passing percentage key may differ between LD versions
+		// Passing percentage key may differ between LD versions.
 		$passing_percentage = 0;
 		$pp1                = learndash_get_setting( $quiz_id, 'passingpercentage' );
 		$pp2                = learndash_get_setting( $quiz_id, 'passing_percentage' );
@@ -292,14 +292,14 @@ class LearnDash {
 		$score_percentage = ( $total > 0 ) ? ( ( $correct / $total ) * 100.0 ) : 0.0;
 
 		if ( $score_percentage >= $passing_percentage ) {
-			// Mark quiz as complete
+			// Mark quiz as complete.
 			learndash_process_mark_complete( $user_id, $quiz_id, false, $course_id );
 
-			// Check if associated lesson/topic should be marked complete
+			// Check if associated lesson/topic should be marked complete.
 			$this->check_parent_completion( $user_id, $quiz_id, $course_id );
 		}
 
-		// Save quiz statistics for LearnDash reporting
+		// Save quiz statistics for LearnDash reporting.
 		$this->save_quiz_statistics( $user_id, $quiz_id, $stats );
 	}
 
@@ -312,7 +312,7 @@ class LearnDash {
 	 * @return void
 	 */
 	private function check_parent_completion( $user_id, $quiz_id, $course_id ) {
-		// Get parent lesson or topic
+		// Get parent lesson or topic.
 		$parent_id = learndash_get_lesson_id( $quiz_id, $course_id );
 
 		if ( ! $parent_id ) {
@@ -320,7 +320,7 @@ class LearnDash {
 		}
 
 		if ( $parent_id ) {
-			// Check if all child steps are complete
+			// Check if all child steps are complete.
 			$progress = learndash_get_course_progress( $user_id, $parent_id );
 
 			if ( $progress['completed'] === $progress['total'] ) {
@@ -338,8 +338,8 @@ class LearnDash {
 	 * @return void
 	 */
 	private function save_quiz_statistics( $user_id, $quiz_id, $stats ) {
-		// This would integrate with LearnDash's quiz statistics
-		// For now, store in user meta
+		// This would integrate with LearnDash's quiz statistics.
+		// For now, store in user meta.
 		$key      = 'ea_gaming_quiz_stats_' . $quiz_id;
 		$existing = get_user_meta( $user_id, $key, true );
 		if ( ! $existing ) {
@@ -404,7 +404,7 @@ class LearnDash {
 		$points = $model->getPoints();
 		$type   = $model->getAnswerType();
 
-		// Complex question types are harder
+		// Complex question types are harder.
 		$complex_types = array( 'matrix_sort', 'cloze_answer', 'essay' );
 
 		if ( in_array( $type, $complex_types, true ) ) {
@@ -427,7 +427,7 @@ class LearnDash {
 	 * @return string
 	 */
 	private function determine_gate_type( $quiz_id ) {
-		// Check if it's a course quiz (final boss)
+		// Check if it's a course quiz (final boss).
 		$course_id      = learndash_get_course_id( $quiz_id );
 		$course_quizzes = learndash_get_course_quiz_list( $course_id );
 
@@ -437,7 +437,7 @@ class LearnDash {
 			}
 		}
 
-		// Check question count
+		// Check question count.
 		$questions = learndash_get_quiz_questions( $quiz_id );
 		$count     = count( $questions );
 
@@ -603,9 +603,9 @@ class LearnDash {
 	 * @return string
 	 */
 	public function handle_game_completion_redirect( $redirect_url, $post_id ) {
-		// Check if coming from game mode
+		// Check if coming from game mode.
 		if ( isset( $_GET['game_mode'] ) && $_GET['game_mode'] === 'true' ) {
-			// Redirect to next game level instead
+			// Redirect to next game level instead.
 			$next_step = $this->get_next_game_step( $post_id );
 			if ( $next_step ) {
 				return add_query_arg( 'game_mode', 'true', get_permalink( $next_step ) );
@@ -640,7 +640,7 @@ class LearnDash {
 	 * @return string
 	 */
 	public function enhance_content_with_games( $content, $post ) {
-		// Add game elements to lesson/topic content
+		// Add game elements to lesson/topic content.
 		if ( in_array( $post->post_type, array( 'sfwd-lessons', 'sfwd-topic' ), true ) ) {
 			$game_elements = apply_filters( 'ea_gaming_content_elements', array(), $post );
 
@@ -666,7 +666,7 @@ class LearnDash {
 	 * @return bool
 	 */
 	public function check_game_completion( $can_complete, $step_id, $course_id, $user_id ) {
-		// Check if game requirements are met
+		// Check if game requirements are met.
 		$game_complete = get_user_meta( $user_id, 'ea_gaming_step_' . $step_id, true );
 
 		if ( $game_complete === 'required' && ! $game_complete ) {
@@ -710,7 +710,7 @@ class LearnDash {
 
 		$questions = $this->map_quiz_to_game( $quiz_id );
 
-		// Remove correct answers before sending to frontend
+		// Remove correct answers before sending to frontend.
 		foreach ( $questions['questions'] as &$question ) {
 			foreach ( $question['answers'] as &$answer ) {
 				unset( $answer['correct'] );

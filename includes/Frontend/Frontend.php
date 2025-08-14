@@ -28,24 +28,24 @@ class Frontend {
 	 * @return void
 	 */
 	private function init_hooks() {
-		// Shortcodes
+		// Shortcodes.
 		add_shortcode( 'ea_gaming_arcade', array( $this, 'render_arcade_shortcode' ) );
 		add_shortcode( 'ea_gaming_launcher', array( $this, 'render_launcher_shortcode' ) );
 		add_shortcode( 'ea_gaming_leaderboard', array( $this, 'render_leaderboard_shortcode' ) );
 		add_shortcode( 'ea_gaming_stats', array( $this, 'render_stats_shortcode' ) );
 
-		// Content filters
+		// Content filters.
 		add_filter( 'the_content', array( $this, 'add_game_launcher_to_content' ), 20 );
 
-		// Body classes
+		// Body classes.
 		add_filter( 'body_class', array( $this, 'add_body_classes' ) );
 
-		// AJAX handlers
+		// AJAX handlers.
 		add_action( 'wp_ajax_ea_gaming_launch', array( $this, 'ajax_launch_game' ) );
 		add_action( 'wp_ajax_ea_gaming_get_leaderboard', array( $this, 'ajax_get_leaderboard' ) );
 		add_action( 'wp_ajax_nopriv_ea_gaming_get_leaderboard', array( $this, 'ajax_get_leaderboard' ) );
 
-		// Game modal
+		// Game modal.
 		add_action( 'wp_footer', array( $this, 'render_game_modal' ) );
 	}
 
@@ -75,22 +75,22 @@ class Frontend {
 			return '<div class="ea-gaming-notice">' . __( 'Please log in to play games.', 'ea-gaming-engine' ) . '</div>';
 		}
 
-		// Check if gaming is enabled
+		// Check if gaming is enabled.
 		if ( ! get_option( 'ea_gaming_engine_enabled', true ) ) {
 			return '';
 		}
 
-		// Get course ID if not provided
+		// Get course ID if not provided.
 		if ( ! $atts['course_id'] ) {
 			$atts['course_id'] = get_the_ID();
 
-			// Try to get course ID from context
+			// Try to get course ID from context.
 			if ( function_exists( 'learndash_get_course_id' ) ) {
 				$atts['course_id'] = learndash_get_course_id( $atts['course_id'] );
 			}
 		}
 
-		// Check policies
+		// Check policies.
 		$policy_engine = PolicyEngine::get_instance();
 		$can_play      = $policy_engine->can_user_play( get_current_user_id(), $atts['course_id'] );
 
@@ -163,7 +163,7 @@ class Frontend {
 			return '';
 		}
 
-		// Get course/quiz IDs from context if not provided
+		// Get course/quiz IDs from context if not provided.
 		if ( ! $atts['course_id'] && ! $atts['quiz_id'] ) {
 			$post_id   = get_the_ID();
 			$post_type = get_post_type( $post_id );
@@ -209,7 +209,7 @@ class Frontend {
 			'ea_gaming_leaderboard'
 		);
 
-		// Get course ID from context if not provided
+		// Get course ID from context if not provided.
 		if ( ! $atts['course_id'] && function_exists( 'learndash_get_course_id' ) ) {
 			$atts['course_id'] = learndash_get_course_id();
 		}
@@ -238,7 +238,7 @@ class Frontend {
 			return '';
 		}
 
-		// Get course ID from context if not provided
+		// Get course ID from context if not provided.
 		if ( ! $atts['course_id'] && function_exists( 'learndash_get_course_id' ) ) {
 			$atts['course_id'] = learndash_get_course_id();
 		}
@@ -405,7 +405,7 @@ class Frontend {
 			$params[] = $course_id;
 		}
 
-		// Add period filter
+		// Add period filter.
 		if ( $period !== 'all' ) {
 			switch ( $period ) {
 				case 'today':
@@ -469,17 +469,17 @@ class Frontend {
 	 * @return string
 	 */
 	public function add_game_launcher_to_content( $content ) {
-		// Only add to LearnDash content
+		// Only add to LearnDash content.
 		if ( ! in_array( get_post_type(), array( 'sfwd-courses', 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ), true ) ) {
 			return $content;
 		}
 
-		// Check if auto-insert is enabled
+		// Check if auto-insert is enabled.
 		if ( ! apply_filters( 'ea_gaming_auto_insert_launcher', true ) ) {
 			return $content;
 		}
 
-		// Don't add if shortcode already exists
+		// Don't add if shortcode already exists.
 		if ( has_shortcode( $content, 'ea_gaming_arcade' ) || has_shortcode( $content, 'ea_gaming_launcher' ) ) {
 			return $content;
 		}
@@ -528,7 +528,7 @@ class Frontend {
 			return;
 		}
 
-		// Only load on pages that might need it
+		// Only load on pages that might need it.
 		if ( ! is_singular( array( 'sfwd-courses', 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) && ! has_shortcode( get_post()->post_content ?? '', 'ea_gaming' ) ) {
 			return;
 		}
@@ -592,7 +592,7 @@ class Frontend {
 		$course_id = intval( $_POST['course_id'] ?? 0 );
 		$quiz_id   = intval( $_POST['quiz_id'] ?? 0 );
 
-		// Check policies
+		// Check policies.
 		$policy_engine = PolicyEngine::get_instance();
 		$can_play      = $policy_engine->can_user_play( get_current_user_id(), $course_id );
 
@@ -600,12 +600,12 @@ class Frontend {
 			wp_send_json_error( $can_play['reason'] );
 		}
 
-		// Get theme and preset
+		// Get theme and preset.
 		$theme_manager = ThemeManager::get_instance();
 		$theme         = $theme_manager->get_theme_data( null );
 		$preset        = $theme_manager->get_preset_data( null );
 
-		// Prepare game configuration
+		// Prepare game configuration.
 		$config = array(
 			'game_type' => $game_type,
 			'course_id' => $course_id,

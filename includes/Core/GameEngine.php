@@ -100,7 +100,7 @@ class GameEngine {
 			return false;
 		}
 
-		// Check if user can play
+		// Check if user can play.
 		$policy_engine = PolicyEngine::get_instance();
 		if ( ! $policy_engine->can_user_play( $user_id, $course_id ) ) {
 			return false;
@@ -122,7 +122,7 @@ class GameEngine {
 
 		$session_id = $wpdb->insert_id;
 
-		// Trigger action
+		// Trigger action.
 		do_action( 'ea_gaming_session_started', $session_id, $user_id, $course_id, $game_type );
 
 		return $session_id;
@@ -140,7 +140,7 @@ class GameEngine {
 
 		$table = $wpdb->prefix . 'ea_game_sessions';
 
-		// Get session data
+		// Get session data.
 		$session = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM $table WHERE id = %d",
@@ -152,10 +152,10 @@ class GameEngine {
 			return false;
 		}
 
-		// Calculate duration
+		// Calculate duration.
 		$duration = time() - strtotime( $session->created_at );
 
-		// Update session
+		// Update session.
 		$data = array(
 			'score'             => $stats['score'] ?? 0,
 			'questions_correct' => $stats['questions_correct'] ?? 0,
@@ -170,10 +170,10 @@ class GameEngine {
 			array( 'id' => $session_id )
 		);
 
-		// Update player stats
+		// Update player stats.
 		$this->update_player_stats( $session->user_id, $session->course_id, $stats );
 
-		// Trigger action
+		// Trigger action.
 		do_action( 'ea_gaming_session_ended', $session_id, $session->user_id, $session->course_id, $stats );
 
 		return true;
@@ -192,7 +192,7 @@ class GameEngine {
 
 		$table = $wpdb->prefix . 'ea_player_stats';
 
-		// Get existing stats
+		// Get existing stats.
 		$player_stats = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM $table WHERE user_id = %d AND course_id = %d",
@@ -202,7 +202,7 @@ class GameEngine {
 		);
 
 		if ( $player_stats ) {
-			// Update existing stats
+			// Update existing stats.
 			$data = array(
 				'total_games_played'       => $player_stats->total_games_played + 1,
 				'total_score'              => $player_stats->total_score + ( $stats['score'] ?? 0 ),
@@ -212,7 +212,7 @@ class GameEngine {
 				'last_played'              => current_time( 'mysql' ),
 			);
 
-			// Update streak
+			// Update streak.
 			if ( isset( $stats['perfect'] ) && $stats['perfect'] ) {
 				$data['streak_current'] = $player_stats->streak_current + 1;
 				if ( $data['streak_current'] > $player_stats->streak_best ) {
@@ -231,7 +231,7 @@ class GameEngine {
 				)
 			);
 		} else {
-			// Create new stats
+			// Create new stats.
 			$data = array(
 				'user_id'                  => $user_id,
 				'course_id'                => $course_id,
@@ -271,7 +271,7 @@ class GameEngine {
 			);
 		}
 
-		// Get overall stats
+		// Get overall stats.
 		return $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT 
@@ -371,7 +371,7 @@ class GameEngine {
 			wp_send_json_error( __( 'Invalid session ID', 'ea-gaming-engine' ) );
 		}
 
-		// Update session progress
+		// Update session progress.
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_sessions';
 

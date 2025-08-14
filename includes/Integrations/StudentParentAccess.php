@@ -50,10 +50,10 @@ class StudentParentAccess {
 		// Simple fallback admin settings (optional; used if SPA is not active or returns no data).
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 
-		// Hook into our custom action to add menu at the right place
+		// Hook into our custom action to add menu at the right place.
 		add_action( 'ea_gaming_engine_add_admin_menus', array( $this, 'add_admin_menu' ) );
 
-		// Listen for plugin activation/deactivation
+		// Listen for plugin activation/deactivation.
 		add_action( 'activated_plugin', array( $this, 'check_plugin_activation' ), 10, 2 );
 		add_action( 'deactivated_plugin', array( $this, 'check_plugin_deactivation' ), 10, 2 );
 	}
@@ -393,12 +393,12 @@ class StudentParentAccess {
 	 * @return void
 	 */
 	public function add_admin_menu(): void {
-		// Only add menu if SPA is active
+		// Only add menu if SPA is active.
 		if ( ! $this->spa_active ) {
 			return;
 		}
 
-		// Get dynamic label from SPA plugin
+		// Get dynamic label from SPA plugin.
 		$parent_label = $this->get_parent_label();
 		$menu_title   = sprintf( __( '%s Controls', 'ea-gaming-engine' ), $parent_label );
 
@@ -422,13 +422,13 @@ class StudentParentAccess {
 			return;
 		}
 
-		// Get dynamic labels
+		// Get dynamic labels.
 		$parent_label  = $this->get_parent_label();
 		$parent_plural = $this->get_parent_plural_label();
 		$child_label   = $this->get_child_label();
 		$child_plural  = $this->get_child_plural_label();
 
-		// Get current users with parent controls enabled
+		// Get current users with parent controls enabled.
 		$controlled_users = $this->get_controlled_users();
 
 		?>
@@ -595,7 +595,7 @@ class StudentParentAccess {
 	 * @return string
 	 */
 	private function get_parent_label(): string {
-		// Try to use the SPA Custom Label class if available
+		// Try to use the SPA Custom Label class if available.
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'parent' );
 			if ( ! empty( $label ) ) {
@@ -603,7 +603,7 @@ class StudentParentAccess {
 			}
 		}
 
-		// Fallback to default
+		// Fallback to default.
 		return __( 'Parent', 'ea-gaming-engine' );
 	}
 
@@ -613,7 +613,7 @@ class StudentParentAccess {
 	 * @return string
 	 */
 	private function get_child_label(): string {
-		// Try to use the SPA Custom Label class if available
+		// Try to use the SPA Custom Label class if available.
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'child' );
 			if ( ! empty( $label ) ) {
@@ -621,7 +621,7 @@ class StudentParentAccess {
 			}
 		}
 
-		// Fallback to default
+		// Fallback to default.
 		return __( 'Child', 'ea-gaming-engine' );
 	}
 
@@ -631,7 +631,7 @@ class StudentParentAccess {
 	 * @return string
 	 */
 	private function get_parent_plural_label(): string {
-		// Try to use the SPA Custom Label class if available
+		// Try to use the SPA Custom Label class if available.
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'parents' );
 			if ( ! empty( $label ) ) {
@@ -639,7 +639,7 @@ class StudentParentAccess {
 			}
 		}
 
-		// Fallback to default
+		// Fallback to default.
 		return __( 'Parents', 'ea-gaming-engine' );
 	}
 
@@ -649,7 +649,7 @@ class StudentParentAccess {
 	 * @return string
 	 */
 	private function get_child_plural_label(): string {
-		// Try to use the SPA Custom Label class if available
+		// Try to use the SPA Custom Label class if available.
 		if ( class_exists( 'EA_Student_Parent_Access_Custom_Label' ) ) {
 			$label = \EA_Student_Parent_Access_Custom_Label::get_label( 'children' );
 			if ( ! empty( $label ) ) {
@@ -657,7 +657,7 @@ class StudentParentAccess {
 			}
 		}
 
-		// Fallback to default
+		// Fallback to default.
 		return __( 'Children', 'ea-gaming-engine' );
 	}
 
@@ -669,7 +669,7 @@ class StudentParentAccess {
 	private function get_controlled_users(): array {
 		$controlled_users = array();
 
-		// Check if SPA has a function to get parent-child relationships
+		// Check if SPA has a function to get parent-child relationships.
 		if ( function_exists( 'ea_spa_get_parent_child_relationships' ) ) {
 			$relationships = ea_spa_get_parent_child_relationships();
 
@@ -700,7 +700,7 @@ class StudentParentAccess {
 				}
 			}
 		} else {
-			// Fallback: Check for users with parent control meta
+			// Fallback: Check for users with parent control meta.
 			$args = array(
 				'meta_query' => array(
 					array(
@@ -717,7 +717,7 @@ class StudentParentAccess {
 				$controls = $this->get_spa_controls( $user->ID );
 				$tickets  = $this->get_user_tickets( $user->ID );
 
-				// Try to get parent info
+				// Try to get parent info.
 				$parent_id   = get_user_meta( $user->ID, 'ea_spa_parent_id', true );
 				$parent_name = __( 'Unknown', 'ea-gaming-engine' );
 
@@ -755,10 +755,10 @@ class StudentParentAccess {
 	 * @return void
 	 */
 	public function check_plugin_activation( $plugin, $network_wide ): void {
-		// Check if it's the SPA plugin being activated
+		// Check if it's the SPA plugin being activated.
 		if ( strpos( $plugin, 'ea-student-parent-access' ) !== false ) {
 			$this->spa_active = true;
-			// Clear any menu cache if needed
+			// Clear any menu cache if needed.
 			wp_cache_delete( 'ea_gaming_admin_menu', 'ea_gaming_engine' );
 		}
 	}
@@ -771,10 +771,10 @@ class StudentParentAccess {
 	 * @return void
 	 */
 	public function check_plugin_deactivation( $plugin, $network_wide ): void {
-		// Check if it's the SPA plugin being deactivated
+		// Check if it's the SPA plugin being deactivated.
 		if ( strpos( $plugin, 'ea-student-parent-access' ) !== false ) {
 			$this->spa_active = false;
-			// Clear any menu cache if needed
+			// Clear any menu cache if needed.
 			wp_cache_delete( 'ea_gaming_admin_menu', 'ea_gaming_engine' );
 		}
 	}

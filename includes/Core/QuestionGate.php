@@ -63,16 +63,16 @@ class QuestionGate {
 			return false;
 		}
 
-		// Extract IDs
+		// Extract IDs.
 		$question_ids = array_keys( $ld_questions_map );
 
-		// Exclude answered
+		// Exclude answered.
 		if ( ! empty( $options['exclude'] ) && is_array( $options['exclude'] ) ) {
 			$exclude      = array_map( 'intval', $options['exclude'] );
 			$question_ids = array_values( array_diff( $question_ids, $exclude ) );
 		}
 
-		// Difficulty filter (optional, uses post meta _difficulty_level)
+		// Difficulty filter (optional, uses post meta _difficulty_level).
 		if ( ! empty( $options['difficulty'] ) ) {
 			$question_ids = array_values(
 				array_filter(
@@ -89,24 +89,24 @@ class QuestionGate {
 			return false;
 		}
 
-		// Pick a question
+		// Pick a question.
 		$chosen_id = ! empty( $options['question_id'] ) && in_array( (int) $options['question_id'], $question_ids, true )
 			? (int) $options['question_id']
 			: $question_ids[ array_rand( $question_ids ) ];
 
-		// Format for frontend
+		// Format for frontend.
 		$formatted = $this->format_question( $chosen_id, (int) $quiz_id );
 		if ( empty( $formatted ) ) {
 			return false;
 		}
 
-		// Cache full data (with correct answers) for validation
+		// Cache full data (with correct answers) for validation.
 		$this->cache_question( $formatted );
 
-		// Remove correctness details before sending to client
+		// Remove correctness details before sending to client.
 		unset( $formatted['correct_answer'], $formatted['correct_answers'] );
 
-		// Add hint capability information
+		// Add hint capability information.
 		$formatted = apply_filters( 'ea_gaming_question_data', $formatted, $chosen_id );
 
 		return $formatted;
@@ -126,7 +126,7 @@ class QuestionGate {
 			return array();
 		}
 
-		// Load ProQuiz question model
+		// Load ProQuiz question model.
 		$question_pro_id = get_post_meta( $question_id, 'question_pro_id', true );
 		$question_pro_id = (int) $question_pro_id;
 
@@ -144,7 +144,7 @@ class QuestionGate {
 		$answer_data = $question_model->getAnswerData();
 		$answers     = array();
 
-		// Build answers list with stable IDs (index from model)
+		// Build answers list with stable IDs (index from model).
 		foreach ( $answer_data as $index => $answer ) {
 			$answers[] = array(
 				'id'   => $index,
@@ -153,7 +153,7 @@ class QuestionGate {
 			);
 		}
 
-		// Shuffle answers if ProQuiz indicates random order
+		// Shuffle answers if ProQuiz indicates random order.
 		if ( method_exists( $question_model, 'isAnswerRandom' ) && $question_model->isAnswerRandom() ) {
 			shuffle( $answers );
 		}
@@ -168,7 +168,7 @@ class QuestionGate {
 			'answers'  => $answers,
 		);
 
-		// For validation server-side
+		// For validation server-side.
 		$formatted['correct_answer'] = $this->get_correct_answers( $question_model );
 
 		return $formatted;
@@ -186,7 +186,7 @@ class QuestionGate {
 			return null;
 		}
 
-		// Apply difficulty filter if set
+		// Apply difficulty filter if set.
 		if ( ! empty( $options['difficulty'] ) ) {
 			$questions = array_filter(
 				$questions,
@@ -197,7 +197,7 @@ class QuestionGate {
 			);
 		}
 
-		// Get random question
+		// Get random question.
 		$random_key = array_rand( $questions );
 		return $questions[ $random_key ];
 	}
@@ -309,12 +309,12 @@ class QuestionGate {
 
 		switch ( $question['type'] ) {
 			case 'single_choice':
-				// Expect single answer ID (number or string numeric)
+				// Expect single answer ID (number or string numeric).
 				$is_correct = in_array( (int) $answer, array_map( 'intval', (array) $question['correct_answer'] ), true );
 				break;
 
 			case 'multiple_choice':
-				// Expect array of IDs
+				// Expect array of IDs.
 				if ( is_array( $answer ) ) {
 					$given   = array_map( 'intval', $answer );
 					$correct = array_map( 'intval', (array) $question['correct_answer'] );
@@ -333,10 +333,10 @@ class QuestionGate {
 				$is_correct = false;
 		}
 
-		// Record attempt
+		// Record attempt.
 		$this->record_attempt( $question['id'], $answer, $is_correct, $question['quiz_id'], $question['points'] );
 
-		// Clear cached question
+		// Clear cached question.
 		$cache_key = 'ea_gaming_question_' . $question_id . '_' . get_current_user_id();
 		delete_transient( $cache_key );
 
@@ -356,8 +356,8 @@ class QuestionGate {
 	 * @return bool
 	 */
 	private function validate_free_text( $answer, $question ) {
-		// This would need to be implemented based on LearnDash's free text validation
-		// For now, simple string comparison
+		// This would need to be implemented based on LearnDash's free text validation.
+		// For now, simple string comparison.
 		$correct_answers = $question['correct_answer'];
 
 		foreach ( $correct_answers as $correct ) {
@@ -441,7 +441,7 @@ class QuestionGate {
 			wp_send_json_error( __( 'Invalid parameters', 'ea-gaming-engine' ) );
 		}
 
-		// Set session ID if provided
+		// Set session ID if provided.
 		if ( ! empty( $_POST['session_id'] ) ) {
 			$this->session_id = intval( $_POST['session_id'] );
 		}

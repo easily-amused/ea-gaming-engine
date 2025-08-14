@@ -24,7 +24,7 @@ class Blocks {
 	 * Register blocks
 	 */
 	public function register_blocks() {
-		// Register block scripts
+		// Register block scripts.
 		wp_register_script(
 			'ea-gaming-blocks',
 			EA_GAMING_ENGINE_URL . 'assets/dist/js/blocks.min.js',
@@ -40,7 +40,7 @@ class Blocks {
 			EA_GAMING_ENGINE_VERSION
 		);
 
-		// Register blocks
+		// Register blocks.
 		register_block_type(
 			'ea-gaming-engine/arcade',
 			array(

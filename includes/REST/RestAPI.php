@@ -39,7 +39,7 @@ class RestAPI {
 	 * @return void
 	 */
 	public function register_routes() {
-		// Session routes
+		// Session routes.
 		register_rest_route(
 			$this->namespace,
 			'/sessions',
@@ -81,7 +81,7 @@ class RestAPI {
 			)
 		);
 
-		// Question routes
+		// Question routes.
 		register_rest_route(
 			$this->namespace,
 			'/questions/(?P<quiz_id>\d+)',
@@ -137,7 +137,7 @@ class RestAPI {
 			)
 		);
 
-		// Policy routes
+		// Policy routes.
 		register_rest_route(
 			$this->namespace,
 			'/policies/active',
@@ -164,7 +164,7 @@ class RestAPI {
 			)
 		);
 
-		// Stats routes
+		// Stats routes.
 		register_rest_route(
 			$this->namespace,
 			'/stats/player',
@@ -196,7 +196,7 @@ class RestAPI {
 			)
 		);
 
-		// Theme routes
+		// Theme routes.
 		register_rest_route(
 			$this->namespace,
 			'/themes',
@@ -233,7 +233,7 @@ class RestAPI {
 			)
 		);
 
-		// Preset routes
+		// Preset routes.
 		register_rest_route(
 			$this->namespace,
 			'/presets',
@@ -270,7 +270,7 @@ class RestAPI {
 			)
 		);
 
-		// Course structure routes
+		// Course structure routes.
 		register_rest_route(
 			$this->namespace,
 			'/courses/(?P<id>\d+)/structure',
@@ -281,7 +281,7 @@ class RestAPI {
 			)
 		);
 
-		// Game-specific routes
+		// Game-specific routes.
 		register_rest_route(
 			$this->namespace,
 			'/games/available',
@@ -471,7 +471,7 @@ class RestAPI {
 			);
 		}
 
-		// Parse metadata
+		// Parse metadata.
 		$session->metadata = json_decode( $session->metadata, true );
 
 		return rest_ensure_response( $session );
@@ -654,7 +654,7 @@ class RestAPI {
 		$policy_engine = PolicyEngine::get_instance();
 		$policies      = $policy_engine->get_active_policies();
 
-		// Filter out sensitive data
+		// Filter out sensitive data.
 		$filtered = array_map(
 			function ( $policy ) {
 				return array(
@@ -935,7 +935,7 @@ class RestAPI {
 		$course_id = $request->get_param( 'course_id' );
 		$quiz_id   = $request->get_param( 'quiz_id' );
 
-		// Check policy
+		// Check policy.
 		$user_id       = get_current_user_id();
 		$policy_engine = PolicyEngine::get_instance();
 		$can_play      = $policy_engine->can_user_play( $user_id, $course_id );
@@ -948,7 +948,7 @@ class RestAPI {
 			);
 		}
 
-		// Create session
+		// Create session.
 		$game_engine = GameEngine::get_instance();
 		$session_id  = $game_engine->start_session(
 			$user_id,
@@ -969,7 +969,7 @@ class RestAPI {
 			);
 		}
 
-		// Get game configuration
+		// Get game configuration.
 		$theme_manager = ThemeManager::get_instance();
 		$theme         = $theme_manager->get_theme_data( null );
 		$preset        = $theme_manager->get_preset_data( null );

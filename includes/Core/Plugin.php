@@ -73,33 +73,33 @@ class Plugin {
 	 * @return void
 	 */
 	private function init_components() {
-		// Core components
+		// Core components.
 		$this->components['game_engine']   = GameEngine::get_instance();
 		$this->components['policy_engine'] = PolicyEngine::get_instance();
 		$this->components['theme_manager'] = ThemeManager::get_instance();
 		$this->components['hint_system']   = new HintSystem();
 
-		// Integrations
+		// Integrations.
 		if ( class_exists( 'SFWD_LMS' ) ) {
 			$this->components['learndash'] = new LearnDash();
 		}
-		// Add Student-Parent Access integration (optional; self-detects availability)
+		// Add Student-Parent Access integration (optional; self-detects availability).
 		$this->components['student_parent_access'] = new \EAGamingEngine\Integrations\StudentParentAccess();
 
-		// REST API
+		// REST API.
 		$this->components['rest_api'] = new RestAPI();
 
-		// Admin
+		// Admin.
 		if ( is_admin() ) {
 			$this->components['admin'] = new Admin();
 		}
 
-		// Frontend
+		// Frontend.
 		if ( ! is_admin() ) {
 			$this->components['frontend'] = new Frontend();
 		}
 
-		// Blocks
+		// Blocks.
 		$this->components['blocks'] = new Blocks();
 	}
 
@@ -109,13 +109,13 @@ class Plugin {
 	 * @return void
 	 */
 	public function init() {
-		// Register custom post types
+		// Register custom post types.
 		$this->register_post_types();
 
-		// Register taxonomies
+		// Register taxonomies.
 		$this->register_taxonomies();
 
-		// Flush rewrite rules if needed
+		// Flush rewrite rules if needed.
 		$this->maybe_flush_rewrite_rules();
 	}
 
@@ -125,7 +125,7 @@ class Plugin {
 	 * @return void
 	 */
 	private function register_post_types() {
-		// Game Sessions CPT
+		// Game Sessions CPT.
 		register_post_type(
 			'ea_game_session',
 			array(
@@ -154,7 +154,7 @@ class Plugin {
 	 * @return void
 	 */
 	private function register_taxonomies() {
-		// Game Type taxonomy
+		// Game Type taxonomy.
 		register_taxonomy(
 			'ea_game_type',
 			array( 'ea_game_session' ),
@@ -194,7 +194,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		// Main frontend styles
+		// Main frontend styles.
 		wp_enqueue_style(
 			'ea-gaming-engine',
 			EA_GAMING_ENGINE_URL . 'assets/css/frontend.css',
@@ -202,7 +202,7 @@ class Plugin {
 			EA_GAMING_ENGINE_VERSION
 		);
 
-		// Main frontend script
+		// Main frontend script.
 		wp_enqueue_script(
 			'ea-gaming-engine',
 			EA_GAMING_ENGINE_URL . 'assets/js/frontend.js',
@@ -211,7 +211,7 @@ class Plugin {
 			true
 		);
 
-		// Localize script
+		// Localize script.
 		wp_localize_script(
 			'ea-gaming-engine',
 			'eaGamingEngine',
@@ -234,7 +234,7 @@ class Plugin {
 			)
 		);
 
-		// Load games bundle built by Webpack
+		// Load games bundle built by Webpack.
 		$games_min = EA_GAMING_ENGINE_PATH . 'assets/dist/js/games.min.js';
 		$games_rel = file_exists( $games_min ) ? 'assets/dist/js/games.min.js' : 'assets/dist/js/games.js';
 
@@ -256,7 +256,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function admin_enqueue_scripts( $hook ) {
-		// Admin styles
+		// Admin styles.
 		wp_enqueue_style(
 			'ea-gaming-engine-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/css/admin.min.css',
@@ -264,7 +264,7 @@ class Plugin {
 			EA_GAMING_ENGINE_VERSION
 		);
 
-		// Admin scripts
+		// Admin scripts.
 		wp_enqueue_script(
 			'ea-gaming-engine-admin',
 			EA_GAMING_ENGINE_URL . 'assets/dist/js/admin.min.js',
@@ -273,7 +273,7 @@ class Plugin {
 			true
 		);
 
-		// Localize admin script
+		// Localize admin script.
 		wp_localize_script(
 			'ea-gaming-engine-admin',
 			'eaGamingEngineAdmin',
@@ -296,23 +296,23 @@ class Plugin {
 	 * @return bool
 	 */
 	private function should_load_games() {
-		// Load on single course pages
+		// Load on single course pages.
 		if ( is_singular( 'sfwd-courses' ) ) {
 			return true;
 		}
 
-		// Load on lesson/topic/quiz pages
+		// Load on lesson/topic/quiz pages.
 		if ( is_singular( array( 'sfwd-lessons', 'sfwd-topic', 'sfwd-quiz' ) ) ) {
 			return true;
 		}
 
-		// Load if shortcode is present
+		// Load if shortcode is present.
 		global $post;
 		if ( $post && has_shortcode( $post->post_content, 'ea_gaming_arcade' ) ) {
 			return true;
 		}
 
-		// Load if block is present
+		// Load if block is present.
 		if ( $post && has_block( 'ea-gaming-engine/arcade', $post ) ) {
 			return true;
 		}
