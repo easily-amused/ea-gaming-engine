@@ -67,10 +67,10 @@ class LearnDash {
 		$structure = array(
 			'course_id'    => $course_id,
 			'title'        => get_the_title( $course_id ),
-			'worlds'       => array(), // Lessons as worlds
-			'boss_battles' => array(), // Quizzes as boss battles
-			'side_quests'  => array(), // Topics as side quests
-			'final_boss'   => null, // Course quiz as final boss
+			'worlds'       => array(), // Lessons as worlds.
+			'boss_battles' => array(), // Quizzes as boss battles.
+			'side_quests'  => array(), // Topics as side quests.
+			'final_boss'   => null, // Course quiz as final boss.
 		);
 
 		// Get course lessons (worlds).
@@ -81,8 +81,8 @@ class LearnDash {
 				'id'          => $lesson->ID,
 				'title'       => $lesson->post_title,
 				'description' => $lesson->post_excerpt,
-				'levels'      => array(), // Topics
-				'gates'       => array(), // Lesson quizzes
+				'levels'      => array(), // Topics.
+				'gates'       => array(), // Lesson quizzes.
 				'completed'   => $this->is_step_complete( get_current_user_id(), $course_id, $lesson->ID ),
 			);
 
@@ -256,12 +256,18 @@ class LearnDash {
 		global $wpdb;
 
 		// Get session data.
-		$session = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}ea_game_sessions WHERE id = %d",
-				$session_id
-			)
-		);
+		$cache_key = 'ea_gaming_session_' . $session_id;
+		$session   = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $session ) {
+			$session = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}ea_game_sessions WHERE id = %d",
+					$session_id
+				)
+			);
+			wp_cache_set( $cache_key, $session, 'ea_gaming_engine', 300 );
+		}
 
 		if ( ! $session ) {
 			return;
@@ -323,7 +329,7 @@ class LearnDash {
 			// Check if all child steps are complete.
 			$progress = learndash_get_course_progress( $user_id, $parent_id );
 
-			if ( $progress['completed'] === $progress['total'] ) {
+			if ( $progress['total'] === $progress['completed'] ) {
 				learndash_process_mark_complete( $user_id, $parent_id, false, $course_id );
 			}
 		}
@@ -432,7 +438,7 @@ class LearnDash {
 		$course_quizzes = learndash_get_course_quiz_list( $course_id );
 
 		foreach ( $course_quizzes as $quiz ) {
-			if ( $quiz->ID === $quiz_id ) {
+			if ( $quiz_id === $quiz->ID ) {
 				return 'boss_battle';
 			}
 		}
@@ -441,9 +447,9 @@ class LearnDash {
 		$questions = learndash_get_quiz_questions( $quiz_id );
 		$count     = count( $questions );
 
-		if ( $count >= 10 ) {
+		if ( 10 <= $count ) {
 			return 'boss_battle';
-		} elseif ( $count >= 5 ) {
+		} elseif ( 5 <= $count ) {
 			return 'mini_boss';
 		} else {
 			return 'gate';
@@ -518,7 +524,7 @@ class LearnDash {
 	 * @return void
 	 */
 	public function display_game_launcher( $course_id, $user_id ) {
-		if ( ! apply_filters( 'ea_gaming_show_course_launcher', true, $course_id, $user_id ) ) {
+		if ( ! apply_filters( 'ea_gaming_engine_show_course_launcher', true, $course_id, $user_id ) ) {
 			return;
 		}
 
@@ -547,7 +553,7 @@ class LearnDash {
 	 * @return void
 	 */
 	public function display_mini_game( $lesson_id, $user_id ) {
-		if ( ! apply_filters( 'ea_gaming_show_lesson_game', true, $lesson_id, $user_id ) ) {
+		if ( ! apply_filters( 'ea_gaming_engine_show_lesson_game', true, $lesson_id, $user_id ) ) {
 			return;
 		}
 
@@ -577,12 +583,12 @@ class LearnDash {
 	 * @return void
 	 */
 	public function display_quiz_game_option( $quiz_id, $user_id ) {
-		if ( ! apply_filters( 'ea_gaming_show_quiz_game', true, $quiz_id, $user_id ) ) {
+		if ( ! apply_filters( 'ea_gaming_engine_show_quiz_game', true, $quiz_id, $user_id ) ) {
 			return;
 		}
 
 		$gate_type  = $this->determine_gate_type( $quiz_id );
-		$gate_label = $gate_type === 'boss_battle' ? __( 'Boss Battle', 'ea-gaming-engine' ) : __( 'Challenge Gate', 'ea-gaming-engine' );
+		$gate_label = 'boss_battle' === $gate_type ? __( 'Boss Battle', 'ea-gaming-engine' ) : __( 'Challenge Gate', 'ea-gaming-engine' );
 
 		?>
 		<div class="ea-gaming-quiz-option" data-quiz-id="<?php echo esc_attr( $quiz_id ); ?>">
@@ -642,7 +648,7 @@ class LearnDash {
 	public function enhance_content_with_games( $content, $post ) {
 		// Add game elements to lesson/topic content.
 		if ( in_array( $post->post_type, array( 'sfwd-lessons', 'sfwd-topic' ), true ) ) {
-			$game_elements = apply_filters( 'ea_gaming_content_elements', array(), $post );
+			$game_elements = apply_filters( 'ea_gaming_engine_content_elements', array(), $post );
 
 			if ( ! empty( $game_elements ) ) {
 				$content .= '<div class="ea-gaming-content-elements">';
@@ -669,7 +675,7 @@ class LearnDash {
 		// Check if game requirements are met.
 		$game_complete = get_user_meta( $user_id, 'ea_gaming_step_' . $step_id, true );
 
-		if ( $game_complete === 'required' && ! $game_complete ) {
+		if ( 'required' === $game_complete && ! $game_complete ) {
 			return false;
 		}
 

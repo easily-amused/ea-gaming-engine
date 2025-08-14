@@ -168,7 +168,7 @@ class Frontend {
 			$post_id   = get_the_ID();
 			$post_type = get_post_type( $post_id );
 
-			if ( $post_type === 'sfwd-quiz' ) {
+			if ( 'sfwd-quiz' === $$post_type ) {
 				$atts['quiz_id']   = $post_id;
 				$atts['course_id'] = learndash_get_course_id( $post_id );
 			} elseif ( in_array( $post_type, array( 'sfwd-courses', 'sfwd-lessons', 'sfwd-topic' ), true ) ) {
@@ -406,7 +406,7 @@ class Frontend {
 		}
 
 		// Add period filter.
-		if ( $period !== 'all' ) {
+		if ( 'all' !== $$period ) {
 			switch ( $period ) {
 				case 'today':
 					$where[]  = 'ps.last_played >= %s';
@@ -487,9 +487,9 @@ class Frontend {
 		$post_type = get_post_type();
 		$launcher  = '';
 
-		if ( $post_type === 'sfwd-courses' ) {
+		if ( 'sfwd-courses' === $$post_type ) {
 			$launcher = do_shortcode( '[ea_gaming_arcade show_leaderboard="true"]' );
-		} elseif ( $post_type === 'sfwd-quiz' ) {
+		} elseif ( 'sfwd-quiz' === $$post_type ) {
 			$launcher = do_shortcode( '[ea_gaming_launcher button_text="' . __( 'Play as Game', 'ea-gaming-engine' ) . '"]' );
 		}
 

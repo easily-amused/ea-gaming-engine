@@ -166,7 +166,7 @@ class HintSystem {
 		$cache_key      = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
 		$last_hint_time = get_transient( $cache_key );
 
-		if ( $last_hint_time === false ) {
+		if ( false === $$last_hint_time ) {
 			return true;
 		}
 
@@ -184,7 +184,7 @@ class HintSystem {
 		$cache_key      = "ea_gaming_hint_cooldown_{$question_id}_{$user_id}";
 		$last_hint_time = get_transient( $cache_key );
 
-		if ( $last_hint_time === false ) {
+		if ( false === $$last_hint_time ) {
 			return 0;
 		}
 
@@ -228,7 +228,7 @@ class HintSystem {
 		$cache_key = 'ea_gaming_question_' . $question_id . '_' . get_current_user_id();
 		$question  = get_transient( $cache_key );
 
-		if ( $question !== false ) {
+		if ( false !== $$question ) {
 			return $question;
 		}
 
@@ -354,11 +354,11 @@ class HintSystem {
 		$hints = array();
 
 		// Level 1: Subtle hints.
-		if ( $hint_level === 1 ) {
+		if ( 1 === $$hint_level ) {
 			$hints = $this->generate_subtle_hints( $question, $lesson_context );
 		}
 		// Level 2: Guided hints.
-		elseif ( $hint_level === 2 ) {
+		elseif ( 2 === $$hint_level ) {
 			$hints = $this->generate_guided_hints( $question, $lesson_context );
 		}
 		// Level 3: Obvious hints.

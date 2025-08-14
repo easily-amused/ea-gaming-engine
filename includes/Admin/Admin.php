@@ -129,7 +129,7 @@ class Admin {
 	 */
 	public function enqueue_admin_assets( $hook ) {
 		// Only load on our admin pages.
-		if ( strpos( $hook, 'ea-gaming' ) === false && $hook !== 'toplevel_page_ea-gaming-engine' ) {
+		if ( false === strpos( $hook, 'ea-gaming' ) && 'toplevel_page_ea-gaming-engine' !== $hook ) {
 			return;
 		}
 
@@ -254,22 +254,39 @@ class Admin {
 		$sessions_table = $wpdb->prefix . 'ea_game_sessions';
 		$stats_table    = $wpdb->prefix . 'ea_player_stats';
 
-		$total_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
-		$active_players = $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$sessions_table}" );
-		$total_score    = $wpdb->get_var( "SELECT SUM(score) FROM {$sessions_table}" );
-		$avg_score      = $wpdb->get_var( "SELECT AVG(score) FROM {$sessions_table}" );
+		// Get cached stats or fetch from database.
+		$cache_key = 'ea_gaming_dashboard_stats';
+		$stats     = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $stats ) {
+			$total_sessions = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$sessions_table}" ) );
+			$active_players = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT user_id) FROM {$sessions_table}" ) );
+			$total_score    = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(score) FROM {$sessions_table}" ) );
+			$avg_score      = $wpdb->get_var( $wpdb->prepare( "SELECT AVG(score) FROM {$sessions_table}" ) );
+
+			$stats = compact( 'total_sessions', 'active_players', 'total_score', 'avg_score' );
+			wp_cache_set( $cache_key, $stats, 'ea_gaming_engine', 300 ); // Cache for 5 minutes.
+		} else {
+			extract( $stats );
+		}
 
 		// Get recent sessions.
-		$recent_sessions = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT s.*, u.display_name 
-				FROM {$sessions_table} s
-				LEFT JOIN {$wpdb->users} u ON s.user_id = u.ID
-				ORDER BY s.started_at DESC
-				LIMIT %d",
-				5
-			)
-		);
+		$cache_key_sessions = 'ea_gaming_recent_sessions';
+		$recent_sessions    = wp_cache_get( $cache_key_sessions, 'ea_gaming_engine' );
+
+		if ( false === $recent_sessions ) {
+			$recent_sessions = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT s.*, u.display_name 
+					FROM {$sessions_table} s
+					LEFT JOIN {$wpdb->users} u ON s.user_id = u.ID
+					ORDER BY s.started_at DESC
+					LIMIT %d",
+					5
+				)
+			);
+			wp_cache_set( $cache_key_sessions, $recent_sessions, 'ea_gaming_engine', 300 );
+		}
 
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
@@ -347,7 +364,7 @@ class Admin {
 							<td><?php echo esc_html( ucwords( str_replace( '_', ' ', $session->game_type ) ) ); ?></td>
 							<td><?php echo number_format( $session->score ); ?></td>
 							<td>
-								<span class="ea-gaming-policy-status <?php echo $session->status === 'completed' ? 'active' : 'inactive'; ?>">
+								<span class="ea-gaming-policy-status <?php echo 'completed' === $session->status ? 'active' : 'inactive'; ?>">
 									<?php echo esc_html( ucfirst( $session->status ) ); ?>
 								</span>
 							</td>
@@ -581,9 +598,13 @@ class Admin {
 		$policies_table = $wpdb->prefix . 'ea_game_policies';
 
 		// Get all policies.
-		$policies = $wpdb->get_results(
-			"SELECT * FROM {$policies_table} ORDER BY priority ASC, id DESC"
-		);
+		$cache_key_policies = 'ea_gaming_all_policies';
+		$policies           = wp_cache_get( $cache_key_policies, 'ea_gaming_engine' );
+
+		if ( false === $policies ) {
+			$policies = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$policies_table} ORDER BY priority ASC, id DESC" ) );
+			wp_cache_set( $cache_key_policies, $policies, 'ea_gaming_engine', 300 );
+		}
 
 		$policy_types = PolicyEngine::get_policy_types();
 		?>
@@ -739,19 +760,35 @@ class Admin {
 		$stats_table    = $wpdb->prefix . 'ea_player_stats';
 
 		// Get analytics data.
-		$total_sessions     = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table}" );
-		$completed_sessions = $wpdb->get_var( "SELECT COUNT(*) FROM {$sessions_table} WHERE status = 'completed'" );
-		$avg_duration       = $wpdb->get_var( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" );
-		$top_players        = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT u.display_name, ps.total_score, ps.games_played, ps.avg_score
-				FROM {$stats_table} ps
-				LEFT JOIN {$wpdb->users} u ON ps.user_id = u.ID
-				ORDER BY ps.total_score DESC
-				LIMIT %d",
-				10
-			)
-		);
+		$cache_key_analytics = 'ea_gaming_analytics_data';
+		$analytics_data      = wp_cache_get( $cache_key_analytics, 'ea_gaming_engine' );
+
+		if ( false === $analytics_data ) {
+			$total_sessions     = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$sessions_table}" ) );
+			$completed_sessions = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$sessions_table} WHERE status = 'completed'" ) );
+			$avg_duration       = $wpdb->get_var( $wpdb->prepare( "SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, ended_at)) FROM {$sessions_table} WHERE ended_at IS NOT NULL" ) );
+
+			$analytics_data = compact( 'total_sessions', 'completed_sessions', 'avg_duration' );
+			wp_cache_set( $cache_key_analytics, $analytics_data, 'ea_gaming_engine', 300 );
+		} else {
+			extract( $analytics_data );
+		}
+		$cache_key_top_players = 'ea_gaming_top_players';
+		$top_players           = wp_cache_get( $cache_key_top_players, 'ea_gaming_engine' );
+
+		if ( false === $top_players ) {
+			$top_players = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT u.display_name, ps.total_score, ps.games_played, ps.avg_score
+					FROM {$stats_table} ps
+					LEFT JOIN {$wpdb->users} u ON ps.user_id = u.ID
+					ORDER BY ps.total_score DESC
+					LIMIT %d",
+					10
+				)
+			);
+			wp_cache_set( $cache_key_top_players, $top_players, 'ea_gaming_engine', 300 );
+		}
 
 		?>
 		<div class="wrap ea-gaming-admin-wrap">
@@ -772,7 +809,7 @@ class Admin {
 				<div class="ea-gaming-analytics-card">
 					<h3><?php esc_html_e( 'Completion Rate', 'ea-gaming-engine' ); ?></h3>
 					<div class="ea-gaming-stat-value">
-						<?php echo $total_sessions > 0 ? number_format( ( $completed_sessions / $total_sessions ) * 100, 1 ) : 0; ?>%
+						<?php echo 0 < $total_sessions ? number_format( ( $completed_sessions / $total_sessions ) * 100, 1 ) : 0; ?>%
 					</div>
 				</div>
 				
@@ -1057,7 +1094,8 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$settings = $_POST['settings'] ?? array();
+		// Sanitize and validate POST data.
+		$settings = isset( $_POST['settings'] ) ? wp_unslash( $_POST['settings'] ) : array();
 
 		if ( empty( $settings ) ) {
 			wp_send_json_error( __( 'Invalid settings data', 'ea-gaming-engine' ) );
@@ -1176,23 +1214,23 @@ class Admin {
 		global $wpdb;
 
 		// Get analytics data.
-		$period    = sanitize_text_field( $_POST['period'] ?? '7days' );
-		$course_id = intval( $_POST['course_id'] ?? 0 );
+		$period    = isset( $_POST['period'] ) ? sanitize_text_field( wp_unslash( $_POST['period'] ) ) : '7days';
+		$course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
 
 		// Calculate date range.
-		$end_date = current_time( 'Y-m-d 23:59:59' );
+		$end_date = gmdate( 'Y-m-d 23:59:59' );
 		switch ( $period ) {
 			case '24hours':
-				$start_date = current_time( 'Y-m-d H:i:s', strtotime( '-24 hours' ) );
+				$start_date = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
 				break;
 			case '7days':
-				$start_date = current_time( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+				$start_date = gmdate( 'Y-m-d 00:00:00', time() - ( 7 * DAY_IN_SECONDS ) );
 				break;
 			case '30days':
-				$start_date = current_time( 'Y-m-d 00:00:00', strtotime( '-30 days' ) );
+				$start_date = gmdate( 'Y-m-d 00:00:00', time() - ( 30 * DAY_IN_SECONDS ) );
 				break;
 			default:
-				$start_date = current_time( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+				$start_date = gmdate( 'Y-m-d 00:00:00', time() - ( 7 * DAY_IN_SECONDS ) );
 		}
 
 		// Build query.
@@ -1279,7 +1317,7 @@ class Admin {
 		global $wpdb;
 
 		$export_data = array(
-			'export_date'    => current_time( 'mysql' ),
+			'export_date'    => gmdate( 'Y-m-d H:i:s' ),
 			'plugin_version' => EA_GAMING_ENGINE_VERSION,
 			'site_url'       => get_site_url(),
 			'wp_version'     => get_bloginfo( 'version' ),
@@ -1329,12 +1367,23 @@ class Admin {
 
 		// Create export file.
 		$upload_dir = wp_upload_dir();
-		$filename   = 'ea-gaming-export-' . date( 'Y-m-d-H-i-s' ) . '.json';
+		$filename   = 'ea-gaming-export-' . gmdate( 'Y-m-d-H-i-s' ) . '.json';
 		$file_path  = $upload_dir['basedir'] . '/' . $filename;
 
-		$json_data = json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+		$json_data = wp_json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 
-		if ( false === file_put_contents( $file_path, $json_data ) ) {
+		if ( ! $json_data ) {
+			wp_send_json_error( __( 'Failed to encode export data', 'ea-gaming-engine' ) );
+		}
+
+		// Use WP_Filesystem.
+		global $wp_filesystem;
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		if ( ! $wp_filesystem->put_contents( $file_path, $json_data, FS_CHMOD_FILE ) ) {
 			wp_send_json_error( __( 'Failed to create export file', 'ea-gaming-engine' ) );
 		}
 
@@ -1367,7 +1416,7 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$policy_id = intval( $_POST['policy_id'] ?? 0 );
+		$policy_id = isset( $_POST['policy_id'] ) ? intval( $_POST['policy_id'] ) : 0;
 
 		if ( ! $policy_id ) {
 			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
@@ -1402,7 +1451,7 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$policy = $_POST['policy'] ?? array();
+		$policy = isset( $_POST['policy'] ) ? wp_unslash( $_POST['policy'] ) : array();
 
 		if ( empty( $policy ) ) {
 			wp_send_json_error( __( 'Invalid policy data', 'ea-gaming-engine' ) );
@@ -1437,7 +1486,7 @@ class Admin {
 			$result = $wpdb->insert( $table, $data );
 		}
 
-		if ( $result === false ) {
+		if ( false === $result ) {
 			wp_send_json_error( __( 'Failed to save policy', 'ea-gaming-engine' ) );
 		}
 
@@ -1461,8 +1510,8 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$policy_id = intval( $_POST['policy_id'] ?? 0 );
-		$active    = intval( $_POST['active'] ?? 0 );
+		$policy_id = isset( $_POST['policy_id'] ) ? intval( $_POST['policy_id'] ) : 0;
+		$active    = isset( $_POST['active'] ) ? intval( $_POST['active'] ) : 0;
 
 		if ( ! $policy_id ) {
 			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
@@ -1477,7 +1526,7 @@ class Admin {
 			array( 'id' => $policy_id )
 		);
 
-		if ( $result === false ) {
+		if ( false === $result ) {
 			wp_send_json_error( __( 'Failed to update policy status', 'ea-gaming-engine' ) );
 		}
 
@@ -1500,7 +1549,7 @@ class Admin {
 			wp_send_json_error( __( 'Permission denied', 'ea-gaming-engine' ) );
 		}
 
-		$policy_id = intval( $_POST['policy_id'] ?? 0 );
+		$policy_id = isset( $_POST['policy_id'] ) ? intval( $_POST['policy_id'] ) : 0;
 
 		if ( ! $policy_id ) {
 			wp_send_json_error( __( 'Invalid policy ID', 'ea-gaming-engine' ) );
@@ -1514,7 +1563,7 @@ class Admin {
 			array( 'id' => $policy_id )
 		);
 
-		if ( $result === false ) {
+		if ( false === $result ) {
 			wp_send_json_error( __( 'Failed to delete policy', 'ea-gaming-engine' ) );
 		}
 

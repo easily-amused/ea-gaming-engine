@@ -112,10 +112,10 @@ class GameEngine {
 			'user_id'        => $user_id,
 			'course_id'      => $course_id,
 			'game_type'      => $game_type,
-			'game_mode'      => $options['game_mode'] ?? 'arcade',
-			'theme_used'     => $options['theme'] ?? get_option( 'ea_gaming_engine_default_theme', 'playful' ),
-			'profile_preset' => $options['preset'] ?? get_option( 'ea_gaming_engine_default_preset', 'classic' ),
-			'metadata'       => wp_json_encode( $options['metadata'] ?? array() ),
+			'game_mode'      => isset( $options['game_mode'] ) ? $options['game_mode'] : 'arcade',
+			'theme_used'     => isset( $options['theme'] ) ? $options['theme'] : get_option( 'ea_gaming_engine_default_theme', 'playful' ),
+			'profile_preset' => isset( $options['preset'] ) ? $options['preset'] : get_option( 'ea_gaming_engine_default_preset', 'classic' ),
+			'metadata'       => wp_json_encode( isset( $options['metadata'] ) ? $options['metadata'] : array() ),
 		);
 
 		$wpdb->insert( $table, $data );
@@ -123,7 +123,7 @@ class GameEngine {
 		$session_id = $wpdb->insert_id;
 
 		// Trigger action.
-		do_action( 'ea_gaming_session_started', $session_id, $user_id, $course_id, $game_type );
+		do_action( 'ea_gaming_engine_session_started', $session_id, $user_id, $course_id, $game_type );
 
 		return $session_id;
 	}
@@ -141,12 +141,18 @@ class GameEngine {
 		$table = $wpdb->prefix . 'ea_game_sessions';
 
 		// Get session data.
-		$session = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM $table WHERE id = %d",
-				$session_id
-			)
-		);
+		$cache_key = 'ea_gaming_session_' . $session_id;
+		$session   = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $session ) {
+			$session = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$table} WHERE id = %d",
+					$session_id
+				)
+			);
+			wp_cache_set( $cache_key, $session, 'ea_gaming_engine', 300 );
+		}
 
 		if ( ! $session ) {
 			return false;
@@ -157,9 +163,9 @@ class GameEngine {
 
 		// Update session.
 		$data = array(
-			'score'             => $stats['score'] ?? 0,
-			'questions_correct' => $stats['questions_correct'] ?? 0,
-			'questions_total'   => $stats['questions_total'] ?? 0,
+			'score'             => isset( $stats['score'] ) ? $stats['score'] : 0,
+			'questions_correct' => isset( $stats['questions_correct'] ) ? $stats['questions_correct'] : 0,
+			'questions_total'   => isset( $stats['questions_total'] ) ? $stats['questions_total'] : 0,
 			'duration'          => $duration,
 			'completed'         => 1,
 		);
@@ -174,7 +180,7 @@ class GameEngine {
 		$this->update_player_stats( $session->user_id, $session->course_id, $stats );
 
 		// Trigger action.
-		do_action( 'ea_gaming_session_ended', $session_id, $session->user_id, $session->course_id, $stats );
+		do_action( 'ea_gaming_engine_session_ended', $session_id, $session->user_id, $session->course_id, $stats );
 
 		return true;
 	}
@@ -193,23 +199,29 @@ class GameEngine {
 		$table = $wpdb->prefix . 'ea_player_stats';
 
 		// Get existing stats.
-		$player_stats = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM $table WHERE user_id = %d AND course_id = %d",
-				$user_id,
-				$course_id
-			)
-		);
+		$cache_key    = 'ea_gaming_player_stats_' . $user_id . '_' . $course_id;
+		$player_stats = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $player_stats ) {
+			$player_stats = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$table} WHERE user_id = %d AND course_id = %d",
+					$user_id,
+					$course_id
+				)
+			);
+			wp_cache_set( $cache_key, $player_stats, 'ea_gaming_engine', 600 );
+		}
 
 		if ( $player_stats ) {
 			// Update existing stats.
 			$data = array(
 				'total_games_played'       => $player_stats->total_games_played + 1,
-				'total_score'              => $player_stats->total_score + ( $stats['score'] ?? 0 ),
-				'total_questions_answered' => $player_stats->total_questions_answered + ( $stats['questions_total'] ?? 0 ),
-				'total_questions_correct'  => $player_stats->total_questions_correct + ( $stats['questions_correct'] ?? 0 ),
-				'total_time_played'        => $player_stats->total_time_played + ( $stats['duration'] ?? 0 ),
-				'last_played'              => current_time( 'mysql' ),
+				'total_score'              => $player_stats->total_score + ( isset( $stats['score'] ) ? $stats['score'] : 0 ),
+				'total_questions_answered' => $player_stats->total_questions_answered + ( isset( $stats['questions_total'] ) ? $stats['questions_total'] : 0 ),
+				'total_questions_correct'  => $player_stats->total_questions_correct + ( isset( $stats['questions_correct'] ) ? $stats['questions_correct'] : 0 ),
+				'total_time_played'        => $player_stats->total_time_played + ( isset( $stats['duration'] ) ? $stats['duration'] : 0 ),
+				'last_played'              => gmdate( 'Y-m-d H:i:s' ),
 			);
 
 			// Update streak.
@@ -236,13 +248,13 @@ class GameEngine {
 				'user_id'                  => $user_id,
 				'course_id'                => $course_id,
 				'total_games_played'       => 1,
-				'total_score'              => $stats['score'] ?? 0,
-				'total_questions_answered' => $stats['questions_total'] ?? 0,
-				'total_questions_correct'  => $stats['questions_correct'] ?? 0,
-				'total_time_played'        => $stats['duration'] ?? 0,
+				'total_score'              => isset( $stats['score'] ) ? $stats['score'] : 0,
+				'total_questions_answered' => isset( $stats['questions_total'] ) ? $stats['questions_total'] : 0,
+				'total_questions_correct'  => isset( $stats['questions_correct'] ) ? $stats['questions_correct'] : 0,
+				'total_time_played'        => isset( $stats['duration'] ) ? $stats['duration'] : 0,
 				'streak_current'           => ( isset( $stats['perfect'] ) && $stats['perfect'] ) ? 1 : 0,
 				'streak_best'              => ( isset( $stats['perfect'] ) && $stats['perfect'] ) ? 1 : 0,
-				'last_played'              => current_time( 'mysql' ),
+				'last_played'              => gmdate( 'Y-m-d H:i:s' ),
 			);
 
 			$wpdb->insert( $table, $data );
@@ -262,31 +274,45 @@ class GameEngine {
 		$table = $wpdb->prefix . 'ea_player_stats';
 
 		if ( $course_id ) {
-			return $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT * FROM $table WHERE user_id = %d AND course_id = %d",
-					$user_id,
-					$course_id
-				)
-			);
+			$cache_key = 'ea_gaming_player_stats_' . $user_id . '_' . $course_id;
+			$stats     = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+			if ( false === $stats ) {
+				$stats = $wpdb->get_row(
+					$wpdb->prepare(
+						"SELECT * FROM {$table} WHERE user_id = %d AND course_id = %d",
+						$user_id,
+						$course_id
+					)
+				);
+				wp_cache_set( $cache_key, $stats, 'ea_gaming_engine', 600 );
+			}
+			return $stats;
 		}
 
 		// Get overall stats.
-		return $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT 
-					SUM(total_games_played) as total_games_played,
-					SUM(total_score) as total_score,
-					SUM(total_questions_answered) as total_questions_answered,
-					SUM(total_questions_correct) as total_questions_correct,
-					SUM(total_time_played) as total_time_played,
-					MAX(streak_best) as streak_best,
-					MAX(last_played) as last_played
-				FROM $table 
-				WHERE user_id = %d",
-				$user_id
-			)
-		);
+		$cache_key     = 'ea_gaming_overall_stats_' . $user_id;
+		$overall_stats = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $overall_stats ) {
+			$overall_stats = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT 
+						SUM(total_games_played) as total_games_played,
+						SUM(total_score) as total_score,
+						SUM(total_questions_answered) as total_questions_answered,
+						SUM(total_questions_correct) as total_questions_correct,
+						SUM(total_time_played) as total_time_played,
+						MAX(streak_best) as streak_best,
+						MAX(last_played) as last_played
+					FROM {$table} 
+					WHERE user_id = %d",
+					$user_id
+				)
+			);
+			wp_cache_set( $cache_key, $overall_stats, 'ea_gaming_engine', 600 );
+		}
+		return $overall_stats;
 	}
 
 	/**
@@ -298,17 +324,17 @@ class GameEngine {
 		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
 
 		$user_id   = get_current_user_id();
-		$course_id = intval( $_POST['course_id'] ?? 0 );
-		$game_type = sanitize_text_field( $_POST['game_type'] ?? '' );
+		$course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
+		$game_type = isset( $_POST['game_type'] ) ? sanitize_text_field( wp_unslash( $_POST['game_type'] ) ) : '';
 
 		if ( ! $user_id || ! $course_id || ! $game_type ) {
 			wp_send_json_error( __( 'Invalid parameters', 'ea-gaming-engine' ) );
 		}
 
 		$options = array(
-			'theme'     => sanitize_text_field( $_POST['theme'] ?? '' ),
-			'preset'    => sanitize_text_field( $_POST['preset'] ?? '' ),
-			'game_mode' => sanitize_text_field( $_POST['game_mode'] ?? 'arcade' ),
+			'theme'     => isset( $_POST['theme'] ) ? sanitize_text_field( wp_unslash( $_POST['theme'] ) ) : '',
+			'preset'    => isset( $_POST['preset'] ) ? sanitize_text_field( wp_unslash( $_POST['preset'] ) ) : '',
+			'game_mode' => isset( $_POST['game_mode'] ) ? sanitize_text_field( wp_unslash( $_POST['game_mode'] ) ) : 'arcade',
 		);
 
 		$session_id = $this->start_session( $user_id, $course_id, $game_type, $options );
@@ -333,17 +359,17 @@ class GameEngine {
 	public function ajax_end_session() {
 		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
 
-		$session_id = intval( $_POST['session_id'] ?? 0 );
+		$session_id = isset( $_POST['session_id'] ) ? intval( $_POST['session_id'] ) : 0;
 
 		if ( ! $session_id ) {
 			wp_send_json_error( __( 'Invalid session ID', 'ea-gaming-engine' ) );
 		}
 
 		$stats = array(
-			'score'             => intval( $_POST['score'] ?? 0 ),
-			'questions_correct' => intval( $_POST['questions_correct'] ?? 0 ),
-			'questions_total'   => intval( $_POST['questions_total'] ?? 0 ),
-			'perfect'           => (bool) ( $_POST['perfect'] ?? false ),
+			'score'             => isset( $_POST['score'] ) ? intval( $_POST['score'] ) : 0,
+			'questions_correct' => isset( $_POST['questions_correct'] ) ? intval( $_POST['questions_correct'] ) : 0,
+			'questions_total'   => isset( $_POST['questions_total'] ) ? intval( $_POST['questions_total'] ) : 0,
+			'perfect'           => isset( $_POST['perfect'] ) ? (bool) wp_unslash( $_POST['perfect'] ) : false,
 		);
 
 		if ( $this->end_session( $session_id, $stats ) ) {
@@ -365,7 +391,7 @@ class GameEngine {
 	public function ajax_update_session() {
 		check_ajax_referer( 'ea-gaming-engine', 'nonce' );
 
-		$session_id = intval( $_POST['session_id'] ?? 0 );
+		$session_id = isset( $_POST['session_id'] ) ? intval( $_POST['session_id'] ) : 0;
 
 		if ( ! $session_id ) {
 			wp_send_json_error( __( 'Invalid session ID', 'ea-gaming-engine' ) );
@@ -376,9 +402,9 @@ class GameEngine {
 		$table = $wpdb->prefix . 'ea_game_sessions';
 
 		$data = array(
-			'score'             => intval( $_POST['score'] ?? 0 ),
-			'questions_correct' => intval( $_POST['questions_correct'] ?? 0 ),
-			'questions_total'   => intval( $_POST['questions_total'] ?? 0 ),
+			'score'             => isset( $_POST['score'] ) ? intval( $_POST['score'] ) : 0,
+			'questions_correct' => isset( $_POST['questions_correct'] ) ? intval( $_POST['questions_correct'] ) : 0,
+			'questions_total'   => isset( $_POST['questions_total'] ) ? intval( $_POST['questions_total'] ) : 0,
 		);
 
 		$wpdb->update(

@@ -515,7 +515,7 @@ class RestAPI {
 			array( 'id' => $session_id )
 		);
 
-		if ( $updated === false ) {
+		if ( false === $updated ) {
 			return new \WP_Error(
 				'update_failed',
 				__( 'Failed to update session.', 'ea-gaming-engine' ),

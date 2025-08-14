@@ -89,9 +89,15 @@ class PolicyEngine {
 		$table = $wpdb->prefix . 'ea_game_policies';
 
 		// Check if default policies exist.
-		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table" );
+		$cache_key = 'ea_gaming_policy_count';
+		$count     = wp_cache_get( $cache_key, 'ea_gaming_engine' );
 
-		if ( $count == 0 ) {
+		if ( false === $count ) {
+			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table}" ) );
+			wp_cache_set( $cache_key, $count, 'ea_gaming_engine', 600 );
+		}
+
+		if ( 0 === $count ) {
 			$this->create_default_policies();
 		}
 	}
@@ -175,18 +181,26 @@ class PolicyEngine {
 	 * @return array
 	 */
 	public function get_active_policies( $force_refresh = false ) {
-		if ( $this->active_policies !== null && ! $force_refresh ) {
+		if ( null !== $this->active_policies && ! $force_refresh ) {
 			return $this->active_policies;
 		}
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_policies';
 
-		$policies = $wpdb->get_results(
-			"SELECT * FROM $table 
-			WHERE active = 1 
-			ORDER BY priority ASC, id ASC"
-		);
+		$cache_key = 'ea_gaming_active_policies';
+		$policies  = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $policies || $force_refresh ) {
+			$policies = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM {$table} 
+					WHERE active = 1 
+					ORDER BY priority ASC, id ASC"
+				)
+			);
+			wp_cache_set( $cache_key, $policies, 'ea_gaming_engine', 600 );
+		}
 
 		$this->active_policies = array();
 
@@ -227,7 +241,7 @@ class PolicyEngine {
 			}
 		}
 
-		return apply_filters( 'ea_gaming_can_user_play', true, $user_id, $course_id );
+		return apply_filters( 'ea_gaming_engine_can_user_play', true, $user_id, $course_id );
 	}
 
 	/**
@@ -273,7 +287,7 @@ class PolicyEngine {
 			$context['parent_controls'] = $this->get_parent_controls( $user_id );
 		}
 
-		return apply_filters( 'ea_gaming_policy_context', $context, $user_id, $course_id );
+		return apply_filters( 'ea_gaming_engine_policy_context', $context, $user_id, $course_id );
 	}
 
 	/**
@@ -316,7 +330,7 @@ class PolicyEngine {
 				break;
 
 			default:
-				$result = apply_filters( 'ea_gaming_evaluate_custom_policy', $result, $policy, $context );
+				$result = apply_filters( 'ea_gaming_engine_evaluate_custom_policy', $result, $policy, $context );
 		}
 
 		return $result;
@@ -386,15 +400,13 @@ class PolicyEngine {
 					'actions' => $policy['actions'],
 				);
 			}
-		} else {
+		} elseif ( $this->is_time_between( $current_time, $start, $end ) ) {
 			// Normal time range.
-			if ( $this->is_time_between( $current_time, $start, $end ) ) {
-				return array(
-					'block'   => true,
-					'message' => $policy['actions']['message'] ?? __( 'Games are not available during quiet hours.', 'ea-gaming-engine' ),
-					'actions' => $policy['actions'],
-				);
-			}
+			return array(
+				'block'   => true,
+				'message' => $policy['actions']['message'] ?? __( 'Games are not available during quiet hours.', 'ea-gaming-engine' ),
+				'actions' => $policy['actions'],
+			);
 		}
 
 		return array(
@@ -643,26 +655,32 @@ class PolicyEngine {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ea_game_sessions';
 
-		$today_start = current_time( 'Y-m-d 00:00:00' );
-		$today_end   = current_time( 'Y-m-d 23:59:59' );
+		$today_start = gmdate( 'Y-m-d 00:00:00' );
+		$today_end   = gmdate( 'Y-m-d 23:59:59' );
 
-		$stats = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT 
-					COUNT(*) as games_played,
-					SUM(duration) as time_played
-				FROM $table
-				WHERE user_id = %d
-				AND created_at BETWEEN %s AND %s",
-				$user_id,
-				$today_start,
-				$today_end
-			)
-		);
+		$cache_key = 'ea_gaming_today_stats_' . $user_id . '_' . gmdate( 'Ymd' );
+		$stats     = wp_cache_get( $cache_key, 'ea_gaming_engine' );
+
+		if ( false === $stats ) {
+			$stats = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT 
+						COUNT(*) as games_played,
+						SUM(duration) as time_played
+					FROM {$table}
+					WHERE user_id = %d
+					AND created_at BETWEEN %s AND %s",
+					$user_id,
+					$today_start,
+					$today_end
+				)
+			);
+			wp_cache_set( $cache_key, $stats, 'ea_gaming_engine', 3600 ); // Cache for 1 hour.
+		}
 
 		return array(
-			'games_played' => $stats->games_played ?? 0,
-			'time_played'  => $stats->time_played ?? 0,
+			'games_played' => isset( $stats->games_played ) ? $stats->games_played : 0,
+			'time_played'  => isset( $stats->time_played ) ? $stats->time_played : 0,
 		);
 	}
 
@@ -688,7 +706,7 @@ class PolicyEngine {
 	 */
 	private function get_parent_controls( $user_id ) {
 		// This would integrate with Student-Parent Access plugin.
-		return apply_filters( 'ea_gaming_parent_controls', array(), $user_id );
+		return apply_filters( 'ea_gaming_engine_parent_controls', array(), $user_id );
 	}
 
 	/**
@@ -698,7 +716,8 @@ class PolicyEngine {
 	 * @return int
 	 */
 	private function get_user_tickets( $user_id ) {
-		return get_user_meta( $user_id, 'ea_gaming_tickets', true ) ?: 0;
+		$tickets = get_user_meta( $user_id, 'ea_gaming_tickets', true );
+		return $tickets ? $tickets : 0;
 	}
 
 	/**
@@ -725,6 +744,6 @@ class PolicyEngine {
 	public function evaluate_policies() {
 		// This would run periodic policy checks.
 		// For example, sending notifications when free play starts.
-		do_action( 'ea_gaming_policies_evaluated' );
+		do_action( 'ea_gaming_engine_policies_evaluated' );
 	}
 }
