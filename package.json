@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "Transform LearnDash courses into interactive educational games",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
     "build:games": "cd assets/games && npm run build",
     "dev:games": "cd assets/games && npm run dev",
-    "lint": "eslint assets/js assets/games/src --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint assets/js assets/games/src --ext .js,.jsx,.ts,.tsx --fix",
+    "lint": "eslint assets/js assets/games/src",
+    "lint:fix": "eslint assets/js assets/games/src --fix",
     "i18n:make-pot": "wp i18n make-pot . languages/ea-gaming-engine.pot --domain=ea-gaming-engine --exclude=node_modules,vendor,assets/dist",
     "i18n:make-json": "wp i18n make-json languages --no-purge"
   },
