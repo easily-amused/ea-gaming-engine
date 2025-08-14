@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Transform LearnDash courses into interactive educational games",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
