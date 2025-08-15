@@ -402,7 +402,7 @@ class RestAPI {
 		$user_id   = get_current_user_id();
 		$course_id = isset( $params['course_id'] ) ? intval( $params['course_id'] ) : 0;
 		$game_type = isset( $params['game_type'] ) ? sanitize_text_field( $params['game_type'] ) : '';
-		
+
 		// Check for required game_type
 		if ( empty( $game_type ) ) {
 			return new \WP_Error(
@@ -422,7 +422,7 @@ class RestAPI {
 
 		// Check for admin preview mode
 		$is_preview = isset( $params['preview'] ) && $params['preview'];
-		
+
 		if ( $is_preview && current_user_can( 'manage_options' ) ) {
 			// Return a preview session without database write
 			return rest_ensure_response(
@@ -452,7 +452,7 @@ class RestAPI {
 			$quizzes = learndash_get_course_quiz_list( $course_id );
 			if ( ! empty( $quizzes ) ) {
 				$first_quiz = reset( $quizzes );
-				$quiz_id = isset( $first_quiz['post']->ID ) ? $first_quiz['post']->ID : null;
+				$quiz_id    = isset( $first_quiz['post']->ID ) ? $first_quiz['post']->ID : null;
 			}
 		}
 
@@ -580,7 +580,7 @@ class RestAPI {
 	 */
 	public function end_session( $request ) {
 		$session_id = $request->get_param( 'id' );
-		
+
 		// Get parameters from JSON body or form params
 		$params = $request->get_json_params();
 		if ( empty( $params ) ) {

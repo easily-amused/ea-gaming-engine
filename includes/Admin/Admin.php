@@ -152,7 +152,7 @@ class Admin {
 				'3.80.0',
 				true
 			);
-			
+
 			// Games bundle depends on Phaser.
 			wp_enqueue_script(
 				'ea-gaming-games',
@@ -240,9 +240,9 @@ class Admin {
 
 		// Add game catalog data on games page.
 		if ( strpos( $hook, 'page_ea-gaming-games' ) !== false ) {
-			$game_engine = GameEngine::get_instance();
+			$game_engine   = GameEngine::get_instance();
 			$theme_manager = ThemeManager::get_instance();
-			
+
 			// Get available LearnDash courses.
 			$courses = array();
 			if ( function_exists( 'learndash_get_courses' ) ) {
@@ -254,13 +254,16 @@ class Admin {
 					);
 				}
 			}
-			
+
 			// Add demo course option.
-			array_unshift( $courses, array(
-				'id'   => 0,
-				'name' => __( 'Demo Course', 'ea-gaming-engine' ),
-			) );
-			
+			array_unshift(
+				$courses,
+				array(
+					'id'   => 0,
+					'name' => __( 'Demo Course', 'ea-gaming-engine' ),
+				)
+			);
+
 			wp_localize_script(
 				'ea-gaming-games',
 				'eaGamingCatalog',
