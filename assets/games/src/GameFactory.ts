@@ -2,6 +2,8 @@ import { EAGameBase, GameConfig } from './index';
 import { WhackAQuestion } from './games/WhackAQuestion';
 import { TicTacTactics } from './games/TicTacTactics';
 import { TargetTrainer } from './games/TargetTrainer';
+import { Snake } from './games/Snake';
+import { Tetris } from './games/Tetris';
 
 /**
  * Game Factory - Creates game instances based on game type
@@ -18,6 +20,10 @@ export class GameFactory {
 				return new TicTacTactics('tic-tac-tactics', config);
 			case 'target_trainer':
 				return new TargetTrainer('target-trainer', config);
+			case 'snake':
+				return new Snake('snake', config);
+			case 'tetris':
+				return new Tetris('tetris', config);
 			default:
 				throw new Error(`Unknown game type: ${gameType}`);
 		}
@@ -42,6 +48,16 @@ export class GameFactory {
 				id: 'target_trainer',
 				name: 'Target Trainer',
 				description: 'Aim and shoot at targets with correct answers to score points'
+			},
+			{
+				id: 'snake',
+				name: 'Snake',
+				description: 'Classic snake game - grow longer by eating food'
+			},
+			{
+				id: 'tetris',
+				name: 'Tetris',
+				description: 'Stack falling blocks to clear lines and score high'
 			}
 		];
 	}
