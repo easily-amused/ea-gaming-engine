@@ -9,6 +9,8 @@ import '../../css/admin.css';
 import './settings';
 import './dashboard';
 import './analytics';
+import './games';
+import './policies';
 
 // Initialize admin when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
