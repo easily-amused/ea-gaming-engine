@@ -142,6 +142,34 @@ class Admin {
 		wp_enqueue_script( 'wp-data' );
 		wp_enqueue_script( 'wp-notices' );
 
+		// Enqueue Phaser and games bundle on games page.
+		if ( strpos( $hook, 'page_ea-gaming-games' ) !== false ) {
+			// Enqueue Phaser.
+			wp_enqueue_script(
+				'ea-gaming-phaser',
+				EA_GAMING_ENGINE_URL . 'assets/dist/js/phaser.min.js',
+				array(),
+				EA_GAMING_ENGINE_VERSION,
+				true
+			);
+
+			// Enqueue games bundle.
+			wp_enqueue_script(
+				'ea-gaming-games',
+				EA_GAMING_ENGINE_URL . 'assets/dist/js/games.min.js',
+				array( 'ea-gaming-phaser' ),
+				EA_GAMING_ENGINE_VERSION,
+				true
+			);
+
+			// Add nonce for games REST API calls.
+			wp_add_inline_script(
+				'ea-gaming-games',
+				'window.eaGamingNonce = "' . wp_create_nonce( 'wp_rest' ) . '";',
+				'before'
+			);
+		}
+
 		// Enqueue WordPress styles.
 		wp_enqueue_style( 'wp-components' );
 		wp_enqueue_style( 'wp-notices' );
@@ -209,6 +237,41 @@ class Admin {
 			'window.eaGamingAdminReady = true;',
 			'after'
 		);
+
+		// Add game catalog data on games page.
+		if ( strpos( $hook, 'page_ea-gaming-games' ) !== false ) {
+			$game_engine = GameEngine::get_instance();
+			$theme_manager = ThemeManager::get_instance();
+			
+			// Get available LearnDash courses.
+			$courses = array();
+			if ( function_exists( 'learndash_get_courses' ) ) {
+				$ld_courses = learndash_get_courses( array( 'posts_per_page' => -1 ) );
+				foreach ( $ld_courses as $course ) {
+					$courses[] = array(
+						'id'   => $course->ID,
+						'name' => $course->post_title,
+					);
+				}
+			}
+			
+			// Add demo course option.
+			array_unshift( $courses, array(
+				'id'   => 0,
+				'name' => __( 'Demo Course', 'ea-gaming-engine' ),
+			) );
+			
+			wp_localize_script(
+				'ea-gaming-games',
+				'eaGamingCatalog',
+				array(
+					'games'   => $game_engine->get_game_types(),
+					'courses' => $courses,
+					'themes'  => $theme_manager->get_all_themes(),
+					'presets' => $theme_manager->get_all_presets(),
+				)
+			);
+		}
 	}
 
 	/**
@@ -881,7 +944,7 @@ class Admin {
 				
 				<div class="ea-gaming-games-grid">
 					<?php foreach ( $game_types as $game_id => $game ) : ?>
-					<div class="ea-gaming-game-card">
+					<div class="ea-gaming-game-card" data-game-id="<?php echo esc_attr( $game_id ); ?>">
 						<div class="ea-gaming-game-card-header">
 							<h3><?php echo esc_html( $game['name'] ); ?></h3>
 						</div>
