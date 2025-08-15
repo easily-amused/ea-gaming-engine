@@ -144,16 +144,16 @@ class Admin {
 
 		// Enqueue Phaser and games bundle on games page.
 		if ( strpos( $hook, 'page_ea-gaming-games' ) !== false ) {
-			// Enqueue Phaser.
+			// Load UMD build of Phaser.
 			wp_enqueue_script(
 				'ea-gaming-phaser',
-				EA_GAMING_ENGINE_URL . 'assets/dist/js/phaser.min.js',
+				EA_GAMING_ENGINE_URL . 'assets/vendor/phaser.min.js',
 				array(),
-				EA_GAMING_ENGINE_VERSION,
+				'3.80.0',
 				true
 			);
-
-			// Enqueue games bundle.
+			
+			// Games bundle depends on Phaser.
 			wp_enqueue_script(
 				'ea-gaming-games',
 				EA_GAMING_ENGINE_URL . 'assets/dist/js/games.min.js',

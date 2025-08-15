@@ -1,4 +1,4 @@
-import { EAGameBase, GameConfig } from './index';
+import { EAGameBase, GameConfig } from './core/EAGameBase';
 import { WhackAQuestion } from './games/WhackAQuestion';
 import { TicTacTactics } from './games/TicTacTactics';
 import { TargetTrainer } from './games/TargetTrainer';

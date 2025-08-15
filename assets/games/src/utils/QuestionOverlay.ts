@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from './PhaserShim';
 
 interface Question {
     id: number;

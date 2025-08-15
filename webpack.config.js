@@ -124,15 +124,11 @@ module.exports = (env, argv) => {
         chunks: 'all',
         cacheGroups: {
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
+            test: /[\\/]node_modules[\\/](?!phaser)/,
             name: 'vendor',
             priority: 10,
           },
-          phaser: {
-            test: /[\\/]node_modules[\\/]phaser[\\/]/,
-            name: 'phaser',
-            priority: 20,
-          },
+          // Remove phaser split chunk - it will be external
           react: {
             test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
             name: 'react',
@@ -143,6 +139,8 @@ module.exports = (env, argv) => {
     },
     
     externals: {
+      // Phaser will be loaded as external global
+      phaser: 'Phaser',
       // WordPress externals
       '@wordpress/api-fetch': 'wp.apiFetch',
       '@wordpress/blocks': 'wp.blocks',

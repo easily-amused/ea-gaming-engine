@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { EAGameBase, GameConfig } from '../index';
+import Phaser from '../utils/PhaserShim';
+import { EAGameBase, GameConfig } from '../core/EAGameBase';
 
 export class Pong extends EAGameBase {
 	private playerPaddle?: Phaser.GameObjects.Rectangle;

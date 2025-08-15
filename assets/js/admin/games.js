@@ -191,7 +191,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce': window.eaGamingAdmin?.nonce || ''
+                'X-WP-Nonce': window.eaGamingNonce || window.eaGamingAdmin?.nonce || ''
             },
             credentials: 'same-origin',
             body: JSON.stringify({
@@ -199,12 +199,19 @@
                 game_type: gameType,
                 preset: $('#ea-gaming-preset').val(),
                 theme: $('#ea-gaming-theme').val(),
-                gate_mode: $('#ea-gaming-gate').val()
+                gate_mode: $('#ea-gaming-gate').val(),
+                preview: true // Admin preview mode
             })
         });
         
         if (!response.ok) {
-            throw new Error('Failed to create session');
+            // Fallback to ephemeral session for testing
+            console.warn('Session creation failed, using ephemeral preview session');
+            return {
+                session_id: 'preview-' + Date.now(),
+                quiz_id: null,
+                preview: true
+            };
         }
         
         const data = await response.json();

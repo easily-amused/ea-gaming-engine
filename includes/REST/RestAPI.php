@@ -393,16 +393,47 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function create_session( $request ) {
+		// Get parameters from JSON body or form params
+		$params = $request->get_json_params();
+		if ( empty( $params ) ) {
+			$params = $request->get_params();
+		}
+
 		$user_id   = get_current_user_id();
-		$course_id = $request->get_param( 'course_id' );
-		$game_type = $request->get_param( 'game_type' );
+		$course_id = isset( $params['course_id'] ) ? intval( $params['course_id'] ) : 0;
+		$game_type = isset( $params['game_type'] ) ? sanitize_text_field( $params['game_type'] ) : '';
+		
+		// Check for required game_type
+		if ( empty( $game_type ) ) {
+			return new \WP_Error(
+				'missing_game_type',
+				__( 'Game type is required.', 'ea-gaming-engine' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		$options = array(
-			'game_mode' => $request->get_param( 'game_mode' ),
-			'theme'     => $request->get_param( 'theme' ),
-			'preset'    => $request->get_param( 'preset' ),
-			'metadata'  => $request->get_param( 'metadata' ),
+			'game_mode' => isset( $params['game_mode'] ) ? sanitize_text_field( $params['game_mode'] ) : '',
+			'theme'     => isset( $params['theme'] ) ? sanitize_text_field( $params['theme'] ) : 'playful',
+			'preset'    => isset( $params['preset'] ) ? sanitize_text_field( $params['preset'] ) : 'classic',
+			'gate_mode' => isset( $params['gate_mode'] ) ? sanitize_text_field( $params['gate_mode'] ) : 'none',
+			'metadata'  => isset( $params['metadata'] ) ? $params['metadata'] : array(),
 		);
+
+		// Check for admin preview mode
+		$is_preview = isset( $params['preview'] ) && $params['preview'];
+		
+		if ( $is_preview && current_user_can( 'manage_options' ) ) {
+			// Return a preview session without database write
+			return rest_ensure_response(
+				array(
+					'session_id' => 'preview-' . wp_generate_uuid4(),
+					'quiz_id'    => null,
+					'preview'    => true,
+					'message'    => __( 'Preview session created.', 'ea-gaming-engine' ),
+				)
+			);
+		}
 
 		$game_engine = GameEngine::get_instance();
 		$session_id  = $game_engine->start_session( $user_id, $course_id, $game_type, $options );
@@ -415,9 +446,20 @@ class RestAPI {
 			);
 		}
 
+		// Get quiz ID if available
+		$quiz_id = null;
+		if ( $course_id && function_exists( 'learndash_get_course_quiz_list' ) ) {
+			$quizzes = learndash_get_course_quiz_list( $course_id );
+			if ( ! empty( $quizzes ) ) {
+				$first_quiz = reset( $quizzes );
+				$quiz_id = isset( $first_quiz['post']->ID ) ? $first_quiz['post']->ID : null;
+			}
+		}
+
 		return rest_ensure_response(
 			array(
 				'session_id' => $session_id,
+				'quiz_id'    => $quiz_id,
 				'message'    => __( 'Session created successfully.', 'ea-gaming-engine' ),
 			)
 		);
@@ -538,12 +580,28 @@ class RestAPI {
 	 */
 	public function end_session( $request ) {
 		$session_id = $request->get_param( 'id' );
+		
+		// Get parameters from JSON body or form params
+		$params = $request->get_json_params();
+		if ( empty( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		// Handle preview sessions (non-numeric IDs)
+		if ( ! is_numeric( $session_id ) || strpos( $session_id, 'preview-' ) === 0 ) {
+			return rest_ensure_response(
+				array(
+					'message' => __( 'Preview session ended.', 'ea-gaming-engine' ),
+					'preview' => true,
+				)
+			);
+		}
 
 		$stats = array(
-			'score'             => intval( $request->get_param( 'score' ) ?? 0 ),
-			'questions_correct' => intval( $request->get_param( 'questions_correct' ) ?? 0 ),
-			'questions_total'   => intval( $request->get_param( 'questions_total' ) ?? 0 ),
-			'perfect'           => (bool) ( $request->get_param( 'perfect' ) ?? false ),
+			'score'             => isset( $params['score'] ) ? intval( $params['score'] ) : 0,
+			'questions_correct' => isset( $params['questions_correct'] ) ? intval( $params['questions_correct'] ) : 0,
+			'questions_total'   => isset( $params['questions_total'] ) ? intval( $params['questions_total'] ) : 0,
+			'perfect'           => isset( $params['perfect'] ) ? (bool) $params['perfect'] : false,
 		);
 
 		$game_engine = GameEngine::get_instance();

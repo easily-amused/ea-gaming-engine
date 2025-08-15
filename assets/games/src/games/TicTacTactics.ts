@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { EAGameBase, GameConfig } from '../index';
+import Phaser from '../utils/PhaserShim';
+import { EAGameBase, GameConfig } from '../core/EAGameBase';
 
 interface Question {
 	id: number;
@@ -142,20 +142,8 @@ export class TicTacTactics extends EAGameBase {
 	preload(): void {
 		super.preload();
 
-		// Load placeholder sprites - fallback to procedural graphics
-		this.load.on('loaderror', () => {
-			console.warn('Tic-Tac-Tactics sprites not found, using fallback graphics');
-		});
-
-		try {
-			this.load.image('tictac-board', '/assets/games/sprites/tictac/board.png');
-			this.load.image('tictac-cell', '/assets/games/sprites/tictac/cell.png');
-			this.load.image('tictac-x', '/assets/games/sprites/tictac/x-mark.png');
-			this.load.image('tictac-o', '/assets/games/sprites/tictac/o-mark.png');
-			this.load.image('tictac-background', '/assets/games/sprites/tictac/background.png');
-		} catch (error) {
-			console.warn('Error loading sprites:', error);
-		}
+		// Skip loading sprites for now - use fallback graphics
+		// TODO: Add actual sprite assets when available
 	}
 
 	create(): void {
