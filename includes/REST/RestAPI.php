@@ -47,7 +47,7 @@ class RestAPI {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'create_session' ),
-					'permission_callback' => array( $this, 'check_logged_in' ),
+					'permission_callback' => array( $this, 'check_session_permission' ),
 					'args'                => $this->get_session_args(),
 				),
 				array(
@@ -321,6 +321,41 @@ class RestAPI {
 	}
 
 	/**
+	 * Check session creation permission
+	 * Allows preview mode for admins and logged-in users
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool|\WP_Error
+	 */
+	public function check_session_permission( $request ) {
+		// Allow if user can manage options (admin)
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+		
+		// Allow if logged in
+		if ( is_user_logged_in() ) {
+			return true;
+		}
+		
+		// For non-logged in users, only allow if preview mode
+		$params = $request->get_json_params();
+		if ( empty( $params ) ) {
+			$params = $request->get_params();
+		}
+		
+		if ( isset( $params['preview'] ) && $params['preview'] ) {
+			return true;
+		}
+		
+		return new \WP_Error(
+			'rest_not_logged_in',
+			__( 'You must be logged in to access this endpoint.', 'ea-gaming-engine' ),
+			array( 'status' => 401 )
+		);
+	}
+
+	/**
 	 * Check session access
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -420,10 +455,10 @@ class RestAPI {
 			'metadata'  => isset( $params['metadata'] ) ? $params['metadata'] : array(),
 		);
 
-		// Check for admin preview mode
+		// Check for preview mode
 		$is_preview = isset( $params['preview'] ) && $params['preview'];
 
-		if ( $is_preview && current_user_can( 'manage_options' ) ) {
+		if ( $is_preview ) {
 			// Return a preview session without database write
 			return rest_ensure_response(
 				array(
@@ -1051,13 +1086,14 @@ class RestAPI {
 	private function get_session_args() {
 		return array(
 			'course_id' => array(
-				'required' => true,
+				'required' => false,  // Optional for preview mode
 				'type'     => 'integer',
+				'default'  => 0,
 			),
 			'game_type' => array(
 				'required' => true,
 				'type'     => 'string',
-				'enum'     => array( 'whack_a_question', 'tic_tac_tactics', 'target_trainer' ),
+				// Removed enum to allow all game types
 			),
 			'game_mode' => array(
 				'required' => false,
@@ -1071,6 +1107,14 @@ class RestAPI {
 			'preset'    => array(
 				'required' => false,
 				'type'     => 'string',
+			),
+			'gate_mode' => array(
+				'required' => false,
+				'type'     => 'string',
+			),
+			'preview'   => array(
+				'required' => false,
+				'type'     => 'boolean',
 			),
 			'metadata'  => array(
 				'required' => false,
