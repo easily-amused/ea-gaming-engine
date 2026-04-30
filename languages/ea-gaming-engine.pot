@@ -654,7 +654,7 @@ msgstr ""
 
 #: includes/Frontend/Frontend.php:258
 #: includes/REST/RestAPI.php:906
-msgid "Whack-a-Question"
+msgid "Tap-a-Question"
 msgstr ""
 
 #: includes/Frontend/Frontend.php:259

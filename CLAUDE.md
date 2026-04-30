@@ -199,7 +199,7 @@ Four profile presets control difficulty and effects:
 **High Priority - Core Functionality**
 1. **Game Implementation** (Critical for MVP)
    - TypeScript/Phaser game framework base structure
-   - Whack-a-Question game implementation
+   - Tap-a-Question game implementation
    - Tic-Tac-Tactics game implementation
    - Target Trainer game implementation
    - Game-to-API communication layer
@@ -235,7 +235,7 @@ Four profile presets control difficulty and effects:
 
 1. **Create JavaScript entry files** for webpack compilation
 2. **Implement TypeScript/Phaser game framework** base structure
-3. **Build first game (Whack-a-Question)** as proof of concept
+3. **Build first game (Tap-a-Question)** as proof of concept
 4. **Create React admin components** for settings management
 5. **Style the frontend** with CSS/SCSS
 6. **Test with LearnDash** course content

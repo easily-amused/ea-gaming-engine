@@ -15,7 +15,7 @@ EA Gaming Engine is a WordPress plugin that revolutionizes online learning by tr
 
 ### Game Modes
 
-- **Whack-a-Question**: Fast-paced reflex game for quick recall exercises
+- **Tap-a-Question**: Fast-paced reflex game for quick recall exercises
 - **Tic-Tac-Tactics**: Strategic game combining classic tic-tac-toe with educational content
 - **Target Trainer**: Precision-based game for multiple choice questions
 
