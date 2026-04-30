@@ -1,31 +1,31 @@
-# Whack-a-Question Sprites
+# Tap-a-Question Sprites
 
-This directory contains placeholder sprite information for the Whack-a-Question game.
+This directory contains placeholder sprite information for the Tap-a-Question game.
 
 ## Required Sprites
 
-- `hole.png` - Mole hole sprite (circular brown hole in ground)
-- `mole.png` - Mole sprite (brown mole character)
-- `background.png` - Game background (grass field or playground)
+- `hole.png` - Hole sprite (circular dark hole in ground)
+- `target.png` - Pop-up target sprite (creature or icon that emerges from the hole)
+- `background.png` - Game background (grass field or playful surface)
 
 ## Sprite Specifications
 
 ### hole.png
 - Size: 60x60 pixels
 - Format: PNG with transparency
-- Content: Brown circular hole with darker edges
+- Content: Dark circular hole with shaded edges
 - Style: Cartoon-like, matching theme aesthetic
 
-### mole.png
+### target.png
 - Size: 50x50 pixels
 - Format: PNG with transparency
-- Content: Cute brown mole character
+- Content: Friendly pop-up character or icon
 - Style: Friendly cartoon appearance
 
 ### background.png
 - Size: 800x600 pixels
 - Format: PNG or JPG
-- Content: Grassy field or playground scene
+- Content: Grassy field or playful surface
 - Style: Colorful, child-friendly environment
 
 ## Fallback Graphics

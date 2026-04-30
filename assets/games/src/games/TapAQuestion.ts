@@ -30,10 +30,10 @@ interface ApiResponse {
 }
 
 /**
- * Whack-a-Question Game
- * Players click on correct answers that pop up from holes like whack-a-mole
+ * Tap-a-Question Game
+ * Players tap correct answers that pop up from holes
  */
-export class WhackAQuestion extends EAGameBase {
+export class TapAQuestion extends EAGameBase {
 	private currentQuestion: Question | null = null;
 	private moleHoles: MoleHole[] = [];
 	private score: number = 0;
@@ -122,9 +122,9 @@ export class WhackAQuestion extends EAGameBase {
 
 		// Load placeholder sprites
 		// In production, these would be proper game assets
-		this.load.image('hole', '/assets/games/sprites/whack/hole.png');
-		this.load.image('mole', '/assets/games/sprites/whack/mole.png');
-		this.load.image('background', '/assets/games/sprites/whack/background.png');
+		this.load.image('hole', '/assets/games/sprites/tap/hole.png');
+		this.load.image('target', '/assets/games/sprites/tap/target.png');
+		this.load.image('background', '/assets/games/sprites/tap/background.png');
 		
 		// Create fallback rectangles if images don't exist
 		this.load.on('loaderror', () => {
