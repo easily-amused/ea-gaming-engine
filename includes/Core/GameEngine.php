@@ -25,9 +25,9 @@ class GameEngine {
 	 * @var array
 	 */
 	private $game_types = array(
-		'whack_a_question' => array(
-			'name'        => 'Whack-a-Question',
-			'description' => 'Test your reflexes by whacking questions as they pop up!',
+		'tap_a_question'   => array(
+			'name'        => 'Tap-a-Question',
+			'description' => 'Test your reflexes by tapping questions as they pop up!',
 			'duration'    => '3-5 min',
 			'players'     => 'Single',
 			'category'    => 'Action',
@@ -61,8 +61,8 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'tetris'           => array(
-			'name'        => 'Tetris',
+		'block_stack'      => array(
+			'name'        => 'Block Stack',
 			'description' => 'Stack falling blocks to clear lines and score high points.',
 			'duration'    => '5-10 min',
 			'players'     => 'Single',
@@ -70,17 +70,17 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'space_invaders'   => array(
-			'name'        => 'Space Invaders',
-			'description' => 'Defend Earth from waves of alien invaders in this classic arcade shooter.',
+		'star_defender'    => array(
+			'name'        => 'Star Defender',
+			'description' => 'Defend the galaxy from waves of incoming attackers in this arcade shooter.',
 			'duration'    => '5-10 min',
 			'players'     => 'Single',
 			'category'    => 'Action',
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'breakout'         => array(
-			'name'        => 'Breakout',
+		'brick_breaker'    => array(
+			'name'        => 'Brick Breaker',
 			'description' => 'Break all the bricks with your ball and paddle.',
 			'duration'    => '5-10 min',
 			'players'     => 'Single',
@@ -88,9 +88,9 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'pong'             => array(
-			'name'        => 'Pong',
-			'description' => 'The timeless arcade classic - play against an AI opponent.',
+		'paddle_rally'     => array(
+			'name'        => 'Paddle Rally',
+			'description' => 'A timeless paddle-and-ball duel - play against an AI opponent.',
 			'duration'    => '3-5 min',
 			'players'     => 'Single',
 			'category'    => 'Arcade',
@@ -133,8 +133,8 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'connect_four'     => array(
-			'name'        => 'Connect Four',
+		'four_in_a_row'    => array(
+			'name'        => 'Four in a Row',
 			'description' => 'Drop pieces to get four in a row against the AI.',
 			'duration'    => '5-10 min',
 			'players'     => 'Single',
@@ -151,8 +151,8 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'minesweeper'      => array(
-			'name'        => 'Minesweeper',
+		'grid_sweeper'     => array(
+			'name'        => 'Grid Sweeper',
 			'description' => 'Clear the board without hitting mines.',
 			'duration'    => '5-10 min',
 			'players'     => 'Single',
@@ -169,8 +169,8 @@ class GameEngine {
 			'width'       => 800,
 			'height'      => 600,
 		),
-		'dino_run'         => array(
-			'name'        => 'Dino Run',
+		'runner_dash'      => array(
+			'name'        => 'Runner Dash',
 			'description' => 'Jump over cacti and dodge flying obstacles.',
 			'duration'    => '3-5 min',
 			'players'     => 'Single',

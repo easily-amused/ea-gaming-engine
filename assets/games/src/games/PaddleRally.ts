@@ -1,7 +1,7 @@
 import Phaser from '../utils/PhaserShim';
 import { EAGameBase, GameConfig } from '../core/EAGameBase';
 
-export class Pong extends EAGameBase {
+export class PaddleRally extends EAGameBase {
 	private playerPaddle?: Phaser.GameObjects.Rectangle;
 	private aiPaddle?: Phaser.GameObjects.Rectangle;
 	private ball?: Phaser.GameObjects.Circle;
@@ -267,7 +267,7 @@ export class Pong extends EAGameBase {
 	private showInstructions(): void {
 		const theme = this.getThemeColors();
 		
-		const instructions = this.add.text(400, 300, 'PONG\n\nUse UP/DOWN arrows to move\nPress SPACE to serve\nFirst to 11 wins!', {
+		const instructions = this.add.text(400, 300, 'PADDLE RALLY\n\nUse UP/DOWN arrows to move\nPress SPACE to serve\nFirst to 11 wins!', {
 			fontSize: '20px',
 			color: theme.primary,
 			align: 'center'

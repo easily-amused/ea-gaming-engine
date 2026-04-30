@@ -1,12 +1,12 @@
 import { EAGameBase, GameConfig } from './core/EAGameBase';
-import { WhackAQuestion } from './games/WhackAQuestion';
+import { TapAQuestion } from './games/TapAQuestion';
 import { TicTacTactics } from './games/TicTacTactics';
 import { TargetTrainer } from './games/TargetTrainer';
 import { Snake } from './games/Snake';
-import { Tetris } from './games/Tetris';
-import { SpaceInvaders } from './games/SpaceInvaders';
-import { Breakout } from './games/Breakout';
-import { Pong } from './games/Pong';
+import { BlockStack } from './games/BlockStack';
+import { StarDefender } from './games/StarDefender';
+import { BrickBreaker } from './games/BrickBreaker';
+import { PaddleRally } from './games/PaddleRally';
 import { ReactionTime } from './games/ReactionTime';
 
 /**
@@ -18,22 +18,22 @@ export class GameFactory {
 	 */
 	static createGame(gameType: string, config: GameConfig): EAGameBase {
 		switch (gameType) {
-			case 'whack_a_question':
-				return new WhackAQuestion('whack-a-question', config);
+			case 'tap_a_question':
+				return new TapAQuestion('tap-a-question', config);
 			case 'tic_tac_tactics':
 				return new TicTacTactics('tic-tac-tactics', config);
 			case 'target_trainer':
 				return new TargetTrainer('target-trainer', config);
 			case 'snake':
 				return new Snake('snake', config);
-			case 'tetris':
-				return new Tetris('tetris', config);
-			case 'space_invaders':
-				return new SpaceInvaders('space-invaders', config);
-			case 'breakout':
-				return new Breakout('breakout', config);
-			case 'pong':
-				return new Pong('pong', config);
+			case 'block_stack':
+				return new BlockStack('block-stack', config);
+			case 'star_defender':
+				return new StarDefender('star-defender', config);
+			case 'brick_breaker':
+				return new BrickBreaker('brick-breaker', config);
+			case 'paddle_rally':
+				return new PaddleRally('paddle-rally', config);
 			case 'reaction_time':
 				return new ReactionTime('reaction-time', config);
 			default:
@@ -47,8 +47,8 @@ export class GameFactory {
 	static getAvailableGames(): Array<{id: string, name: string, description: string}> {
 		return [
 			{
-				id: 'whack_a_question',
-				name: 'Whack-a-Question',
+				id: 'tap_a_question',
+				name: 'Tap-a-Question',
 				description: 'Fast-paced question answering game'
 			},
 			{
@@ -64,27 +64,27 @@ export class GameFactory {
 			{
 				id: 'snake',
 				name: 'Snake',
-				description: 'Classic snake game - grow longer by eating food'
+				description: 'Grow longer by eating food and avoid hitting walls'
 			},
 			{
-				id: 'tetris',
-				name: 'Tetris',
+				id: 'block_stack',
+				name: 'Block Stack',
 				description: 'Stack falling blocks to clear lines and score high'
 			},
 			{
-				id: 'space_invaders',
-				name: 'Space Invaders',
-				description: 'Defend Earth from waves of alien invaders'
+				id: 'star_defender',
+				name: 'Star Defender',
+				description: 'Defend the galaxy from waves of incoming attackers'
 			},
 			{
-				id: 'breakout',
-				name: 'Breakout',
+				id: 'brick_breaker',
+				name: 'Brick Breaker',
 				description: 'Break all the bricks with your ball and paddle'
 			},
 			{
-				id: 'pong',
-				name: 'Pong',
-				description: 'The timeless arcade classic - play against AI'
+				id: 'paddle_rally',
+				name: 'Paddle Rally',
+				description: 'Timeless paddle-and-ball duel - play against AI'
 			},
 			{
 				id: 'reaction_time',

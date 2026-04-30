@@ -186,7 +186,7 @@ class Activator {
 		add_option(
 			'ea_gaming_engine_games',
 			array(
-				'whack_a_question' => array(
+				'tap_a_question'   => array(
 					'enabled'    => true,
 					'difficulty' => 'medium',
 					'time_limit' => 60,

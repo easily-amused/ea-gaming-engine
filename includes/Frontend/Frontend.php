@@ -151,7 +151,7 @@ class Frontend {
 			array(
 				'course_id'   => 0,
 				'quiz_id'     => 0,
-				'game_type'   => 'whack_a_question',
+				'game_type'   => 'tap_a_question',
 				'button_text' => __( 'Play Game', 'ea-gaming-engine' ),
 				'style'       => 'default',
 			),
@@ -254,8 +254,8 @@ class Frontend {
 	 */
 	private function render_game_cards( $filter_type = '' ) {
 		$games = array(
-			'whack_a_question' => array(
-				'name'        => __( 'Whack-a-Question', 'ea-gaming-engine' ),
+			'tap_a_question'   => array(
+				'name'        => __( 'Tap-a-Question', 'ea-gaming-engine' ),
 				'description' => __( 'Fast-paced question answering', 'ea-gaming-engine' ),
 				'icon'        => 'hammer',
 				'color'       => '#7C3AED',
@@ -588,7 +588,7 @@ class Frontend {
 			wp_send_json_error( __( 'Please log in to play', 'ea-gaming-engine' ) );
 		}
 
-		$game_type = sanitize_text_field( $_POST['game_type'] ?? 'whack_a_question' );
+		$game_type = sanitize_text_field( $_POST['game_type'] ?? 'tap_a_question' );
 		$course_id = intval( $_POST['course_id'] ?? 0 );
 		$quiz_id   = intval( $_POST['quiz_id'] ?? 0 );
 

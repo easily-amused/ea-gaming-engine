@@ -16,7 +16,7 @@ interface Bullet {
 	sprite?: Phaser.GameObjects.Rectangle;
 }
 
-export class SpaceInvaders extends EAGameBase {
+export class StarDefender extends EAGameBase {
 	private player?: Phaser.GameObjects.Rectangle;
 	private playerX: number = 400;
 	private invaders: Invader[][] = [];

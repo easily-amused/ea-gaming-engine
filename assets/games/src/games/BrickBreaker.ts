@@ -12,7 +12,7 @@ interface Brick {
 	sprite?: Phaser.GameObjects.Rectangle;
 }
 
-export class Breakout extends EAGameBase {
+export class BrickBreaker extends EAGameBase {
 	private paddle?: Phaser.GameObjects.Rectangle;
 	private ball?: Phaser.GameObjects.Circle;
 	private bricks: Brick[] = [];

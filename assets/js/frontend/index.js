@@ -40,7 +40,7 @@ domReady(() => {
 	if (quitBtn) quitBtn.addEventListener('click', closeModal);
 
 	// Helper: launch game via REST, then mount Phaser
-	async function launchGameFlow({ courseId = 0, quizId = 0, gameType = 'whack_a_question', title = 'Game', theme = '', preset = '' }) {
+	async function launchGameFlow({ courseId = 0, quizId = 0, gameType = 'tap_a_question', title = 'Game', theme = '', preset = '' }) {
 		try {
 			// Create session and get game configuration
 			const resp = await apiFetch({
@@ -92,7 +92,7 @@ domReady(() => {
 			startBtn.addEventListener('click', () => {
 				launchGameFlow({
 					courseId,
-					gameType: 'whack_a_question',
+					gameType: 'tap_a_question',
 					title: 'Gaming Mode',
 					theme,
 					preset
@@ -106,7 +106,7 @@ domReady(() => {
 		btn.addEventListener('click', () => {
 			const courseId = btn.getAttribute('data-course-id') || '0';
 			const quizId = btn.getAttribute('data-quiz-id') || '0';
-			const gameType = btn.getAttribute('data-game-type') || 'whack_a_question';
+			const gameType = btn.getAttribute('data-game-type') || 'tap_a_question';
 			launchGameFlow({
 				courseId,
 				quizId,
@@ -123,7 +123,7 @@ domReady(() => {
 		$$('.ea-gaming-play-btn', arcade).forEach((playBtn) => {
 			playBtn.addEventListener('click', () => {
 				const card = playBtn.closest('.ea-gaming-card');
-				const gameType = card ? card.getAttribute('data-game-type') : 'whack_a_question';
+				const gameType = card ? card.getAttribute('data-game-type') : 'tap_a_question';
 				launchGameFlow({
 					courseId,
 					quizId,
@@ -146,7 +146,7 @@ domReady(() => {
 			launchGameFlow({
 				courseId,
 				quizId,
-				gameType: 'whack_a_question',
+				gameType: 'tap_a_question',
 				title: 'Quiz Game'
 			});
 		});
@@ -166,7 +166,7 @@ domReady(() => {
 			launchGameFlow({
 				courseId,
 				quizId: 0,
-				gameType: 'whack_a_question',
+				gameType: 'tap_a_question',
 				title: 'Challenge Gate'
 			});
 		});
@@ -179,7 +179,7 @@ domReady(() => {
 			launchGameFlow({
 				courseId,
 				quizId: 0,
-				gameType: 'whack_a_question',
+				gameType: 'tap_a_question',
 				title: 'Gaming Mode'
 			});
 		});

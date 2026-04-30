@@ -20,10 +20,10 @@ const PIECES = {
 };
 
 /**
- * Tetris Game
- * Classic Tetris with LearnDash integration
+ * Block Stack Game
+ * Falling-block stacking puzzler with LearnDash integration
  */
-export class Tetris extends EAGameBase {
+export class BlockStack extends EAGameBase {
     private readonly BOARD_WIDTH = 10;
     private readonly BOARD_HEIGHT = 20;
     private readonly BLOCK_SIZE = 25;
@@ -227,7 +227,7 @@ export class Tetris extends EAGameBase {
         this.menuContainer.add(panel);
         
         // Title
-        const title = this.add.text(0, -100, 'TETRIS', {
+        const title = this.add.text(0, -100, 'BLOCK STACK', {
             fontSize: '48px',
             color: colors['text-primary'],
             fontStyle: 'bold'

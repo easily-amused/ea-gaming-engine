@@ -995,8 +995,8 @@ class RestAPI {
 	public function get_available_games( $request ) {
 		$games = array(
 			array(
-				'id'          => 'whack_a_question',
-				'name'        => __( 'Whack-a-Question', 'ea-gaming-engine' ),
+				'id'          => 'tap_a_question',
+				'name'        => __( 'Tap-a-Question', 'ea-gaming-engine' ),
 				'description' => __( 'Fast-paced question answering game', 'ea-gaming-engine' ),
 				'enabled'     => true,
 			),
@@ -1176,7 +1176,7 @@ class RestAPI {
 			'game_type' => array(
 				'required' => true,
 				'type'     => 'string',
-				'enum'     => array( 'whack_a_question', 'tic_tac_tactics', 'target_trainer' ),
+				'enum'     => array( 'tap_a_question', 'tic_tac_tactics', 'target_trainer' ),
 			),
 			'course_id' => array(
 				'required' => true,

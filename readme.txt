@@ -17,7 +17,7 @@ Transform LearnDash courses into interactive educational games with dynamic ques
 
 ### 🎮 Three Engaging Game Modes
 
-**Whack-a-Question**: Fast-paced reflex game where students must quickly identify correct answers as they pop up on screen. Perfect for vocabulary, definitions, and quick recall exercises.
+**Tap-a-Question**: Fast-paced reflex game where students must quickly identify correct answers as they pop up on screen. Perfect for vocabulary, definitions, and quick recall exercises.
 
 **Tic-Tac-Tactics**: Strategic game combining classic tic-tac-toe with educational content. Students must answer questions correctly to claim squares, adding tactical thinking to knowledge assessment.
 
@@ -240,7 +240,7 @@ Yes, all game data can be exported through the admin analytics section. Data inc
 
 1. **Game Arcade Interface** - Students can browse and launch games for their enrolled courses with an intuitive card-based layout showing progress and achievements.
 
-2. **Whack-a-Question Gameplay** - Fast-paced action game where students must quickly identify correct answers as they appear and disappear on screen.
+2. **Tap-a-Question Gameplay** - Fast-paced action game where students must quickly identify correct answers as they appear and disappear on screen.
 
 3. **Tic-Tac-Tactics Strategic Play** - Educational twist on classic tic-tac-toe where students must answer questions correctly to claim squares and achieve victory.
 
@@ -266,7 +266,7 @@ Yes, all game data can be exported through the admin analytics section. Data inc
 **Initial Release Features:**
 
 * **Core Game Engine**
-  * Three complete games: Whack-a-Question, Tic-Tac-Tactics, and Target Trainer
+  * Three complete games: Tap-a-Question, Tic-Tac-Tactics, and Target Trainer
   * Server-side answer validation system for security
   * Comprehensive session management and progress tracking
   * Real-time scoring and achievement system
