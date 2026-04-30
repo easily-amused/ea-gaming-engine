@@ -101,7 +101,7 @@ class Blocks {
 					),
 					'gameType'   => array(
 						'type'    => 'string',
-						'default' => 'whack_a_question',
+						'default' => 'tap_a_question',
 					),
 					'buttonText' => array(
 						'type'    => 'string',

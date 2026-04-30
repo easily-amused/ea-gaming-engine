@@ -990,7 +990,7 @@ class Admin {
 				
 				<div style="background: #f1f1f1; padding: 15px; border-radius: 4px; margin-top: 15px;">
 					<h4><?php esc_html_e( 'Display Specific Game', 'ea-gaming-engine' ); ?></h4>
-					<code>[ea_gaming_launcher course_id="123" game_type="whack_a_question"]</code>
+					<code>[ea_gaming_launcher course_id="123" game_type="tap_a_question"]</code>
 					<p class="description"><?php esc_html_e( 'Shows a specific game for a specific course', 'ea-gaming-engine' ); ?></p>
 				</div>
 				
@@ -1115,7 +1115,7 @@ class Admin {
 	 */
 	private function get_default_games() {
 		return array(
-			'whack_a_question' => array(
+			'tap_a_question'   => array(
 				'enabled'    => true,
 				'difficulty' => 'medium',
 				'time_limit' => 60,
